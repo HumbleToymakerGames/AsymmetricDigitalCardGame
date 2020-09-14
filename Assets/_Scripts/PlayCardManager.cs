@@ -190,6 +190,11 @@ public class PlayCardManager : MonoBehaviour
 		}
 	}
 
+    public void ReversePaidAbility(PaidAbility paidAbility)
+	{
+        GameManager.CurrentTurnPlayer.AddCredits(paidAbility.payAmount);
+	}
+
 
     #region Actions
     void Action_DrawNextCard(PlayerNR player)

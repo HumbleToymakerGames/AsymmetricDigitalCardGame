@@ -8,6 +8,9 @@ public abstract class CardFunction : MonoBehaviour
 	public Card card;
 	public PaidAbility[] paidAbilities;
 
+	public delegate void PaidAbilityActivated();
+	public event PaidAbilityActivated OnPaidAbilityActivated;
+
 	protected virtual void Awake()
 	{
 		card = GetComponent<Card>();
@@ -44,7 +47,7 @@ public abstract class CardFunction : MonoBehaviour
 
 	public virtual void ActivatePaidAbility(int index)
 	{
-
+		OnPaidAbilityActivated?.Invoke();
 	}
 
 	public void UpdatePaidAbilitesActive_Credits(int playerCredits)
@@ -64,13 +67,4 @@ public abstract class CardFunction : MonoBehaviour
 			paidAbilities[i].myAbilityIndex = i + 1;
 		}
 	}
-
-	public void SetAllPaidAbilityClickables(bool clickable = true)
-	{
-		for (int i = 0; i < paidAbilities.Length; i++)
-		{
-			paidAbilities[i].SetClickable(clickable);
-		}
-	}
-
 }

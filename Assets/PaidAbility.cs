@@ -5,39 +5,52 @@ using UnityEngine.UI;
 
 public class PaidAbility : MonoBehaviour
 {
+    [Header("Ability")]
     public int payAmount;
     public Currency currency;
+    public CardSubType breakerType;
+    bool isBreakerRoutine;
     Button button;
-    public GameObject clickableGO;
 
-	public CardFunction cardFunction;
+	CardFunction cardFunction;
     [HideInInspector]
     public int myAbilityIndex;
 
-    public CardFunction viewCardFunction;
+    //public CardFunction viewCardFunction;
 
 	//public string AbilityText;
 	private void Awake()
 	{
         cardFunction = GetComponentInParent<CardFunction>();
         button = GetComponent<Button>();
-        SetClickable(false);
+        isBreakerRoutine = breakerType != CardSubType.NULL;
     }
 
-    void Start()
+	private void OnEnable()
+	{
+		if (cardFunction.card.isViewCard) RunOperator.OnIceBeingEncountered += RunOperator_OnIceBeingEncountered;
+	}
+    private void OnDisable()
+    {
+        if (cardFunction.card.isViewCard) RunOperator.OnIceBeingEncountered -= RunOperator_OnIceBeingEncountered;
+    }
+
+    private void RunOperator_OnIceBeingEncountered(Card_Ice iceCard)
+	{
+        if (cardFunction.card.IsCardType(CardType.Program))
+        {
+            TrySetAbleAbilitiesActive();
+        }
+	}
+
+	void Start()
     {
         
     }
 
-
-    public void SetClickable(bool clickable)
-	{
-        clickableGO.SetActive(clickable);
-	}
-
     public void ActivateOnCredits(int playerCredits)
 	{
-        button.interactable = currency == Currency.Credits && playerCredits >= payAmount;
+        TrySetAbleAbilitiesActive();
     }
 
 
@@ -52,12 +65,66 @@ public class PaidAbility : MonoBehaviour
         //if (viewCardFunction) viewCardFunction.ActivatePaidAbility(myAbilityIndex);
     }
 
-
-    public void SetCardFunctions(CardFunction _cardFunction, CardFunction _viewCardFunction)
+    public void TrySetAbleAbilitiesActive()
 	{
-        cardFunction = _cardFunction;
-        viewCardFunction = _viewCardFunction;
+        bool interactable = false;
+        if (CanBeActive_Credits(cardFunction.card.myPlayer.Credits))
+		{
+            if (RunOperator.instance.isRunning)
+            {
+                Card_Program programCard = cardFunction.card as Card_Program;
+                bool isStrongEnough = RunOperator.instance.IsCardStrongEnough(programCard);
+                if (CanBeActive_Strength(isStrongEnough))
+                {
+                    if (CanBeActive_Type())
+                    {
+                        interactable = true;
+                    }
+                    else interactable = false;
+                }
+            }
+            else interactable = true;
+		}
+
+        button.interactable = interactable;
 	}
+
+    bool CanBeActive_Credits(int playerCredits)
+	{
+        return currency == Currency.Credits && playerCredits >= payAmount;
+
+    }
+
+    bool CanBeActive_Strength(bool isStrongEnough)
+	{
+        if (cardFunction.card.isViewCard && isBreakerRoutine)
+        {
+            if (!isStrongEnough)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool CanBeActive_Type()
+	{
+        if (cardFunction.card.isViewCard && isBreakerRoutine)
+		{
+            if (!RunOperator.instance.IceIsType(breakerType))
+			{
+                return false;
+			}
+		}
+        return true;
+    }
+
+
+    //   public void SetCardFunctions(CardFunction _cardFunction, CardFunction _viewCardFunction)
+    //{
+    //       cardFunction = _cardFunction;
+    //       viewCardFunction = _viewCardFunction;
+    //}
 
 
 

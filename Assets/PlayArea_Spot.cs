@@ -20,4 +20,10 @@ public abstract class PlayArea_Spot : MonoBehaviour
 	{
 
 	}
+
+	public bool IsCurrentTurns()
+	{
+		return playerSide == GameManager.CurrentTurnPlayer.playerSide;
+	}
+
 }

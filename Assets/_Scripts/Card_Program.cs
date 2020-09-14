@@ -2,15 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEditor;
 
 public class Card_Program : Card, IInstallable
 {
 	public TextMeshProUGUI memorySpaceText, strengthText;
 	public int strength;
+	int baseStrength;
+
+	public delegate void ProgramStrengthModified(Card_Program programCard);
+	public static event ProgramStrengthModified OnProgramStrengthModified;
 
 	protected override void Awake()
 	{
 		base.Awake();
+		baseStrength = strength;
 	}
 
 	protected override void Start()
@@ -23,6 +29,8 @@ public class Card_Program : Card, IInstallable
 
 	public override bool CanSelect()
 	{
+		if (!base.CanSelect()) return false;
+
 		if (PlayArea.instance.HandNR(myPlayer).IsCardInHand(this))
 		{
 			if (PlayCardManager.instance.CanInstallCard(this))
@@ -53,6 +61,7 @@ public class Card_Program : Card, IInstallable
 	{
 		strength += modification;
 		UpdateStrengthText();
+		OnProgramStrengthModified?.Invoke(this);
 	}
 
 	void UpdateStrengthText()
@@ -60,7 +69,11 @@ public class Card_Program : Card, IInstallable
 		strengthText.text = strength.ToString();
 	}
 
-
+	public void ResetStrength()
+	{
+		strength = baseStrength;
+		UpdateStrengthText();
+	}
 
 
 }

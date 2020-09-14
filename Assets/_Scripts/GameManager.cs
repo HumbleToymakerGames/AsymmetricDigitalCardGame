@@ -48,6 +48,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.T)) StartNextTurn();
         
     }
 
@@ -64,9 +65,9 @@ public class GameManager : MonoBehaviour
         Card[] deckCards = new Card[numCards];
         for (int i = 0; i < numCards; i++)
 		{
+            e_deckCards[i].controllingPlayerSide = player.playerSide;
             Card card = Instantiate(e_deckCards[i]);
             deckCards[i] = card;
-
         }
 
         player.SetPlayerCards(identityCard, deckCards);
@@ -89,6 +90,7 @@ public class GameManager : MonoBehaviour
 
     void StartNextTurn()
 	{
+        currentTurnSide = currentTurnSide == PlayerSide.Runner ? PlayerSide.Corporation : PlayerSide.Runner;
         UpdateCurrentTurn(currentTurnSide);
         PlayCardManager.instance.StartTurn(CurrentTurnPlayer);
 	}

@@ -9,12 +9,13 @@ public class CardViewer : MonoBehaviour
     public Card_Ice ice;
 
 	public CardViewWindow viewWindow_Primary, viewWindow_Secondary;
-
-	public struct CardPair
+	public bool cardsClickableOnView;
+	public class CardPair
 	{
 		public Card realCard, viewCard;
 	}
 	public Dictionary<int, CardPair> cardPairDict = new Dictionary<int, CardPair>();
+	Card[] viewCards;
 
 	private void Awake()
 	{
@@ -49,8 +50,8 @@ public class CardViewer : MonoBehaviour
 		bool viewer = false;
 		if (IsCardBeingViewed(viewIndex, ref viewer)) return;
 
-		if (primary) viewWindow_Primary.ViewCard(viewIndex);
-		else viewWindow_Secondary.ViewCard(viewIndex);
+		if (primary) viewWindow_Primary.ViewCard(viewIndex, cardsClickableOnView);
+		else viewWindow_Secondary.ViewCard(viewIndex, cardsClickableOnView);
 	}
 
 	public void HideAllCards(bool primary)
@@ -60,7 +61,10 @@ public class CardViewer : MonoBehaviour
 			Card viewCard = kvp.Value.viewCard;
 			Transform cardsT = primary ? viewWindow_Primary.cardsT : viewWindow_Secondary.cardsT;
 			if (viewCard.transform.parent == cardsT)
-				kvp.Value.viewCard.gameObject.SetActive(false);
+			{
+				kvp.Value.viewCard.ActivateVisuals(false);
+				kvp.Value.viewCard.ActivateRaycasts(false);
+			}
 		}
 	}
 
@@ -80,12 +84,17 @@ public class CardViewer : MonoBehaviour
 			allDeckCards.Add(PlayerNR.Corporation.deckCards[i]);
 		}
 
+		viewCards = new Card[allDeckCards.Count];
 		for (int i = 0; i < allDeckCards.Count; i++)
 		{
 			Card deckCard = allDeckCards[i];
 			deckCard.viewIndex = viewIndex;
 
+			deckCard.isViewCard = true;
 			Card viewCard = Instantiate(deckCard);
+			deckCard.isViewCard = false;
+
+			viewCards[i] = viewCard;
 			cardPairDict[viewIndex] = new CardPair() { realCard = deckCard, viewCard = viewCard };
 			ParentCard_Start(viewCard);
 			viewIndex++;
@@ -104,16 +113,7 @@ public class CardViewer : MonoBehaviour
 		}
 
 		yield return new WaitForSeconds(0.25f);
-		PaidAbility[] allPaidAbilities = GetComponentsInChildren<PaidAbility>(true);
-		for (int i = 0; i < allPaidAbilities.Length; i++)
-		{
-			allPaidAbilities[i].SetClickable(true);
-			//CardPair cardPair;
-			//if (cardPairDict.TryGetValue(allPaidAbilities[i].cardFunction.card.viewIndex, out cardPair))
-			//{
-			//	allPaidAbilities[i].SetCardFunctions(cardPair.realCard.cardFunction, cardPair.viewCard.cardFunction);
-			//}
-		}
+		SetCardsClickable(false);
 
 		HideAllCards(true);
 		HideAllCards(false);
@@ -151,9 +151,11 @@ public class CardViewer : MonoBehaviour
 	public void PinCard(int viewIndex, bool primary = true)
 	{
 		Card card = GetCard(viewIndex, false);
-		bool viewer = false;
-		if (card && IsCardBeingViewed(card.viewIndex, ref viewer) && viewer != primary) return;
-
+		if (viewIndex != -1)
+		{
+			bool viewer = false;
+			if (card && IsCardBeingViewed(card.viewIndex, ref viewer) && viewer != primary) return;
+		}
 		if (primary) viewWindow_Primary.PinCard(card);
 		else viewWindow_Secondary.PinCard(card);
 	}
@@ -169,5 +171,11 @@ public class CardViewer : MonoBehaviour
 		return primary || secondary;
 	}
 
+
+	public void SetCardsClickable(bool clickable = true)
+	{
+		cardsClickableOnView = clickable;
+		GetCard(viewWindow_Primary.currentViewIndex, false)?.ActivateRaycasts(clickable);
+	}
 
 }

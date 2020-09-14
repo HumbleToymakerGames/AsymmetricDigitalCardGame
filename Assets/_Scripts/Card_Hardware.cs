@@ -27,7 +27,7 @@ public class Card_Hardware : Card, IInstallable
 
 	public override bool CanSelect()
 	{
-		return PlayCardManager.instance.CanInstallCard(this);
+		return base.CanSelect() && PlayCardManager.instance.CanInstallCard(this);
 	}
 
 	public bool CanInstall()

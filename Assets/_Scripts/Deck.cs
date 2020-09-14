@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Deck : PlayArea_Spot, ISelectableNR
+public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
 {
 
     public Transform cardsParentT;
@@ -89,12 +89,12 @@ public class Deck : PlayArea_Spot, ISelectableNR
 
 	public bool CanHighlight()
 	{
-        return true;
+        return IsCurrentTurns();
 	}
 
 	public bool CanSelect()
 	{
-        return !IsDeckEmpty()
+        return CanHighlight() && !IsDeckEmpty()
             && PlayCardManager.instance.CanDrawAnotherCard();
             //&& GameManager.instance.IsCurrentTurn(;
 	}
@@ -107,5 +107,16 @@ public class Deck : PlayArea_Spot, ISelectableNR
 	{
         PlayCardManager.instance.TryDrawNextCard();
 	}
+
+	public void Access()
+	{
+        RevealCard(cardsInDeck[0]);
+    }
+
+    public void RevealCard(Card card)
+	{
+        CardRevealer.instance.RevealCard(card, true);
+	}
+
 }
 

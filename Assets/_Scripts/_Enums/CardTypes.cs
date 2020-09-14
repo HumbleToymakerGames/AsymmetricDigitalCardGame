@@ -36,7 +36,7 @@ public enum CardSubType
     Ambush, Advertisement,
 
     // Ice
-    Gate, Barrier, Sentry, Trap, Trance,
+    Barrier, Code_Gate, Sentry, Trap, Trance,
 
     // Upgrade
     Facility,

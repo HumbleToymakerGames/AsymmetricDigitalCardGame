@@ -4,13 +4,21 @@ using UnityEngine;
 
 public class ServerColumn : PlayArea_Spot
 {
-    public PlayArea_Spot serverProtected;
+    public PlayArea_Spot serverGO;
+    IAccessable serverProtected;
+    public IInstallable ssisd;
     public Transform iceColumnT;
     public Card_Ice currentIceEncountered;
     public List<Card_Ice> iceInColumn = new List<Card_Ice>();
 
-    // Start is called before the first frame update
-    void Start()
+	private void Awake()
+	{
+        serverProtected = serverGO as IAccessable;
+    }
+
+
+	// Start is called before the first frame update
+	void Start()
     {
         
     }
@@ -44,12 +52,17 @@ public class ServerColumn : PlayArea_Spot
 
     }
 
+    public void ResetIceIndex()
+	{
+        currentIceIndex = -1;
+	}
+
 
     public void InstallIce(Card_Ice card)
 	{
         card.MoveCardTo(iceColumnT);
         card.transform.localEulerAngles = Vector3.forward * 180;
-        iceInColumn.Add(card);
+        iceInColumn.Insert(0, card);
 
     }
 
@@ -60,6 +73,11 @@ public class ServerColumn : PlayArea_Spot
         iceInColumn.Remove(card as Card_Ice);
 	}
 
+
+    public void AccessServer()
+	{
+        serverProtected.Access();
+    }
 
 
 }

@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public abstract class Card : MonoBehaviour, ISelectableNR
 {
     CardReferences cardRefs;
+    CanvasGroup canvasGroup;
     [HideInInspector]
     public CardFunction cardFunction;
     [HideInInspector]
@@ -15,7 +16,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
     [Header("Card Data")]
     public PlayerSide playerSide;
-    [HideInInspector]
+    public PlayerSide controllingPlayerSide;
+   // [HideInInspector]
     public PlayerNR myPlayer;
     public CardType cardType;
     public CardSubType cardSubType;
@@ -28,6 +30,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
 
     public int viewIndex;
+    public bool isViewCard;
 
 
 
@@ -37,12 +40,14 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         cardRefs = GetComponent<CardReferences>();
         cardFunction = GetComponent<CardFunction>();
         cardCost = GetComponent<CardCost>();
-        myPlayer = playerSide == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation;
+        canvasGroup = GetComponent<CanvasGroup>();
+        myPlayer = controllingPlayerSide == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation;
+        ActivateRaycasts(false);
         Pinned(false, true);
         Pinned(false, false);
     }
 
-	protected virtual void OnEnable()
+    protected virtual void OnEnable()
 	{
 		PlayCardManager.OnCardInstalled += OnCardInstalled;
 		myPlayer.OnCreditsChanged += MyPlayer_OnCreditsChanged;
@@ -81,6 +86,10 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 	{
         return cardType == _cardType;
 	}
+    public bool IsCardSubType(CardSubType _cardSubType)
+    {
+        return cardSubType == _cardSubType;
+    }
 
     public bool IsOwnedByPlayerSide(PlayerSide _playerSide)
 	{
@@ -151,15 +160,26 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         return PlayArea.instance.HandNR(myPlayer).IsCardInHand(this);
 	}
 
+    public bool IsCardCurrentTurns()
+	{
+        return playerSide == GameManager.CurrentTurnPlayer.playerSide;
+	}
+
+    public bool IsCardControlledByCurrentTurn()
+	{
+        return controllingPlayerSide == GameManager.CurrentTurnPlayer.playerSide;
+    }
+
 
 	public bool CanHighlight()
 	{
-        return true;
+        return IsCardControlledByCurrentTurn();
+        //return true;
 	}
 
 	public virtual bool CanSelect()
 	{
-        return false;
+        return CanHighlight();
 	}
 
 	public void Highlighted()
@@ -196,13 +216,25 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         }
     }
 
-	
+    public void ActivateVisuals(bool activate = true)
+    {
+        canvasGroup.alpha = activate ? 1 : 0;
+    }
+
+    public void ActivateRaycasts(bool activate = true)
+	{
+        canvasGroup.blocksRaycasts = activate;
+	}
 
 
-	//private void OnValidate()
-	//{
-	//       if (titleText) titleText.text = cardTitle;
-	//}
+
+    //private void OnValidate()
+    //{
+    //       if (titleText) titleText.text = cardTitle;
+    //}
+
+
+
 
 
 }

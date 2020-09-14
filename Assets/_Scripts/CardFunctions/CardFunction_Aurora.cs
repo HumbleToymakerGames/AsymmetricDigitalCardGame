@@ -6,6 +6,8 @@ public class CardFunction_Aurora : CardFunction
 {
     public int strengthToAdd;
 
+	
+
 	public override void ActivateFunction()
 	{
 		base.ActivateFunction();
@@ -16,13 +18,13 @@ public class CardFunction_Aurora : CardFunction
 	public override void ActivatePaidAbility(int index)
 	{
 		base.ActivatePaidAbility(index);
-		if (index == 1) BreakSubroutine();
+		if (index == 1) BreakSubroutine(index);
 		else if (index == 2) AddStrength();
 	}
 
-	void BreakSubroutine()
+	void BreakSubroutine(int index)
 	{
-
+		RunOperator.instance.BreakingSubroutines(paidAbilities[index-1]);
 	}
 
 	void AddStrength()

@@ -8,7 +8,7 @@ public class Card_Event : Card, IActivateable
 
 	public override bool CanSelect()
 	{
-        return PlayCardManager.instance.CanActivateEvent(this);
+        return base.CanSelect() && PlayCardManager.instance.CanActivateEvent(this);
 	}
 
     public bool CanActivate()
