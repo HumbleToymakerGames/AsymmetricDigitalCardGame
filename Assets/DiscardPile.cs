@@ -2,11 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DiscardPile : MonoBehaviour
+public class DiscardPile : PlayArea_Spot
 {
     public Transform cardsParentT;
-    // Start is called before the first frame update
-    void Start()
+    public List<Card> cardsInDiscard = new List<Card>();
+
+	protected override void Awake()
+	{
+		base.Awake();
+    }
+
+	// Start is called before the first frame update
+	void Start()
     {
         
     }
@@ -21,8 +28,15 @@ public class DiscardPile : MonoBehaviour
 
     public void AddCardToDiscard(Card card)
 	{
-        card.ParentCardTo(cardsParentT);
+        card.MoveCardTo(cardsParentT);
         card.FlipCardDown();
+        cardsInDiscard.Add(card);
+    }
+
+	public override void RemoveCard(Card card)
+	{
+		base.RemoveCard(card);
+        cardsInDiscard.Remove(card);
 	}
 
 

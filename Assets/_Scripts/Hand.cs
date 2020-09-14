@@ -3,32 +3,42 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class Hand : MonoBehaviour
+public class Hand : PlayArea_Spot
 {
-    public PlayerSide playerSide;
-    PlayerNR myPlayer;
     public Transform cardsParentT;
     int maximumHandSize = 5;
     public float cardScaleInHand;
 
-    [Header("Show Toggler")]
-    bool isShowing = true;
+	[SerializeField]
+	List<Card> cardsInHand = new List<Card>();
+
+	[Header("Show Toggler")]
+    bool isShowing = false;
     RectTransform rt;
     public int showYValue, hideYValue;
     public float transitionTime;
 
-	private void Awake()
+	protected override void Awake()
 	{
-        myPlayer = playerSide == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation;
+		base.Awake();
         rt = GetComponent<RectTransform>();
     }
 
-    public void AddCardsToHand(params Card[] cards)
+	private void Start()
+	{
+        ToggleShowing();
+	}
+
+	public void AddCardsToHand(params Card[] cards)
 	{
 		for (int i = 0; i < cards.Length; i++)
 		{
-            cards[i].ParentCardTo(cardsParentT);
+			cardsInHand.Add(cards[i]);
+            cards[i].MoveCardTo(cardsParentT);
             ScaleCard(cards[i]);
+			Vector3 localPos = cards[i].transform.localPosition;
+			localPos.z = -1 * cardsInHand.Count;
+			cards[i].transform.localPosition = localPos;
 		}
 	}
 
@@ -50,5 +60,25 @@ public class Hand : MonoBehaviour
         rt.DOAnchorPosY(isShowing ? showYValue : hideYValue, transitionTime);
 
     }
+
+	public int NumberOfCardsInHand()
+	{
+		return cardsInHand.Count;
+	}
+
+	public bool HandSizeFull()
+	{
+		return NumberOfCardsInHand() >= maximumHandSize;
+	}
+
+	public bool IsCardInHand(Card card)
+	{
+		return cardsInHand.Contains(card);
+	}
+
+	public override void RemoveCard(Card card)
+	{
+		cardsInHand.Remove(card);
+	}
 
 }

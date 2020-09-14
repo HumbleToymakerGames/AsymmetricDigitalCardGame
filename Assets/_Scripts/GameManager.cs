@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public PlayerSide currentTurnSide;
+    public static PlayerNR CurrentTurnPlayer;
 
 
     public delegate void RunFinished(bool success, int serverType);
@@ -19,13 +21,26 @@ public class GameManager : MonoBehaviour
     private void Awake()
 	{
         instance = this;
-	}
+        UpdateCurrentTurn(currentTurnSide);
+    }
 
-	// Start is called before the first frame update
-	void Start()
+    // Start is called before the first frame update
+    void Start()
     {
-        SpawnAndSetCards();
+        StartCoroutine(StartGame());
+    }
+
+    IEnumerator StartGame()
+	{
+        yield return new WaitForSeconds(0.25f);
+
+        SpawnAndSetCards(PlayerNR.Runner);
+        SpawnAndSetCards(PlayerNR.Corporation);
+
+        yield return new WaitForSeconds(0.25f);
+
         SetPlayerCredits(PlayerNR.Runner, numCreditsToStartWith);
+        SetPlayerCredits(PlayerNR.Corporation, numCreditsToStartWith);
         DrawFirstHands();
         StartNextTurn();
     }
@@ -39,22 +54,23 @@ public class GameManager : MonoBehaviour
 
 
 
-    void SpawnAndSetCards()
+    void SpawnAndSetCards(PlayerNR player)
 	{
         // Runner
-        Card_Identity runnerIdentity = Instantiate(PlayerNR.Runner.e_PlayerDeck.identityCard);
+        Card_Identity identityCard = Instantiate(player.e_PlayerDeck.identityCard);
 
-        Card[] e_deckCards = PlayerNR.Runner.e_PlayerDeck.deckCards;
+        Card[] e_deckCards = player.e_PlayerDeck.deckCards;
         int numCards = e_deckCards.Length;
         Card[] deckCards = new Card[numCards];
-		for (int i = 0; i < numCards; i++)
+        for (int i = 0; i < numCards; i++)
 		{
             Card card = Instantiate(e_deckCards[i]);
             deckCards[i] = card;
-		}
 
-        PlayerNR.Runner.SetPlayerCards(runnerIdentity, deckCards);
-        PlayArea.instance.SetCardsToSpots(PlayerNR.Runner);
+        }
+
+        player.SetPlayerCards(identityCard, deckCards);
+        PlayArea.instance.SetCardsToSpots(player);
 
 	}
 
@@ -66,16 +82,28 @@ public class GameManager : MonoBehaviour
 
     void DrawFirstHands()
 	{
-        PlayCardManager.instance.DrawCards(numCardsToDrawFirstHand);
-	}
+        PlayCardManager.instance.DrawCards(PlayerNR.Corporation, numCardsToDrawFirstHand);
+        PlayCardManager.instance.DrawCards(PlayerNR.Runner, numCardsToDrawFirstHand);
+    }
 
-    
+
     void StartNextTurn()
 	{
-        PlayCardManager.instance.StartTurn(currentTurnSide == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation);
+        UpdateCurrentTurn(currentTurnSide);
+        PlayCardManager.instance.StartTurn(CurrentTurnPlayer);
 	}
 
+    void UpdateCurrentTurn(PlayerSide side)
+	{
+        currentTurnSide = side;
+        CurrentTurnPlayer = side == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation;
+    }
 
+
+    public bool IsCurrentTurn(PlayerSide playerSide)
+	{
+        return currentTurnSide == playerSide;
+	}
 
 
 

@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.UI;
 
 public abstract class Card : MonoBehaviour, ISelectableNR
 {
     CardReferences cardRefs;
-    protected CardFunction cardFunction;
+    [HideInInspector]
+    public CardFunction cardFunction;
     [HideInInspector]
     public CardCost cardCost;
 
     [Header("Card Data")]
     public PlayerSide playerSide;
-    protected PlayerNR myPlayer;
+    [HideInInspector]
+    public PlayerNR myPlayer;
     public CardType cardType;
     public CardSubType cardSubType;
     public string cardTitle;
@@ -24,6 +27,9 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     float cardFlipTransitionTime = 1f;
 
 
+    public int viewIndex;
+
+
 
     protected virtual void Awake()
 	{
@@ -32,23 +38,33 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         cardFunction = GetComponent<CardFunction>();
         cardCost = GetComponent<CardCost>();
         myPlayer = playerSide == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation;
+        Pinned(false, true);
+        Pinned(false, false);
     }
 
 	protected virtual void OnEnable()
 	{
 		PlayCardManager.OnCardInstalled += OnCardInstalled;
+		myPlayer.OnCreditsChanged += MyPlayer_OnCreditsChanged;
 	}
-    protected virtual void OnDisable()
+
+	protected virtual void OnDisable()
     {
         PlayCardManager.OnCardInstalled -= OnCardInstalled;
+		myPlayer.OnCreditsChanged -= MyPlayer_OnCreditsChanged;
     }
     protected virtual void OnCardInstalled(Card card, bool installed)
 	{
 
 	}
 
-	// Start is called before the first frame update
-	protected virtual void Start()
+    private void MyPlayer_OnCreditsChanged()
+    {
+        cardFunction?.UpdatePaidAbilitesActive_Credits(myPlayer.Credits);
+    }
+
+    // Start is called before the first frame update
+    protected virtual void Start()
     {
         UpdateCardTitle();
         UpdateCardTypes();
@@ -99,39 +115,40 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
     }
 
-
+    [ContextMenu("FlipCard")]
     public void FlipCard()
 	{
         isFaceUp = !isFaceUp;
         UpdateCardFlipDisplay();
 	}
 
-    public void FlipCardUp()
+    public void FlipCardUp(bool immediate = false)
 	{
         isFaceUp = true;
-        UpdateCardFlipDisplay();
+        UpdateCardFlipDisplay(immediate);
 	}
-    public void FlipCardDown()
+    public void FlipCardDown(bool immediate = false)
     {
         isFaceUp = false;
-        UpdateCardFlipDisplay();
+        UpdateCardFlipDisplay(immediate);
     }
 
-    void UpdateCardFlipDisplay()
+    void UpdateCardFlipDisplay(bool immediate = false)
 	{
+        float time = immediate ? 0 : cardFlipTransitionTime;
         if (isFaceUp)
 		{
-            transform.DOLocalRotate(Vector3.zero, cardFlipTransitionTime);
+            transform.DOLocalRotate(Vector3.zero, time);
 		}
         else
 		{
-            transform.DOLocalRotate(Vector3.up * 180, cardFlipTransitionTime);
+            transform.DOLocalRotate(Vector3.up * 180, time);
         }
     }
 
     public bool IsCardInHand()
 	{
-        return PlayerNR.Runner.IsCardInHand(this);
+        return PlayArea.instance.HandNR(myPlayer).IsCardInHand(this);
 	}
 
 
@@ -142,7 +159,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
 	public virtual bool CanSelect()
 	{
-        return true;
+        return false;
 	}
 
 	public void Highlighted()
@@ -159,6 +176,12 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         print(IsCardInHand());
 	}
 
+    public void Pinned(bool pinned = true, bool primary = true)
+    {
+        Image pin = primary ? cardRefs.cardPin_Primary : cardRefs.cardPin_Secondary;
+        pin.enabled = pinned;
+    }
+
     public void ActivateCardFromHand()
 	{
         if (this is IInstallable)
@@ -173,6 +196,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         }
     }
 
+	
+
 
 	//private void OnValidate()
 	//{
@@ -186,10 +211,29 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
 static class CardExtensions
 {
+    public static void MoveCardTo(this Card card, Transform parent)
+	{
+        // Remove from list
+        PlayArea_Spot currentSpot = card.GetComponentInParent<PlayArea_Spot>();
+        PlayArea_Spot newSpot = parent.GetComponentInParent<PlayArea_Spot>();
+        if (currentSpot && newSpot != currentSpot)
+        {
+            currentSpot.RemoveCard(card);
+        }
+
+        card.ParentCardTo(parent);
+    }
+
     public static void ParentCardTo(this Card card, Transform parent)
 	{
+        
+
+        // Parent card
+        RectTransform rt = card.GetComponent<RectTransform>();
         card.transform.localScale = Vector3.one;
         card.transform.SetParent(parent, false);
-        card.transform.localPosition = Vector3.zero;
+        rt.anchorMin = rt.anchorMax = Vector2.one * 0.5f;
+        rt.anchoredPosition = Vector3.zero;
+        
     }
 }

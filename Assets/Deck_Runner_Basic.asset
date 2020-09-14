@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8a1687feeea753e4290c71b08f5c7187, type: 3}
-  m_Name: RunnerDeck_Basic
+  m_Name: Deck_Runner_Basic
   m_EditorClassIdentifier: 
   playerSide: 1
   identityCard: {fileID: 1472817870728630276, guid: 3f9c475202498c749b152ddecf26af19,

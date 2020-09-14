@@ -13,7 +13,7 @@ public class Card_Event : Card, IActivateable
 
     public bool CanActivate()
     {
-        return cardCost.CanAffordCard(PlayerNR.Runner.Credits);
+        return cardCost.CanAffordCard(myPlayer.Credits);
     }
 
     public virtual void ActivateCard()

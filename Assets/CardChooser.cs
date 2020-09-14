@@ -5,7 +5,9 @@ using UnityEngine;
 public class CardChooser : MonoBehaviour
 {
     public SelectorNR hoveredSelector;
-
+    public delegate void HoveredOverCard(Card card);
+    public static event HoveredOverCard OnHoveredOverCard;
+    public static event HoveredOverCard OnCardPinned;
 
     // Start is called before the first frame update
     void Start()
@@ -24,6 +26,18 @@ public class CardChooser : MonoBehaviour
                 hoveredSelector.Click();
 			}
 		}
+        else if (Input.GetMouseButtonDown(1))
+		{
+            if (hoveredSelector)
+			{
+                Card card = hoveredSelector.GetComponentInParent<Card>();
+                OnCardPinned?.Invoke(card);
+            }
+            else
+			{
+                OnCardPinned?.Invoke(null);
+			}
+        }
     }
 
 
@@ -40,17 +54,25 @@ public class CardChooser : MonoBehaviour
                 if (selector != hoveredSelector)
                 {
                     Debug.Log("selector - " + hit.collider.name, hit.collider);
-                    if (hoveredSelector) hoveredSelector.Highlight(false);
-                    selector.Highlight();
+                    if (hoveredSelector) hoveredSelector.Hover(false);
+                    selector.Hover();
+
+                    Card card = selector.GetComponentInParent<Card>();
+                    OnHoveredOverCard?.Invoke(card);
+
                     hoveredSelector = selector;
                 }
             }
 		}
         else
 		{
-            if (hoveredSelector) hoveredSelector.Highlight(false);
-            hoveredSelector = null;
-		}
+            if (hoveredSelector)
+            {
+                hoveredSelector.Hover(false);
+                OnHoveredOverCard?.Invoke(null);
+                hoveredSelector = null;
+            }
+        }
 
 	}
 
