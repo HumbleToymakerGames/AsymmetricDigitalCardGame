@@ -118,7 +118,7 @@ public class CardViewWindow : MonoBehaviour
 			isPinning = true;
 			pinGO.SetActive(true);
 			cardViewer.GetCard(currentViewIndex, true)?.Pinned(false, isPrimaryView);
-			ViewCard(card.viewIndex, cardViewer.cardsClickableOnView);
+			ViewCard(card.viewIndex, isPrimaryView && cardViewer.cardsClickableOnView);
 			cardViewer.GetCard(currentViewIndex, true).Pinned(true, isPrimaryView);
 		}
 		else

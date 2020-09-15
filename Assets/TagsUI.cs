@@ -31,7 +31,7 @@ public class TagsUI : PlayArea_Spot, ISelectableNR
 	}
 
 
-	public bool CanHighlight()
+	public bool CanHighlight(bool highlight = true)
 	{
 		return true;
 	}

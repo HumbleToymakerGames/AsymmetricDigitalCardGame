@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
-public class Hand : PlayArea_Spot
+public class Hand : PlayArea_Spot, IAccessable
 {
     public Transform cardsParentT;
     int maximumHandSize = 5;
@@ -80,5 +80,24 @@ public class Hand : PlayArea_Spot
 	{
 		cardsInHand.Remove(card);
 	}
+
+	Card RandomCard()
+	{
+		return cardsInHand[Random.Range(0, cardsInHand.Count)];
+	}
+
+	public void Access()
+	{
+		RevealRandomCardFromHand();
+		print("Hand accesssed");
+	}
+
+
+	void RevealRandomCardFromHand()
+	{
+		Card randomCard = RandomCard();
+		CardRevealer.instance.RevealCard(randomCard, true);
+	}
+
 
 }

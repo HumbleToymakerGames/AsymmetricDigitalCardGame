@@ -29,9 +29,11 @@ public class CardRevealer : MonoBehaviour
     public void RevealCard(Card card, bool pingPong)
 	{
         Activate();
-        cardT.position = card.transform.position;
+		cardT.position = card.transform.position;
         Card revealedCard = Instantiate(card, cardT);
         revealedCard.MoveCardTo(cardT);
+        revealedCard.ActivateRaycasts(false);
+        //revealedCard.transform.localScale = card.transform.lossyScale;
 
         StartCoroutine(RevealRoutine(revealedCard, pingPong));
         

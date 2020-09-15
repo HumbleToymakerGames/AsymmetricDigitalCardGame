@@ -5,11 +5,10 @@ using UnityEngine;
 public class CardViewer : MonoBehaviour
 {
 	public static CardViewer instance;
-    public Card_Program program;
-    public Card_Ice ice;
-
 	public CardViewWindow viewWindow_Primary, viewWindow_Secondary;
 	public bool cardsClickableOnView;
+	public GameObject optionsGO;
+
 	public class CardPair
 	{
 		public Card realCard, viewCard;
@@ -20,6 +19,21 @@ public class CardViewer : MonoBehaviour
 	private void Awake()
 	{
 		instance = this;
+		optionsGO.SetActive(false);
+	}
+
+	private void OnEnable()
+	{
+		RunOperator.OnRunStarted += RunOperator_OnRunStarted;
+	}
+	private void OnDisable()
+	{
+		RunOperator.OnRunStarted -= RunOperator_OnRunStarted;
+	}
+
+	private void RunOperator_OnRunStarted()
+	{
+		optionsGO.SetActive(true);
 	}
 
 	void Start()
@@ -177,5 +191,27 @@ public class CardViewer : MonoBehaviour
 		cardsClickableOnView = clickable;
 		GetCard(viewWindow_Primary.currentViewIndex, false)?.ActivateRaycasts(clickable);
 	}
+
+
+
+	#region Buttons_Options
+
+	public void Button_FireSubroutines()
+	{
+		RunOperator.instance.FireRemainingSubroutines();
+	}
+
+
+
+
+	#endregion
+
+
+
+
+
+
+
+
 
 }

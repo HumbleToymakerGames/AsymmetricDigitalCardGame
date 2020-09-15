@@ -7,7 +7,7 @@ public class Subroutine : MonoBehaviour
 {
 
     Button button;
-    public Color breakableColor;
+    Color breakableColor = Color.red;
     Color ogColor;
     public bool isBroken;
 
@@ -15,7 +15,7 @@ public class Subroutine : MonoBehaviour
 	{
         button = GetComponent<Button>();
         ogColor = button.colors.normalColor;
-
+        button.onClick.AddListener(Button_Clicked);
     }
 
 	// Start is called before the first frame update
@@ -51,7 +51,7 @@ public class Subroutine : MonoBehaviour
         UpdateBrokenDisplay();
 	}
 
-    void UpdateBrokenDisplay()
+    public void UpdateBrokenDisplay()
 	{
         SetInteractable(!isBroken);
 	}

@@ -87,7 +87,7 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
         return false;
 	}
 
-	public bool CanHighlight()
+	public bool CanHighlight(bool highlight = true)
 	{
         return IsCurrentTurns();
 	}

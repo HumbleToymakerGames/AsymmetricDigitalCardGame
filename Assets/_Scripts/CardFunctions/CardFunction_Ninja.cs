@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_Aurora : CardFunction
+public class CardFunction_Ninja : CardFunction
 {
     public int strengthToAdd;
-
-	
 
 	public override void ActivateFunction()
 	{
@@ -23,7 +21,7 @@ public class CardFunction_Aurora : CardFunction
 
 	void BreakSubroutine(int index)
 	{
-		RunOperator.instance.BreakingSubroutines(paidAbilities[index-1]);
+		RunOperator.instance.BreakingSubroutines(paidAbilities[index - 1]);
 	}
 
 	void AddStrength()
@@ -31,11 +29,5 @@ public class CardFunction_Aurora : CardFunction
 		Card_Program programCard = card as Card_Program;
 		programCard.ModifyStrength(strengthToAdd);
 	}
-
-	
-
-
-
-
 
 }

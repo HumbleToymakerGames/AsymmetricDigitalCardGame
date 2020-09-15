@@ -171,10 +171,10 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     }
 
 
-	public bool CanHighlight()
+	public bool CanHighlight(bool highlight = true)
 	{
-        return IsCardControlledByCurrentTurn();
-        //return true;
+        if (highlight) return IsCardControlledByCurrentTurn();
+        return true;
 	}
 
 	public virtual bool CanSelect()

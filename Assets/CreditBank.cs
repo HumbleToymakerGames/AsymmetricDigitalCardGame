@@ -19,7 +19,7 @@ public class CreditBank : MonoBehaviour, ISelectableNR
     }
 
 
-	public bool CanHighlight()
+	public bool CanHighlight(bool highlight = true)
 	{
 		return true;
 	}

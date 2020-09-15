@@ -28,14 +28,23 @@ public class PaidAbility : MonoBehaviour
 
 	private void OnEnable()
 	{
-		if (cardFunction.card.isViewCard) RunOperator.OnIceBeingEncountered += RunOperator_OnIceBeingEncountered;
+        if (cardFunction.card.isViewCard)
+        {
+            RunOperator.OnIceBeingEncountered += RunOperator_OnIceBeingEncountered;
+			RunOperator.OnRunEnded += RunOperator_OnRunEnded;
+        }
 	}
-    private void OnDisable()
+
+	private void OnDisable()
     {
-        if (cardFunction.card.isViewCard) RunOperator.OnIceBeingEncountered -= RunOperator_OnIceBeingEncountered;
+        if (cardFunction.card.isViewCard)
+        {
+            RunOperator.OnIceBeingEncountered -= RunOperator_OnIceBeingEncountered;
+            RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
+        }
     }
 
-    private void RunOperator_OnIceBeingEncountered(Card_Ice iceCard)
+    private void RunOperator_OnIceBeingEncountered(Card_Ice iceCard, int encounterIndex)
 	{
         if (cardFunction.card.IsCardType(CardType.Program))
         {
@@ -43,7 +52,15 @@ public class PaidAbility : MonoBehaviour
         }
 	}
 
-	void Start()
+    private void RunOperator_OnRunEnded(bool success)
+    {
+        if (cardFunction.card.IsCardType(CardType.Program))
+        {
+            TrySetAbleAbilitiesActive();
+        }
+    }
+
+    void Start()
     {
         
     }

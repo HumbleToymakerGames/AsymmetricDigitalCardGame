@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     public delegate void RunFinished(bool success, int serverType);
     public static event RunFinished OnRunFinished;
 
+    public delegate void TurnChanged(bool isRunner);
+    public static event TurnChanged OnTurnChanged;
+
     [Header("Game Data")]
     public int numCardsToDrawFirstHand;
     public int numCreditsToStartWith;
@@ -93,7 +96,9 @@ public class GameManager : MonoBehaviour
         currentTurnSide = currentTurnSide == PlayerSide.Runner ? PlayerSide.Corporation : PlayerSide.Runner;
         UpdateCurrentTurn(currentTurnSide);
         PlayCardManager.instance.StartTurn(CurrentTurnPlayer);
-	}
+        OnTurnChanged?.Invoke(CurrentTurnPlayer.IsRunner());
+
+    }
 
     void UpdateCurrentTurn(PlayerSide side)
 	{

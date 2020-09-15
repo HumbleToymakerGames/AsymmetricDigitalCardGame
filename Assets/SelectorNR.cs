@@ -30,7 +30,7 @@ public class SelectorNR : MonoBehaviour
 
     public void Highlight(bool highlight = true)
 	{
-        if (selectable != null && selectable.CanHighlight())
+        if (selectable != null && selectable.CanHighlight(highlight))
 		{
             highlighter.enabled = highlight;
             selectable.Highlighted();

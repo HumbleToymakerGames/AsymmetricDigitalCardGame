@@ -53,7 +53,7 @@ public class CardChooser : MonoBehaviour
             {
                 if (selector != hoveredSelector)
                 {
-                    Debug.Log("selector - " + hit.collider.name, hit.collider);
+                    //Debug.Log("selector - " + hit.collider.name, hit.collider);
                     if (hoveredSelector) hoveredSelector.Hover(false);
                     selector.Hover();
 

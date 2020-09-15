@@ -155,7 +155,7 @@ public class PlayerNR : MonoBehaviour
     }
     public void ActionPointsUsed(int numActions)
     {
-        ActionPoints -= numActions;
+        ActionPoints = Mathf.Max(ActionPoints-numActions, 0);
     }
 
     public void AddTotalMemory(int amountMemory)
@@ -175,6 +175,12 @@ public class PlayerNR : MonoBehaviour
         Tags -= numTags;
 	}
 
+
+
+    public static PlayerNR GetPlayer(PlayerSide playerSide)
+	{
+        return playerSide == PlayerSide.Runner ? Runner : Corporation;
+	}
 
 
 }
