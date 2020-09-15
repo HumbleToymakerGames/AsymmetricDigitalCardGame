@@ -18,13 +18,13 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 
 	public bool CanHighlight(bool highlight = true)
 	{
-		if (highlight) return !RunOperator.instance.isRunning;
+		if (highlight) return !RunOperator.instance.isRunning && GameManager.CurrentTurnPlayer.IsRunner();
 		return true;
 	}
 
 	public bool CanSelect()
 	{
-		return CanHighlight();
+		return CanHighlight() && PlayCardManager.instance.CanMakeRun();
 	}
 
 	public void Highlighted()
@@ -36,7 +36,7 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 		RunOperator.OnIceBeingEncountered += RunOperator_OnIceBeingEncountered;
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		numIceInColumn = targetServer.iceInColumn.Count;
-		RunOperator.instance.MakeRun(targetServer);
+		PlayCardManager.instance.TryMakeRun(targetServer);
 	}
 
 	private void RunOperator_OnRunEnded(bool success)

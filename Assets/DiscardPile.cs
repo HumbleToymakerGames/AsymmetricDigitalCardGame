@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DiscardPile : PlayArea_Spot
+public class DiscardPile : PlayArea_Spot, IAccessable
 {
     public Transform cardsParentT;
     public List<Card> cardsInDiscard = new List<Card>();
@@ -29,7 +29,7 @@ public class DiscardPile : PlayArea_Spot
     public void AddCardToDiscard(Card card)
 	{
         card.MoveCardTo(cardsParentT);
-        card.FlipCardDown();
+        card.FlipCard(false);
         cardsInDiscard.Add(card);
     }
 
@@ -39,5 +39,7 @@ public class DiscardPile : PlayArea_Spot
         cardsInDiscard.Remove(card);
 	}
 
-
+	public void Access()
+	{
+	}
 }

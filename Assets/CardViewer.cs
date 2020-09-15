@@ -7,7 +7,7 @@ public class CardViewer : MonoBehaviour
 	public static CardViewer instance;
 	public CardViewWindow viewWindow_Primary, viewWindow_Secondary;
 	public bool cardsClickableOnView;
-	public GameObject optionsGO;
+	public GameObject linkIcon;
 
 	public class CardPair
 	{
@@ -19,7 +19,7 @@ public class CardViewer : MonoBehaviour
 	private void Awake()
 	{
 		instance = this;
-		optionsGO.SetActive(false);
+		ShowLinkIcon(false);
 	}
 
 	private void OnEnable()
@@ -33,7 +33,7 @@ public class CardViewer : MonoBehaviour
 
 	private void RunOperator_OnRunStarted()
 	{
-		optionsGO.SetActive(true);
+
 	}
 
 	void Start()
@@ -43,7 +43,7 @@ public class CardViewer : MonoBehaviour
 
 	void ParentCard_Start(Card card)
 	{
-		card.FlipCardUp(true);
+		card.FlipCard(true, true);
 		SelectorNR selector = card.GetComponentInChildren<SelectorNR>();
 		if (selector)
 		{
@@ -64,6 +64,7 @@ public class CardViewer : MonoBehaviour
 		bool viewer = false;
 		if (IsCardBeingViewed(viewIndex, ref viewer)) return;
 
+		ReplicateCardState(viewIndex);
 		if (primary) viewWindow_Primary.ViewCard(viewIndex, cardsClickableOnView);
 		else viewWindow_Secondary.ViewCard(viewIndex, cardsClickableOnView);
 	}
@@ -170,6 +171,8 @@ public class CardViewer : MonoBehaviour
 			bool viewer = false;
 			if (card && IsCardBeingViewed(card.viewIndex, ref viewer) && viewer != primary) return;
 		}
+
+		ReplicateCardState(viewIndex);
 		if (primary) viewWindow_Primary.PinCard(card);
 		else viewWindow_Secondary.PinCard(card);
 	}
@@ -189,27 +192,31 @@ public class CardViewer : MonoBehaviour
 	public void SetCardsClickable(bool clickable = true)
 	{
 		cardsClickableOnView = clickable;
-		GetCard(viewWindow_Primary.currentViewIndex, false)?.ActivateRaycasts(clickable);
+		Card primaryViewCard = GetCard(viewWindow_Primary.currentViewIndex, false);
+		if (primaryViewCard && primaryViewCard.isInstalled) primaryViewCard.ActivateRaycasts(clickable);
 	}
 
 
-
-	#region Buttons_Options
-
-	public void Button_FireSubroutines()
+	void ReplicateCardState(int viewIndex)
 	{
-		RunOperator.instance.FireRemainingSubroutines();
+		CardPair cardPair;
+		if (cardPairDict.TryGetValue(viewIndex, out cardPair))
+		{
+			Card realCard = cardPair.realCard;
+			Card viewCard = cardPair.viewCard;
+
+			viewCard.FlipCard(realCard.isFaceUp, true);
+			viewCard.isRezzed = realCard.isRezzed;
+			viewCard.isInstalled = realCard.isInstalled;
+
+		}
 	}
 
 
-
-
-	#endregion
-
-
-
-
-
+	public void ShowLinkIcon(bool show)
+	{
+		linkIcon.SetActive(show);
+	}
 
 
 

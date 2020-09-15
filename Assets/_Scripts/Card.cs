@@ -26,11 +26,13 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     [Header("Play Data")]
     [HideInInspector]
     public bool isFaceUp = true;
+    public bool isRezzed = true;
     float cardFlipTransitionTime = 1f;
 
 
     public int viewIndex;
     public bool isViewCard;
+    public bool isInstalled;
 
 
 
@@ -60,8 +62,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     }
     protected virtual void OnCardInstalled(Card card, bool installed)
 	{
-
-	}
+        if (card == this) isInstalled = installed;
+    }
 
     private void MyPlayer_OnCreditsChanged()
     {
@@ -111,41 +113,37 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         cardRefs.UpdateCardTypes(cardType.TypeToString(), cardSubType.TypeToString());
     }
 
-
-
-    // Installation
-    protected virtual void CardInstalled()
+    [ContextMenu("FlipCardOver")]
+    public void FlipCardOver()
 	{
-
+        UpdateCardFlipDisplay(!isFaceUp);
+        CardViewer.instance.GetCard(viewIndex, false)?.UpdateCardFlipDisplay(!isFaceUp);
 	}
 
-    protected virtual void CardUnInstalled()
-    {
-
+    public void FlipCard(bool faceUp, bool immediate = false)
+	{
+        UpdateCardFlipDisplay(faceUp, immediate);
+        CardViewer.instance.GetCard(viewIndex, false)?.UpdateCardFlipDisplay(faceUp);
     }
 
-    [ContextMenu("FlipCard")]
-    public void FlipCard()
+    public void Rez()
 	{
-        isFaceUp = !isFaceUp;
-        UpdateCardFlipDisplay();
-	}
-
-    public void FlipCardUp(bool immediate = false)
-	{
-        isFaceUp = true;
-        UpdateCardFlipDisplay(immediate);
-	}
-    public void FlipCardDown(bool immediate = false)
-    {
-        isFaceUp = false;
-        UpdateCardFlipDisplay(immediate);
+        isRezzed = true;
+        FlipCard(true);
+        if (!isViewCard) CardViewer.instance.GetCard(viewIndex, false)?.Rez();
     }
 
-    void UpdateCardFlipDisplay(bool immediate = false)
+    public void DeRez()
 	{
+        isRezzed = false;
+	}
+
+
+    void UpdateCardFlipDisplay(bool faceUp, bool immediate = false)
+	{
+        isFaceUp = faceUp;
         float time = immediate ? 0 : cardFlipTransitionTime;
-        if (isFaceUp)
+        if (faceUp)
 		{
             transform.DOLocalRotate(Vector3.zero, time);
 		}
@@ -191,6 +189,10 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         if (IsCardInHand())
 		{
             ActivateCardFromHand();
+		}
+        else if (isInstalled)
+		{
+            CardViewer.instance.viewWindow_Primary.CardChooser_OnCardPinned(this);
 		}
         //FlipCard();
         print(IsCardInHand());

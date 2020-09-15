@@ -58,6 +58,15 @@ public abstract class CardFunction : MonoBehaviour
 		}
 	}
 
+	public bool HasBreakerOfType(CardSubType cardSubType)
+	{
+		for (int i = 0; i < paidAbilities.Length; i++)
+		{
+			if (paidAbilities[i].breakerType == cardSubType) return true;
+		}
+		return false;
+	}
+
 
 	void GetPaidAbilities()
 	{

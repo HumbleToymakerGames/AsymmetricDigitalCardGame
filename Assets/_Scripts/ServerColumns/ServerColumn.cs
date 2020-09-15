@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class ServerColumn : PlayArea_Spot
+public class ServerColumn : PlayArea_Spot, ISelectableNR
 {
+    ServerSpace serverSpace;
+    Button button;
     public PlayArea_Spot serverGO;
     protected IAccessable serverProtected;
     public IInstallable ssisd;
@@ -14,7 +17,10 @@ public class ServerColumn : PlayArea_Spot
 	protected override void Awake()
 	{
 		base.Awake();
+        serverSpace = GetComponentInParent<ServerSpace>();
         serverProtected = serverGO as IAccessable;
+        button = GetComponent<Button>();
+        SetInteractable(false);
     }
 
 
@@ -55,7 +61,6 @@ public class ServerColumn : PlayArea_Spot
         card.MoveCardTo(iceColumnT);
         card.transform.localEulerAngles = Vector3.forward * 180;
         iceInColumn.Insert(0, card);
-
     }
 
 
@@ -71,5 +76,29 @@ public class ServerColumn : PlayArea_Spot
         serverProtected.Access();
     }
 
+    public void SetInteractable(bool interactable = true)
+	{
+        button.interactable = interactable;
+    }
 
+    public bool CanHighlight(bool highlight = true)
+	{
+        if (highlight) return serverSpace.choosingInstallColumn;
+        return true;
+	}
+
+	public bool CanSelect()
+	{
+        return CanHighlight();
+	}
+
+	public void Highlighted()
+	{
+
+    }
+
+	public void Selected()
+	{
+        serverSpace.ServerChosen(this);
+	}
 }

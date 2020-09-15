@@ -66,7 +66,7 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
     {
         for (int i = 0; i < cardsInDeck.Count; i++)
         {
-            cardsInDeck[i].FlipCard();
+            cardsInDeck[i].FlipCardOver();
         }
     }
 

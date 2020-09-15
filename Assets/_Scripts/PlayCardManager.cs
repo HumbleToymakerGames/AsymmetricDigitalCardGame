@@ -61,7 +61,7 @@ public class PlayCardManager : MonoBehaviour
 		{
             Card drawnCard = PlayArea.instance.DrawCardFromDeck(player);
             drawnCards[i] = drawnCard;
-            drawnCard.FlipCard();
+            drawnCard.FlipCardOver();
 		}
 
         Hand hand = PlayArea.instance.HandNR(player);
@@ -84,9 +84,19 @@ public class PlayCardManager : MonoBehaviour
         return player.CanAffordAction(costOfAction);
 	}
 
-    public bool CanAffordCost(int cost)
+    public bool CanAffordCost(PlayerNR player, int cost)
 	{
-        return PlayerNR.Runner.CanAffordCost(cost);
+        return player.CanAffordCost(cost);
+	}
+
+    public bool TryAffordCost(PlayerNR player, int cost)
+	{
+        if (CanAffordCost(player, cost))
+		{
+            PayCost(player, cost);
+            return true;
+		}
+        return false;
 	}
 
     public bool CanDrawAnotherCard()
@@ -135,6 +145,21 @@ public class PlayCardManager : MonoBehaviour
         return false;
 	}
 
+    public bool CanMakeRun()
+	{
+        return CanAffordAction(PlayerNR.Runner, RUNNER_MAKE_RUN);
+	}
+
+    public bool TryMakeRun(ServerColumn targetServer)
+    {
+        if (CanMakeRun())
+		{
+            Action_MakeRun(targetServer);
+            return true;
+		}
+        return false;
+    }
+
     public bool CanActivateEvent(IActivateable activateableCard)
 	{
         return CanAffordAction(GameManager.CurrentTurnPlayer, RUNNER_EVENT) && activateableCard.CanActivate();
@@ -155,7 +180,7 @@ public class PlayCardManager : MonoBehaviour
     public bool CanRemoveTag()
 	{
         return CanAffordAction(PlayerNR.Runner, RUNNER_REMOVE_TAG)
-            && CanAffordCost(2)
+            && CanAffordCost(PlayerNR.Runner, 2)
             && PlayerNR.Runner.Tags > 0;
     }
 
@@ -164,7 +189,7 @@ public class PlayCardManager : MonoBehaviour
         if (CanRemoveTag())
 		{
             Action_RemoveTag();
-            PayCost(2);
+            PayCost(PlayerNR.Runner, 2);
 
             return true;
 		}
@@ -175,10 +200,10 @@ public class PlayCardManager : MonoBehaviour
 	{
         if (paidAbility.currency == Currency.Credits)
 		{
-            if (CanAffordCost(paidAbility.payAmount))
+            if (CanAffordCost(GameManager.CurrentTurnPlayer, paidAbility.payAmount))
 			{
                 paidAbility.ActivateAbility();
-                PayCost(paidAbility.payAmount);
+                PayCost(GameManager.CurrentTurnPlayer, paidAbility.payAmount);
 			}
 		}
         else if (paidAbility.currency == Currency.Clicks)
@@ -225,6 +250,14 @@ public class PlayCardManager : MonoBehaviour
         InstallCard_Corporation(installableCard);
     }
 
+    void Action_MakeRun(ServerColumn targetServer)
+    {
+        int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Runner, RUNNER_MAKE_RUN);
+        PlayerNR.Runner.ActionPointsUsed(costOfAction);
+        MakeRun(targetServer);
+    }
+
+
     void Action_ActivateEvent(PlayerNR player, IActivateable activateableCard)
 	{
         int costOfAction = PlayArea.instance.CostOfAction(player, player.IsRunner() ? RUNNER_EVENT : CORP_OPERATION);
@@ -239,9 +272,9 @@ public class PlayCardManager : MonoBehaviour
         RemoveTag();
     }
 
-    void PayCost(int cost)
+    void PayCost(PlayerNR player, int cost)
 	{
-        PlayerNR.Runner.Credits -= cost;
+        player.Credits -= cost;
 	}
 
     void PayCostOfCard(PlayerNR player, Card card)
@@ -286,6 +319,11 @@ public class PlayCardManager : MonoBehaviour
 	{
         ServerSpace.instance.InstallCard(installableCard);
 	}
+
+    void MakeRun(ServerColumn targetServer)
+	{
+        RunOperator.instance.MakeRun(targetServer);
+    }
 
     void ActivateCard(IActivateable activateableCard)
 	{

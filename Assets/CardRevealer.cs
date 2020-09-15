@@ -30,9 +30,11 @@ public class CardRevealer : MonoBehaviour
 	{
         Activate();
 		cardT.position = card.transform.position;
+        cardT.localScale = Vector3.one;
         Card revealedCard = Instantiate(card, cardT);
         revealedCard.MoveCardTo(cardT);
         revealedCard.ActivateRaycasts(false);
+        revealedCard.FlipCard(false, true);
         //revealedCard.transform.localScale = card.transform.lossyScale;
 
         StartCoroutine(RevealRoutine(revealedCard, pingPong));
@@ -49,7 +51,7 @@ public class CardRevealer : MonoBehaviour
         sequence.SetLoops(2, LoopType.Yoyo);
         sequence.SetEase(Ease.InOutQuad);
 
-        revealedCard.FlipCardUp();
+        revealedCard.FlipCard(true);
 
         yield return sequence.WaitForElapsedLoops(1);
         sequence.Pause();
@@ -65,7 +67,7 @@ public class CardRevealer : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.5f);
-        revealedCard.FlipCardDown();
+        revealedCard.FlipCard(false);
         yield return sequence.WaitForCompletion();
 
         Destroy(revealedCard.gameObject);

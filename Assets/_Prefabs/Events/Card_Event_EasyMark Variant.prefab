@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d91d547cc67d4946b474794873bced1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  card: {fileID: 0}
+  paidAbilities: []
   numCredits: 3
 --- !u!1001 &6848021747911906026
 PrefabInstance:
@@ -164,6 +166,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8973013273907719793, guid: f2d750e949abee14691cbf22408fce6b,
+        type: 3}
+      propertyPath: m_text
+      value: Gain 3cc
       objectReference: {fileID: 0}
     - target: {fileID: 8973013275403747791, guid: f2d750e949abee14691cbf22408fce6b,
         type: 3}

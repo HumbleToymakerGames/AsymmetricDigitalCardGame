@@ -35,10 +35,15 @@ public class RunOperator : MonoBehaviour
     private void OnEnable()
     {
         CardViewWindow.OnCardPinnedToView += CardViewWindow_OnCardPinnedToView;
+		CardViewWindow.OnCardViewed += CardViewWindow_OnCardViewed;
     }
-    private void OnDisable()
+
+	
+
+	private void OnDisable()
     {
         CardViewWindow.OnCardPinnedToView -= CardViewWindow_OnCardPinnedToView;
+		CardViewWindow.OnCardViewed -= CardViewWindow_OnCardViewed;
     }
     private void CardViewWindow_OnCardPinnedToView(Card card)
     {
@@ -51,24 +56,19 @@ public class RunOperator : MonoBehaviour
             currentProgramEncountering = card as Card_Program;
             currentProgramEncountering.cardFunction.OnPaidAbilityActivated += CardFunction_OnPaidAbilityActivated;
             //if (isRunning) SetAbleAbilitiesActive();
+            
         }
+    }
+
+    private void CardViewWindow_OnCardViewed(Card card)
+    {
+        if (currentIceEncountered && card.cardFunction)
+            CardViewer.instance.ShowLinkIcon(currentIceEncountered.isRezzed && card.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
     }
 
     private void CardFunction_OnPaidAbilityActivated()
     {
         OnIceBeingEncountered?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     public void MakeRun(ServerColumn serverColumn)
@@ -84,8 +84,12 @@ public class RunOperator : MonoBehaviour
     [ContextMenu("Move To Next Ice")]
     public void MoveToNextIce()
 	{
-		StartCoroutine(MoveToNextIceRoutine());
+        if (nextIceRoutine != null) StopCoroutine(nextIceRoutine);
+        nextIceRoutine = StartCoroutine(MoveToNextIceRoutine());
 	}
+
+    Coroutine nextIceRoutine;
+    bool cardIsRezzed;
 	IEnumerator MoveToNextIceRoutine()
 	{
         yield return new WaitForSeconds(0.1f);
@@ -94,16 +98,31 @@ public class RunOperator : MonoBehaviour
 
 		if (currentServerColumn.GetNextIce(ref currentIceEncountered))
 		{
-			currentIceEncountered = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
-			if (!encounteredIceCards.Contains(currentIceEncountered)) encounteredIceCards.Add(currentIceEncountered);
-			currentIceEncountered.ActivateRaycasts(false);
+			Card viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
+			CardViewer.instance.PinCard(viewCard.viewIndex, false);
+            viewCard.ActivateRaycasts(false);
 
-			CardViewer.instance.PinCard(currentIceEncountered.viewIndex, false);
+            yield return new WaitForSeconds(0.25f);
 
-			ResetAllStrengths();
 
-			int iceStrength = currentIceEncountered.strength;
-			OnIceBeingEncountered?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
+            ResetAllStrengths();
+
+            OnIceBeingEncountered?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
+
+            cardIsRezzed = currentIceEncountered.isRezzed;
+
+            if (!cardIsRezzed) ActionOptions.instance.Display_RezCard(currentIceEncountered.cardCost.costOfCard, true);
+            while (!cardIsRezzed) yield return null;
+            currentIceEncountered.Rez();
+
+            yield return new WaitForSeconds(0.25f);
+
+            // var becomes view card
+            currentIceEncountered = viewCard as Card_Ice;
+            if (!encounteredIceCards.Contains(currentIceEncountered)) encounteredIceCards.Add(currentIceEncountered);
+
+            ActionOptions.instance.Display_FireRemainingSubs(true);
+
 			//currentRunChooser.
 			//int 
 
@@ -178,6 +197,23 @@ public class RunOperator : MonoBehaviour
         if (isRunning) MoveToNextIce();
     }
 
+    public void RezCardChoice(bool rezCard)
+	{
+		if (rezCard)
+		{
+            if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentIceEncountered.cardCost.costOfCard))
+			{
+                cardIsRezzed = true;
+                if (currentProgramEncountering)
+                    CardViewer.instance.ShowLinkIcon(currentProgramEncountering.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
+			}
+        }
+        else
+        {
+            MoveToNextIce();
+        }
+	}
+
 
     public bool IsCardStrongEnough(Card_Program programCard)
     {
@@ -198,12 +234,10 @@ public class RunOperator : MonoBehaviour
         {
             CardViewer.instance.PinCard(-1, false);
             CardViewer.instance.SetCardsClickable(false);
-            CardViewer.instance.optionsGO.SetActive(false);
 
             ResetAllStrengths();
             Card_Program.OnProgramStrengthModified -= Card_Program_OnProgramStrengthModified;
 
-            currentIceEncountered?.ResetSubroutinesToFire();
             currentServerColumn?.ResetIceIndex();
             ResetAllIces();
 
@@ -212,6 +246,7 @@ public class RunOperator : MonoBehaviour
             currentPaidAbility = null;
             currentServerColumn = null;
             encounteredIceCards.Clear();
+            ActionOptions.instance.HideAllOptions();
             isRunning = false;
             OnRunEnded?.Invoke(success);
             print("Run Ended.");
@@ -233,6 +268,7 @@ public class RunOperator : MonoBehaviour
 		for (int i = 0; i < encounteredIceCards.Count; i++)
 		{
             encounteredIceCards[i].ResetSubroutines();
+            encounteredIceCards[i].ResetSubroutinesToFire();
         }
     }
 

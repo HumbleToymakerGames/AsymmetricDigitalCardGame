@@ -13,8 +13,9 @@ public class CardViewWindow : MonoBehaviour
     public float scale;
 	public Vector2 anchor;
 
-	public delegate void CardPinnedToView(Card card);
-	public static event CardPinnedToView OnCardPinnedToView;
+	public delegate void CardViewEvent(Card card);
+	public static event CardViewEvent OnCardPinnedToView;
+	public static event CardViewEvent OnCardViewed;
 
 	private void Awake()
 	{
@@ -48,6 +49,7 @@ public class CardViewWindow : MonoBehaviour
 		{
 			cardViewer.HideAllCards(isPrimaryView);
 			currentViewIndex = -1;
+			cardViewer.ShowLinkIcon(false);
 		}
 		else
 		{
@@ -55,7 +57,7 @@ public class CardViewWindow : MonoBehaviour
 		}
 	}
 
-	private void CardChooser_OnCardPinned(Card card)
+	public void CardChooser_OnCardPinned(Card card)
 	{
 		if (card)
 		{
@@ -96,6 +98,7 @@ public class CardViewWindow : MonoBehaviour
 			pair.viewCard.ActivateVisuals(true);
 			pair.viewCard.ActivateRaycasts(activateRaycasts);
 			currentViewIndex = viewIndex;
+			OnCardViewed?.Invoke(pair.viewCard);
 		}
 		else
 		{
@@ -118,7 +121,7 @@ public class CardViewWindow : MonoBehaviour
 			isPinning = true;
 			pinGO.SetActive(true);
 			cardViewer.GetCard(currentViewIndex, true)?.Pinned(false, isPrimaryView);
-			ViewCard(card.viewIndex, isPrimaryView && cardViewer.cardsClickableOnView);
+			ViewCard(card.viewIndex, isPrimaryView && card.isInstalled && cardViewer.cardsClickableOnView);
 			cardViewer.GetCard(currentViewIndex, true).Pinned(true, isPrimaryView);
 		}
 		else
@@ -127,6 +130,7 @@ public class CardViewWindow : MonoBehaviour
 			pinGO.SetActive(false);
 			cardViewer.HideAllCards(isPrimaryView);
 			cardViewer.GetCard(currentViewIndex, true)?.Pinned(false, isPrimaryView);
+			cardViewer.ShowLinkIcon(false);
 			currentViewIndex = -1;
 		}
 	}

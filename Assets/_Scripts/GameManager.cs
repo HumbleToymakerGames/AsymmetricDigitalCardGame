@@ -91,7 +91,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    void StartNextTurn()
+    public void StartNextTurn()
 	{
         currentTurnSide = currentTurnSide == PlayerSide.Runner ? PlayerSide.Corporation : PlayerSide.Runner;
         UpdateCurrentTurn(currentTurnSide);
