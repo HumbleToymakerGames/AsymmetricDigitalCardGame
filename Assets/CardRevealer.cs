@@ -4,11 +4,14 @@ using UnityEngine;
 using DG.Tweening;
 using DG.Tweening.Core;
 
-public class CardRevealer : MonoBehaviour
+public class CardRevealer : MonoBehaviour, ISelectableNR
 {
     public static CardRevealer instance;
     public GameObject panelGO;
-    public RectTransform cardT;
+    public RectTransform cardT, cardsT;
+    public Transform emtpyImageT;
+    public Card[] currentCards;
+
     public Vector3 endRevealPos;
     public float transitionTime_Move;
     public float endRevealScale;
@@ -20,8 +23,33 @@ public class CardRevealer : MonoBehaviour
         Activate(false);
     }
 
+	private void OnEnable()
+	{
+		CardChooser.OnHoveredOverCard += CardChooser_OnHoveredOverCard;
+	}
+    private void OnDisable()
+    {
+        CardChooser.OnHoveredOverCard -= CardChooser_OnHoveredOverCard;
+    }
 
-    public void Activate(bool activate = true)
+    private void CardChooser_OnHoveredOverCard(Card card)
+	{
+        StartCoroutine(MoveEmptyDelay(card));
+	}
+
+    IEnumerator MoveEmptyDelay(Card card)
+	{
+        for (int i = 0; i < currentCards.Length; i++)
+        {
+            if (currentCards[i] == card)
+            {
+                yield return new WaitForSeconds(0.1f);
+                emtpyImageT.SetSiblingIndex(i + 1);
+            }
+        }
+    }
+
+	public void Activate(bool activate = true)
 	{
         panelGO.SetActive(activate);
 	}
@@ -75,6 +103,35 @@ public class CardRevealer : MonoBehaviour
     }
 
 
+    public void RevealCards(Card[] cards)
+	{
+        Activate();
+
+        currentCards = new Card[cards.Length];
+        for (int i = 0; i < cards.Length; i++)
+		{
+            Card revealedCard = Instantiate(cards[i], cardsT);
+            revealedCard.MoveCardTo(cardsT);
+            revealedCard.transform.localScale = Vector3.one * 2.5f;
+            revealedCard.ActivateRaycasts(false);
+            revealedCard.FlipCard(true, true);
+            currentCards[i] = revealedCard;
+        }
+    }
+
+    void DestroyAllCards()
+	{
+        for (int i = 0; i < currentCards.Length; i++)
+		{
+            Destroy(currentCards[i].gameObject);
+		}
+    }
+
+
+
+
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -87,6 +144,24 @@ public class CardRevealer : MonoBehaviour
         
     }
 
+	public bool CanHighlight(bool highlight = true)
+	{
+        return true;
+	}
 
+	public bool CanSelect()
+	{
+        return true;
+	}
 
+	public void Highlighted()
+	{
+
+	}
+
+	public void Selected()
+	{
+        DestroyAllCards();
+        Activate(false);
+    }
 }

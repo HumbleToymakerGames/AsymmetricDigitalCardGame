@@ -7,6 +7,7 @@ public abstract class CardFunction : MonoBehaviour
 	[HideInInspector]
 	public Card card;
 	public PaidAbility[] paidAbilities;
+	public ConditionalAbility[] conditionalAbilities;
 
 	public delegate void PaidAbilityActivated();
 	public event PaidAbilityActivated OnPaidAbilityActivated;
@@ -15,6 +16,7 @@ public abstract class CardFunction : MonoBehaviour
 	{
 		card = GetComponent<Card>();
 		GetPaidAbilities();
+		GetConditionalAbilities();
 	}
 
 
@@ -39,6 +41,36 @@ public abstract class CardFunction : MonoBehaviour
 	{
 
 	}
+
+	#region Conditional Abilities
+
+	public void TryExecuteConditionalAbility(int abilityIndex)
+	{
+		if (CanExecuteConditionalAbility(abilityIndex))
+			ExecuteConditionalAbility(abilityIndex);
+		else ConditionalAbilityResolved();
+	}
+
+	protected virtual void ExecuteConditionalAbility(int abilityIndex)
+	{
+		// Add catch-all cavets here (check if installed)
+
+		// Do whatever action to resolve ability, then callback ConditionalAbilityResolved()
+	}
+
+	protected virtual bool CanExecuteConditionalAbility(int abilityIndex)
+	{
+		return true;
+	}
+
+
+	public void ConditionalAbilityResolved()
+	{
+		ConditionalAbilitiesManager.instance.ConditionalAbilityResolved();
+	}
+
+
+	#endregion
 
 	public virtual void ActivateFunction()
 	{
@@ -76,4 +108,14 @@ public abstract class CardFunction : MonoBehaviour
 			paidAbilities[i].myAbilityIndex = i + 1;
 		}
 	}
+
+	void GetConditionalAbilities()
+	{
+		conditionalAbilities = GetComponentsInChildren<ConditionalAbility>();
+		for (int i = 0; i < conditionalAbilities.Length; i++)
+		{
+			conditionalAbilities[i].myAbilityIndex = i + 1;
+		}
+	}
+
 }

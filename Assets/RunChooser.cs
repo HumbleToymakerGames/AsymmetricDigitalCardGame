@@ -31,6 +31,7 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	{
 	}
 
+	[ContextMenu("Make Run")]
 	public void Selected()
 	{
 		RunOperator.OnIceBeingEncountered += RunOperator_OnIceBeingEncountered;

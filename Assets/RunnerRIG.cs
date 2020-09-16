@@ -12,6 +12,8 @@ public class RunnerRIG : PlayArea_Spot
     public List<Card_Hardware> hardwareCards;
     public List<Card_Resource> resourceCards;
 
+    public bool hasConsoleHardwareInstalled;
+
 	protected override void Awake()
 	{
 		base.Awake();
@@ -62,6 +64,7 @@ public class RunnerRIG : PlayArea_Spot
     {
         hardwareCard.MoveCardTo(hardwaresT);
         hardwareCards.Add(hardwareCard);
+        if (hardwareCard.IsCardSubType(CardSubType.Console)) hasConsoleHardwareInstalled = true;
     }
 
 
@@ -77,6 +80,8 @@ public class RunnerRIG : PlayArea_Spot
         return programCards.Contains(card as Card_Program)
             || hardwareCards.Contains(card as Card_Hardware);
 	}
+
+
 
 
 	public override void RemoveCard(Card card)

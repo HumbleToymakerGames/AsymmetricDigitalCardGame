@@ -83,7 +83,9 @@ public class Hand : PlayArea_Spot, IAccessable
 
 	Card RandomCard()
 	{
-		return cardsInHand[Random.Range(0, cardsInHand.Count)];
+		if (cardsInHand.Count > 0)
+			return cardsInHand[Random.Range(0, cardsInHand.Count)];
+		return null;
 	}
 
 	public void Access()
@@ -96,7 +98,7 @@ public class Hand : PlayArea_Spot, IAccessable
 	void RevealRandomCardFromHand()
 	{
 		Card randomCard = RandomCard();
-		CardRevealer.instance.RevealCard(randomCard, true);
+		if (randomCard) CardRevealer.instance.RevealCard(randomCard, true);
 	}
 
 

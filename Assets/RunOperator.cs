@@ -71,6 +71,51 @@ public class RunOperator : MonoBehaviour
         OnIceBeingEncountered?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
     }
 
+
+    void RunStructure()
+	{
+        // Initiate 'Run' and declare attacked server
+
+        // Collect 'Bad Publicity' credits to be used during run
+
+        // Approach the outermost piece of 'Ice'
+
+            // ## Window for Paid Abilities
+
+        // Continue 'Run' or 'Jack Out' (non-first piece of ice)
+
+            // ## Window for Paid Abilities
+
+        // Corp can rez approached ice and non-ice cards
+
+        // Runner encounters ice if rezzed, passes if not
+
+            // ## Window for Paid Abilities
+
+        // Icebreakers can interact with the encountered ice
+
+        // Resolve all unbroken subroutines on encountered ice
+
+        // Access server or approach next piece of ice
+
+        // Runner approached the attacked server
+
+            // ## Window for Paid Abilities
+
+        // Continue 'Run' or 'Jack Out' (non-first piece of ice)
+
+            // ## Window for Paid Abilities
+
+        // Corp can rez approached ice and non-ice cards
+
+        // Run is considered to be 'successful'
+
+        // Runner accesses cards in server, trashing them if desired
+
+        // Run ends
+
+    }
+
     public void MakeRun(ServerColumn serverColumn)
     {
         if (isRunning) return;

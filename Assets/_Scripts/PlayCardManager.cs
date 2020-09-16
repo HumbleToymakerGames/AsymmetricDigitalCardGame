@@ -343,13 +343,13 @@ public class PlayCardManager : MonoBehaviour
 	}
 
 
-    public void StartTurn(PlayerNR playerTurn)
+    public void StartTurn(PlayerNR playerTurn, bool isFirstTurn)
 	{
         if (playerTurn.IsRunner())
 		{
             playerTurn.ActionPoints = numActionPointsStart;
             playerTurn.MemoryUnitsTotal = numMemoryUnitsStart;
-            playerTurn.MemoryUnitsAvailable = numMemoryUnitsStart;
+            if (isFirstTurn) playerTurn.MemoryUnitsAvailable = numMemoryUnitsStart;
             playerTurn.Tags = numTagsStart;
         }
         else

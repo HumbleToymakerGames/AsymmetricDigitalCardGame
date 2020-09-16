@@ -1,14 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CardFunction_Desperado : CardFunction
 {
 	public int amountMemory;
+	public int numCredits;
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -21,7 +23,6 @@ public class CardFunction_Desperado : CardFunction
 	protected override void SubscribeToConditions()
 	{
 		base.SubscribeToConditions();
-		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
 		// Make Successful Run
 		//GainCredits();
 	}
@@ -29,7 +30,19 @@ public class CardFunction_Desperado : CardFunction
 	protected override void UnSubscribeToConditions()
 	{
 		base.UnSubscribeToConditions();
-		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
+	}
+
+	protected override void ExecuteConditionalAbility(int abilityIndex)
+	{
+		if (abilityIndex == 1) AddMemory();
+		else if (abilityIndex == 2) GainCredits();
+
+		ConditionalAbilityResolved();
+	}
+
+	protected override bool CanExecuteConditionalAbility(int abilityIndex)
+	{
+		return card.isInstalled;
 	}
 
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
@@ -41,6 +54,7 @@ public class CardFunction_Desperado : CardFunction
 	}
 
 
+
 	void AddMemory()
 	{
 		PlayerNR.Runner.AddTotalMemory(amountMemory);
@@ -48,8 +62,7 @@ public class CardFunction_Desperado : CardFunction
 
 	void GainCredits()
 	{
-
+		PlayerNR.Runner.AddCredits(numCredits);
 	}
-
 
 }

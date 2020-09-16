@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     public int numCardsToDrawFirstHand;
     public int numCreditsToStartWith;
 
+    public bool hasGameStarted = false;
 
     private void Awake()
 	{
@@ -37,8 +38,8 @@ public class GameManager : MonoBehaviour
 	{
         yield return new WaitForSeconds(0.25f);
 
-        SpawnAndSetCards(PlayerNR.Runner);
         SpawnAndSetCards(PlayerNR.Corporation);
+        SpawnAndSetCards(PlayerNR.Runner);
 
         yield return new WaitForSeconds(0.25f);
 
@@ -60,7 +61,7 @@ public class GameManager : MonoBehaviour
 
     void SpawnAndSetCards(PlayerNR player)
 	{
-        // Runner
+        player.e_PlayerDeck.identityCard.controllingPlayerSide = player.playerSide;
         Card_Identity identityCard = Instantiate(player.e_PlayerDeck.identityCard);
 
         Card[] e_deckCards = player.e_PlayerDeck.deckCards;
@@ -95,7 +96,8 @@ public class GameManager : MonoBehaviour
 	{
         currentTurnSide = currentTurnSide == PlayerSide.Runner ? PlayerSide.Corporation : PlayerSide.Runner;
         UpdateCurrentTurn(currentTurnSide);
-        PlayCardManager.instance.StartTurn(CurrentTurnPlayer);
+        PlayCardManager.instance.StartTurn(CurrentTurnPlayer, !hasGameStarted);
+        hasGameStarted = true;
         OnTurnChanged?.Invoke(CurrentTurnPlayer.IsRunner());
 
     }

@@ -15,19 +15,14 @@ public class Card_Hardware : Card, IInstallable
 		base.Start();
 	}
 
-
-
-	// Update is called once per frame
-	void Update()
-    {
-        
-    }
-
-
-
 	public override bool CanSelect()
 	{
-		return base.CanSelect() && PlayCardManager.instance.CanInstallCard(this);
+		if (IsCardInHand() && IsCardSubType(CardSubType.Console) && RunnerRIG.instance.hasConsoleHardwareInstalled)
+		{
+			return false;
+		}
+		return base.CanSelect() &&
+			PlayCardManager.instance.CanInstallCard(this);
 	}
 
 	public bool CanInstall()

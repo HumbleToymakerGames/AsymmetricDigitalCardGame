@@ -41,5 +41,6 @@ public class DiscardPile : PlayArea_Spot, IAccessable
 
 	public void Access()
 	{
+        CardRevealer.instance.RevealCards(cardsInDiscard.ToArray());
 	}
 }
