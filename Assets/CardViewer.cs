@@ -8,6 +8,7 @@ public class CardViewer : MonoBehaviour
 	public CardViewWindow viewWindow_Primary, viewWindow_Secondary;
 	public bool cardsClickableOnView;
 	public GameObject linkIcon;
+	public static Card currentPinnedCard;
 
 	public class CardPair
 	{

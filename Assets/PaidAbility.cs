@@ -30,7 +30,7 @@ public class PaidAbility : MonoBehaviour
 	{
         if (cardFunction.card.isViewCard)
         {
-            RunOperator.OnIceBeingEncountered += RunOperator_OnIceBeingEncountered;
+			RunOperator.OnCardBeingApproached += RunOperator_OnCardBeingApproached;
 			RunOperator.OnRunEnded += RunOperator_OnRunEnded;
         }
 	}
@@ -39,14 +39,14 @@ public class PaidAbility : MonoBehaviour
     {
         if (cardFunction.card.isViewCard)
         {
-            RunOperator.OnIceBeingEncountered -= RunOperator_OnIceBeingEncountered;
+            RunOperator.OnCardBeingApproached -= RunOperator_OnCardBeingApproached;
             RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
         }
     }
 
-    private void RunOperator_OnIceBeingEncountered(Card_Ice iceCard, int encounterIndex)
+    private void RunOperator_OnCardBeingApproached(Card card, int encounterIndex)
 	{
-        if (cardFunction.card.IsCardType(CardType.Program))
+        if (card.IsCardType(CardType.Ice) && cardFunction.card.IsCardType(CardType.Program))
         {
             TrySetAbleAbilitiesActive();
         }
@@ -87,7 +87,7 @@ public class PaidAbility : MonoBehaviour
         bool interactable = false;
         if (CanBeActive_Credits(cardFunction.card.myPlayer.Credits))
 		{
-            if (RunOperator.instance.isRunning)
+            if (RunOperator.instance.isEncounteringIce)
             {
                 Card_Program programCard = cardFunction.card as Card_Program;
                 bool isStrongEnough = RunOperator.instance.IsCardStrongEnough(programCard);

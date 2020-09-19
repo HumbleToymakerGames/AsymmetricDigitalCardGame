@@ -6,11 +6,13 @@ using UnityEngine.Events;
 [RequireComponent(typeof(CardFunction))]
 public class ConditionalAbility : MonoBehaviour
 {
-    public enum Condition { Card_Installed, Run_Ends, Run_Successful, Run_Failure };
+    public enum Condition { Turn_Begins, Card_Installed, Run_Ends, Run_Successful, Run_Failure, Card_Scored_This };
     public Condition condition;
-	CardFunction cardFunction;
+	[HideInInspector]
+	public CardFunction cardFunction;
 	[HideInInspector]
 	public Card card;
+	[HideInInspector]
 	public int myAbilityIndex;
 
 	private void Awake()

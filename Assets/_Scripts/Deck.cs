@@ -115,7 +115,7 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
 
     public void RevealCard(Card card)
 	{
-        CardRevealer.instance.RevealCard(card, true);
+        CardRevealer.instance.RevealCard(card);
 	}
 
 }

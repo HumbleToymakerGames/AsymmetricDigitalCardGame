@@ -15,15 +15,60 @@ public class ServerSpace : MonoBehaviour
         serverColumns = GetComponentsInChildren<ServerColumn>();
     }
 
-    public void InstallCard(IInstallable installableCard)
+	private void Start()
 	{
-        choosingInstallColumn = true;
-        currentInstallableCard = installableCard;
+		ActivateAllColumnSelectors(false, true);
+		ActivateAllColumnSelectors(false, false);
+    }
 
-		for (int i = 0; i < serverColumns.Length; i++)
-		{
-            serverColumns[i].SetInteractable(true);
+    public void TryInstallCard(IInstallable installableCard)
+	{
+        if (CanInstallCard(installableCard))
+        {
+            choosingInstallColumn = true;
+            currentInstallableCard = installableCard;
+            Card card = installableCard as Card;
+            bool isIceCard = card.IsCardType(CardType.Ice);
+            ActivateAllColumnSelectors(true, isIceCard);
+
+            List<SelectorNR> selectors = new List<SelectorNR>();
+            foreach (var server in FindObjectsOfType<ServerColumn>())
+            {
+                if (isIceCard)
+                {
+                    selectors.Add(server.selectorIce);
+                }
+                else if (server.IsRemoteServer() && !server.HasRootInstalled())
+                {
+                    selectors.Add(server.selectorRoot);
+                }
+            }
+            CardChooser.instance.ActivateFocus(null, selectors.ToArray());
+            ActionOptions.instance.Display_Cancel(
+                () =>
+                {
+                    CardChooser.instance.DeactivateFocus();
+                    choosingInstallColumn = false;
+                    ActivateAllColumnSelectors(false, true);
+                    ActivateAllColumnSelectors(false, false);
+                    print("Cancelled ice");
+                }, true);
         }
+    }
+
+    public bool CanInstallCard(IInstallable installableCard)
+	{
+        Card card = installableCard as Card;
+        bool isIceCard = card.IsCardType(CardType.Ice);
+        if (!isIceCard)
+		{
+			foreach (var server in serverColumns)
+			{
+                if (!server.HasRootInstalled()) return true;
+			}
+            return false;
+		}
+        return true;
     }
 
 
@@ -38,12 +83,19 @@ public class ServerSpace : MonoBehaviour
             Card_Ice iceCard = installableCard as Card_Ice;
             targetServer.InstallIce(iceCard);
         }
+        else if (card is IAccessable)
+		{
+            IAccessable accessableCard = card as IAccessable;
+            targetServer.InstallCardToServer(accessableCard);
+		}
 
         if (card is IRezzable)
 		{
             IRezzable rezCard = card as IRezzable;
             //if (rezCard.CanRez())
         }
+
+
 
     }
 
@@ -53,13 +105,24 @@ public class ServerSpace : MonoBehaviour
 		{
             InstallCardToServer(currentInstallableCard, serverColumn);
             choosingInstallColumn = false;
-
-            for (int i = 0; i < serverColumns.Length; i++)
-            {
-                serverColumns[i].SetInteractable(false);
-            }
+            ActivateAllColumnSelectors(false, true);
+            ActivateAllColumnSelectors(false, false);
+            PlayCardManager.CardInstalled((Card)currentInstallableCard, true);
         }
-	}
+    }
+
+
+
+    void ActivateAllColumnSelectors(bool activate, bool ice)
+	{
+        for (int i = 0; i < serverColumns.Length; i++)
+		{
+            if (ice) serverColumns[i].ActivateSelector_Ice(activate);
+            else serverColumns[i].ActivateSelector_Root(activate);
+        }
+
+    }
+
 
 
 

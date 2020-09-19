@@ -1,16 +1,46 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor.UI;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CardChooser : MonoBehaviour
 {
+    public static CardChooser instance;
     public SelectorNR hoveredSelector;
     public delegate void HoveredOverCard(Card card);
     public static event HoveredOverCard OnHoveredOverCard;
     public static event HoveredOverCard OnCardPinned;
 
-    // Start is called before the first frame update
-    void Start()
+    public bool isFocused;
+    SelectorNR[] currentFocusedSelectors;
+
+    public Color focusColor;
+
+	private void Awake()
+	{
+        instance = this;
+	}
+
+	private void OnEnable()
+	{
+		SelectorNR.OnSelectorClicked += SelectorNR_OnSelectorClicked;
+	}
+    private void OnDisable()
+    {
+        SelectorNR.OnSelectorClicked -= SelectorNR_OnSelectorClicked;
+    }
+    private void SelectorNR_OnSelectorClicked(SelectorNR selector)
+	{
+        if (isFocused && currentFocusedSelectors.Contains(selector))
+		{
+            DeactivateFocus(selector);
+		}
+	}
+
+	// Start is called before the first frame update
+	void Start()
     {
         
     }
@@ -18,11 +48,14 @@ public class CardChooser : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+
+		if (Input.GetMouseButtonDown(0))
 		{
-            if (hoveredSelector)
+			if (hoveredSelector)
 			{
                 //hoveredSelector.FlipCard();
+                if (isFocused && !currentFocusedSelectors.Contains(hoveredSelector)) return;
+
                 hoveredSelector.Click();
 			}
 		}
@@ -55,7 +88,17 @@ public class CardChooser : MonoBehaviour
                 {
                     //Debug.Log("selector - " + hit.collider.name, hit.collider);
                     if (hoveredSelector) hoveredSelector.Hover(false);
-                    selector.Hover();
+                    if (isFocused)
+                    {
+                        if (currentFocusedSelectors.Contains(selector))
+                        {
+                            selector.Hover();
+                        }
+                    }
+                    else
+                    {
+                        selector.Hover();
+                    }
 
                     Card card = selector.GetComponentInParent<Card>();
                     OnHoveredOverCard?.Invoke(card);
@@ -77,6 +120,36 @@ public class CardChooser : MonoBehaviour
 	}
 
 
+    UnityAction<SelectorNR> currentCallback;
+    public void ActivateFocus(UnityAction<SelectorNR> callback, params SelectorNR[] selectors)
+	{
+        currentFocusedSelectors = selectors;
+        isFocused = true;
+        currentCallback = callback;
+        if (selectors.Length == 0) Debug.LogWarning("Warning: CardChooser activated w/o selectors, no possible return");
+
+        foreach (var selector in selectors)
+		{
+            selector.ActivateFocus(true);
+		}
+	}
+
+    public void DeactivateFocus(SelectorNR clickedSelector = null)
+	{
+        if (currentFocusedSelectors != null)
+        {
+            foreach (var selector in currentFocusedSelectors)
+            {
+                selector.ActivateFocus(false);
+            }
+        }
+        currentFocusedSelectors = null;
+        isFocused = false;
+        print(currentCallback != null);
+        currentCallback?.Invoke(clickedSelector);
+        currentCallback = null;
+        ActionOptions.instance.HideAllOptions();
+    }
 
 
 

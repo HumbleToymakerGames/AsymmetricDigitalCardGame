@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class PlayCardManager : MonoBehaviour
@@ -23,11 +24,13 @@ public class PlayCardManager : MonoBehaviour
         CORP_PURGE_VIRUSES = 6,
         CORP_TRASH_RESOURCE_TAGGED = 7;
 
-    public delegate void CardInstalled(Card card, bool installed);
-    public static event CardInstalled OnCardInstalled;
+    public delegate void eCardInstalled(Card card, bool installed);
+    public static event eCardInstalled OnCardInstalled;
 
-    public delegate void CardActivated(Card card);
-    public static event CardActivated OnCardActivated;
+    public delegate void eCardEvent(Card card);
+    public static event eCardEvent OnCardActivated;
+    public static event eCardEvent OnCardTrashed;
+    public static event eCardEvent OnCardScored;
 
     [Header("Starting Points")]
     public int numActionPointsStart;
@@ -122,7 +125,8 @@ public class PlayCardManager : MonoBehaviour
     public bool CanInstallCard(IInstallable installableCard)
 	{
         int actionIndex = GameManager.CurrentTurnPlayer.IsRunner() ? RUNNER_INSTALL : CORP_INSTALL;
-        return CanAffordAction(GameManager.CurrentTurnPlayer, actionIndex) && installableCard.CanInstall();
+        bool installSpace = GameManager.CurrentTurnPlayer.IsRunner() ? true : ServerSpace.instance.CanInstallCard(installableCard);
+        return installSpace && CanAffordAction(GameManager.CurrentTurnPlayer, actionIndex) && installableCard.CanInstall();
 	}
 
     public bool TryInstallCard(IInstallable installableCard)
@@ -172,7 +176,7 @@ public class PlayCardManager : MonoBehaviour
             Action_ActivateEvent(GameManager.CurrentTurnPlayer, activateableCard);
             Card card = (Card)activateableCard;
             PayCostOfCard(GameManager.CurrentTurnPlayer, card);
-            SendCardToDiscard(card);
+            SendCardToDiscard(GameManager.CurrentTurnPlayer, card);
         }
         return true;
 	}
@@ -220,6 +224,50 @@ public class PlayCardManager : MonoBehaviour
         GameManager.CurrentTurnPlayer.AddCredits(paidAbility.payAmount);
 	}
 
+    public bool TryTrashCard(PlayerNR trashingPlayer, Card card)
+	{
+        if (CanTrashCard(trashingPlayer, card))
+		{
+            PayCost(trashingPlayer, card.cardTrasher.CostOfTrash());
+            PlayerNR trashedPlayer = trashingPlayer.IsRunner() ? PlayerNR.Corporation : PlayerNR.Runner;
+            TrashCard(trashedPlayer, card);
+            return true;
+		}
+        return false;
+	}
+
+    public bool CanTrashCard(PlayerNR trashingPlayer, Card card)
+	{
+        return card.CanBeTrashed() && CanAffordCost(trashingPlayer, card.cardTrasher.CostOfTrash());
+	}
+
+    public bool TryAdvanceCard(Card card)
+	{
+        if (CanAdvanceCard(card))
+		{
+            Action_AdvanceCard(card);
+            PayCost(PlayerNR.Corporation, 1);
+            return true;
+        }
+        return false;
+	}
+
+    public bool CanAdvanceCard(Card card)
+	{
+        return card.CanBeAdvanced()
+            && CanAffordAction(PlayerNR.Corporation, CORP_ADVANCE)
+            && CanAffordCost(PlayerNR.Corporation, 1);
+	}
+
+    public bool TryScoreAgenda(PlayerNR scoringPlayer, Card_Agenda card)
+	{
+        if ((scoringPlayer.IsRunner() && card.IsScoreable()) || (!scoringPlayer.IsRunner() && card.CanBeScored()))
+        {
+            ScoreAgenda(scoringPlayer, card);
+            return true;
+        }
+        return false;
+    }
 
     #region Actions
     void Action_DrawNextCard(PlayerNR player)
@@ -272,6 +320,16 @@ public class PlayCardManager : MonoBehaviour
         RemoveTag();
     }
 
+    void Action_AdvanceCard(Card card)
+	{
+        int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Corporation, CORP_ADVANCE);
+        PlayerNR.Corporation.ActionPointsUsed(costOfAction);
+        AdvanceCard(card);
+    }
+
+    #endregion
+
+
     void PayCost(PlayerNR player, int cost)
 	{
         player.Credits -= cost;
@@ -297,7 +355,6 @@ public class PlayCardManager : MonoBehaviour
         else print("Did not use Memory Space for card!!!");
     }
 
-    #endregion
 
     void DrawNextCard(PlayerNR player)
 	{
@@ -317,8 +374,15 @@ public class PlayCardManager : MonoBehaviour
 
     void InstallCard_Corporation(IInstallable installableCard)
 	{
-        ServerSpace.instance.InstallCard(installableCard);
-	}
+        ServerSpace.instance.TryInstallCard(installableCard);
+        // Waiting on ice install process here
+        //OnCardInstalled?.Invoke((Card)installableCard, true);
+    }
+
+    public static void CardInstalled(Card card, bool installed)
+	{
+        OnCardInstalled?.Invoke(card, installed);
+    }
 
     void MakeRun(ServerColumn targetServer)
 	{
@@ -336,11 +400,33 @@ public class PlayCardManager : MonoBehaviour
         PlayerNR.Runner.Tags--;
 	}
 
-
-    void SendCardToDiscard(Card card)
+    void AdvanceCard(Card card)
 	{
-        PlayArea.instance.DiscardNR(GameManager.CurrentTurnPlayer).AddCardToDiscard(card);
+        card.cardAdvancer.AdvanceCard();
 	}
+
+    void SendCardToDiscard(PlayerNR player, Card card)
+	{
+        PlayArea.instance.DiscardNR(player).AddCardToDiscard(card);
+	}
+
+    void TrashCard(PlayerNR trashedPlayer, Card card)
+	{
+        SendCardToDiscard(trashedPlayer, card);
+        if (card.isInstalled)
+		{
+            OnCardInstalled?.Invoke(card, false);
+		}
+        OnCardTrashed?.Invoke(card);
+    }
+
+    void ScoreAgenda(PlayerNR scoringPlayer, Card_Agenda agenda)
+	{
+        PlayArea.instance.ScoringAreaNR(scoringPlayer).AddCardToScoringArea(agenda);
+        scoringPlayer.AddScore(agenda.scoringAmount);
+        agenda.cardAdvancer.CardScored();
+        OnCardScored?.Invoke(agenda);
+    }
 
 
     public void StartTurn(PlayerNR playerTurn, bool isFirstTurn)

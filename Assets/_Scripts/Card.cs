@@ -13,18 +13,23 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public CardFunction cardFunction;
     [HideInInspector]
     public CardCost cardCost;
+    [HideInInspector]
+    public CardTrasher cardTrasher;
+    [HideInInspector]
+    public CardAdvancer cardAdvancer;
+
 
     [Header("Card Data")]
     public PlayerSide playerSide;
     public PlayerSide controllingPlayerSide;
-   // [HideInInspector]
+    [HideInInspector]
     public PlayerNR myPlayer;
     public CardType cardType;
     public CardSubType cardSubType;
     public string cardTitle;
 
     [Header("Play Data")]
-    [HideInInspector]
+    //[HideInInspector]
     public bool isFaceUp = true;
     public bool isRezzed = true;
     float cardFlipTransitionTime = 1f;
@@ -33,6 +38,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public int viewIndex;
     public bool isViewCard;
     public bool isInstalled;
+    public SelectorNR selector;
 
 
 
@@ -42,7 +48,10 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         cardRefs = GetComponent<CardReferences>();
         cardFunction = GetComponent<CardFunction>();
         cardCost = GetComponent<CardCost>();
+        cardTrasher = GetComponent<CardTrasher>();
+        cardAdvancer = GetComponent<CardAdvancer>();
         canvasGroup = GetComponent<CanvasGroup>();
+        selector = GetComponentInChildren<SelectorNR>();
         myPlayer = controllingPlayerSide == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation;
         ActivateRaycasts(false);
         Pinned(false, true);
@@ -53,12 +62,16 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 	{
 		PlayCardManager.OnCardInstalled += OnCardInstalled;
 		myPlayer.OnCreditsChanged += MyPlayer_OnCreditsChanged;
+		CardViewWindow.OnCardPinnedToView += CardViewWindow_OnCardPinnedToView;
 	}
+
+	
 
 	protected virtual void OnDisable()
     {
         PlayCardManager.OnCardInstalled -= OnCardInstalled;
 		myPlayer.OnCreditsChanged -= MyPlayer_OnCreditsChanged;
+		CardViewWindow.OnCardPinnedToView -= CardViewWindow_OnCardPinnedToView;
     }
     protected virtual void OnCardInstalled(Card card, bool installed)
 	{
@@ -69,19 +82,23 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     {
         cardFunction?.UpdatePaidAbilitesActive_Credits(myPlayer.Credits);
     }
+    private void CardViewWindow_OnCardPinnedToView(Card card)
+    {
+        if (card)
+        {
+            Card realCard = CardViewer.instance.GetCard(card.viewIndex, true);
+            if (realCard && realCard == this)
+            {
+                ActivateCardOptions();
+            }
+        }
+    }
 
-    // Start is called before the first frame update
     protected virtual void Start()
     {
         UpdateCardTitle();
         UpdateCardTypes();
         UpdateCardCost();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public bool IsCardType(CardType _cardType)
@@ -193,10 +210,50 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         else if (isInstalled)
 		{
             CardViewer.instance.viewWindow_Primary.CardChooser_OnCardPinned(this);
-		}
+        }
         //FlipCard();
-        print(IsCardInHand());
+        //print(IsCardInHand());
 	}
+
+    public virtual void ActivateCardOptions()
+	{
+        ActionOptions.instance.HideAllOptions();
+        if (!IsCardInHand())
+		{
+            if (isInstalled)
+			{
+                if (CanBeAdvanced())
+                {
+                    ActionOptions.instance.Display_AdvanceCard(false);
+                    if (IsScoreable())
+					{
+                        ActionOptions.instance.Display_ScoreAgenda(false);
+					}
+                }
+                else
+				{
+                    if (!isRezzed)
+					{
+                        int costOfCard = cardCost.costOfCard;
+                        ActionOptions.instance.Display_RezCard(RezChoice, costOfCard);
+
+                        void RezChoice(bool yes)
+						{
+                            if (yes)
+							{
+                                if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, costOfCard))
+								{
+                                    Rez();
+                                }
+                            }
+						}
+					}
+				}
+            }
+		}
+
+
+    }
 
     public void Pinned(bool pinned = true, bool primary = true)
     {
@@ -228,7 +285,29 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         canvasGroup.blocksRaycasts = activate;
 	}
 
+    public bool IsTrashable() { return cardTrasher != null; }
 
+    public bool IsAdvanceable() { return cardAdvancer != null; }
+
+    public bool IsScoreable() { return this is Card_Agenda; }
+
+    public bool CanBeTrashed()
+	{
+        if (IsTrashable()) return cardTrasher.CanBeTrashed();
+        return false;
+    }
+
+    public bool CanBeAdvanced()
+	{
+        if (IsAdvanceable()) return cardAdvancer.CanBeAdvanced();
+        return false;
+    }
+
+    public bool CanBeScored()
+	{
+        if (IsScoreable()) return cardAdvancer.CanBeScored();
+        return false;
+	}
 
     //private void OnValidate()
     //{

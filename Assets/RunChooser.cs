@@ -10,10 +10,32 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	public RectTransform arrowRT;
 	int numIceInColumn;
 	float transitionTime = 1f;
+	GameObject myGO;
 
 	private void Awake()
 	{
 		myRT = GetComponent<RectTransform>();
+		myGO = transform.GetChild(0).gameObject;
+	}
+
+	private void Start()
+	{
+		if (targetServer.IsRemoteServer())
+			myGO.SetActive(false);
+	}
+
+	private void OnEnable()
+	{
+		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
+	}
+	private void OnDisable()
+	{
+		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
+	}
+	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
+	{
+		if (targetServer.IsRemoteServer())
+			myGO.SetActive(targetServer.HasAnyCardsInServer());
 	}
 
 	public bool CanHighlight(bool highlight = true)
@@ -34,7 +56,7 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	[ContextMenu("Make Run")]
 	public void Selected()
 	{
-		RunOperator.OnIceBeingEncountered += RunOperator_OnIceBeingEncountered;
+		RunOperator.OnCardBeingApproached += RunOperator_OnCardBeingApproached;
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		numIceInColumn = targetServer.iceInColumn.Count;
 		PlayCardManager.instance.TryMakeRun(targetServer);
@@ -42,13 +64,13 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 
 	private void RunOperator_OnRunEnded(bool success)
 	{
-		RunOperator.OnIceBeingEncountered -= RunOperator_OnIceBeingEncountered;
+		RunOperator.OnCardBeingApproached -= RunOperator_OnCardBeingApproached;
 		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
 		if (success) StartCoroutine(SetArrowToCardSpot(numIceInColumn));
 		StartCoroutine(ResetArrow(success));
 	}
 
-	private void RunOperator_OnIceBeingEncountered(Card_Ice iceCard, int encounterIndex)
+	private void RunOperator_OnCardBeingApproached(Card card, int encounterIndex)
 	{
 		StartCoroutine(SetArrowToCardSpot(encounterIndex));
 	}

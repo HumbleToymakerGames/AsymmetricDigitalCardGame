@@ -91,6 +91,21 @@ public class PlayerNR : MonoBehaviour
     public event ValueChanged OnTagsChanged;
 
 
+    [SerializeField]
+    int score;
+    public int Score
+    {
+        get { return score; }
+        set
+        {
+            score = value;
+            OnScoreChanged?.Invoke();
+        }
+    }
+    public event ValueChanged OnScoreChanged;
+
+
+
     private void Awake()
 	{
         GatherPlayer();
@@ -174,6 +189,12 @@ public class PlayerNR : MonoBehaviour
 	{
         Tags -= numTags;
 	}
+
+    public void AddScore(int scoreAmount)
+	{
+        Score += scoreAmount;
+	}
+
 
 
 

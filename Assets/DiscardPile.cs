@@ -12,20 +12,6 @@ public class DiscardPile : PlayArea_Spot, IAccessable
 		base.Awake();
     }
 
-	// Start is called before the first frame update
-	void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-
     public void AddCardToDiscard(Card card)
 	{
         card.MoveCardTo(cardsParentT);
@@ -43,4 +29,5 @@ public class DiscardPile : PlayArea_Spot, IAccessable
 	{
         CardRevealer.instance.RevealCards(cardsInDiscard.ToArray());
 	}
+
 }

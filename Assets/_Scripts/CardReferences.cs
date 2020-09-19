@@ -11,18 +11,8 @@ public class CardReferences : MonoBehaviour
     public TextMeshProUGUI cardTypeText, cardSubTypeText;
     public TextMeshProUGUI costText;
     public Image cardPin_Primary, cardPin_Secondary;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public TextMeshProUGUI advancementText_Front, advancementText_Back;
+    public GameObject advancementCost_BackGO;
 
     public void UpdateCardTitle(string cardTitle)
 	{

@@ -9,35 +9,21 @@ public class gogo : MonoBehaviour
 
     public List<int> inters;
 
+    public SelectorNR selector;
+    public bool inColumn;
+
     // Start is called before the first frame update
     void Start()
     {
         //printing = printer();
-        printing = inters.GetEnumerator();
+        //CardChooser.instance.ActivateFocus(null);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-		{
-            print("bool: " +printing.MoveNext());
-            //print("num: " + printing.MoveNext());
-
-        }
-
     }
 
-
-    IEnumerator printing;
-    IEnumerator printer()
-	{
-		for (int i = 0; i < 10; i++)
-		{
-            print(i);
-            yield return null;
-		}
-	}
 
 
 

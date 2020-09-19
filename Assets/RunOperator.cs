@@ -10,15 +10,17 @@ public class RunOperator : MonoBehaviour
     public Card_Program currentProgramEncountering;
     public PaidAbility currentPaidAbility;
     public ServerColumn currentServerColumn;
+    public Card currentServerCardEncountered;
 
     public bool isRunning;
     public bool isBreakingSubroutines;
+    public bool isEncounteringIce;
 
     List<Card_Program> strengthModifiedProgramCards = new List<Card_Program>();
     List<Card_Ice> encounteredIceCards = new List<Card_Ice>();
 
-    public delegate void IceBeingEncountered(Card_Ice iceCard, int encounterIndex);
-    public static event IceBeingEncountered OnIceBeingEncountered;
+    public delegate void CardBeingApproached(Card card, int encounterIndex);
+    public static event CardBeingApproached OnCardBeingApproached;
 
     public delegate void RunEvent();
     public static event RunEvent OnRunStarted;
@@ -38,16 +40,15 @@ public class RunOperator : MonoBehaviour
 		CardViewWindow.OnCardViewed += CardViewWindow_OnCardViewed;
     }
 
-	
-
 	private void OnDisable()
     {
         CardViewWindow.OnCardPinnedToView -= CardViewWindow_OnCardPinnedToView;
 		CardViewWindow.OnCardViewed -= CardViewWindow_OnCardViewed;
     }
+
     private void CardViewWindow_OnCardPinnedToView(Card card)
     {
-        if (card.IsCardType(CardType.Program))
+        if (card && card.IsCardType(CardType.Program))
         {
             if (currentProgramEncountering)
             {
@@ -68,7 +69,7 @@ public class RunOperator : MonoBehaviour
 
     private void CardFunction_OnPaidAbilityActivated()
     {
-        OnIceBeingEncountered?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
+        OnCardBeingApproached?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
     }
 
 
@@ -134,16 +135,18 @@ public class RunOperator : MonoBehaviour
 	}
 
     Coroutine nextIceRoutine;
-    bool cardIsRezzed;
+    public bool waitForRezRequest;
 	IEnumerator MoveToNextIceRoutine()
 	{
         yield return new WaitForSeconds(0.1f);
 		isRunning = true;
-		CardViewer.instance.PinCard(-1, false);
+        waitForRezRequest = false;
+        CardViewer.instance.PinCard(-1, false);
 
 		if (currentServerColumn.GetNextIce(ref currentIceEncountered))
 		{
-			Card viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
+            isEncounteringIce = true;
+            Card viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
 			CardViewer.instance.PinCard(viewCard.viewIndex, false);
             viewCard.ActivateRaycasts(false);
 
@@ -152,12 +155,12 @@ public class RunOperator : MonoBehaviour
 
             ResetAllStrengths();
 
-            OnIceBeingEncountered?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
+            OnCardBeingApproached?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
 
-            cardIsRezzed = currentIceEncountered.isRezzed;
+            waitForRezRequest = !currentIceEncountered.isRezzed;
 
-            if (!cardIsRezzed) ActionOptions.instance.Display_RezCard(currentIceEncountered.cardCost.costOfCard, true);
-            while (!cardIsRezzed) yield return null;
+            if (waitForRezRequest) ActionOptions.instance.Display_RezCard(RezCardChoice, currentIceEncountered.cardCost.costOfCard, true);
+            while (waitForRezRequest) yield return null;
             currentIceEncountered.Rez();
 
             yield return new WaitForSeconds(0.25f);
@@ -192,9 +195,38 @@ public class RunOperator : MonoBehaviour
 	IEnumerator RunCompleted()
     {
         yield return new WaitForSeconds(0.5f);
+        isEncounteringIce = false;
+        TryRequestRezServerRoot();
+
+        while (waitForRezRequest) yield return null;
+
         currentServerColumn.AccessServer();
         EndRun(true);
     }
+
+
+    void TryRequestRezServerRoot()
+    {
+        IAccessable accessableCard = currentServerColumn.GetRemoteServerRoot();
+        if (accessableCard != null)
+        {
+            currentServerCardEncountered = (Card)accessableCard;
+            if (accessableCard is Card_Asset && !currentServerCardEncountered.isRezzed)
+            {
+                OnCardBeingApproached?.Invoke(currentServerCardEncountered, currentServerColumn.iceInColumn.Count);
+                Card viewCard = CardViewer.instance.GetCard(currentServerCardEncountered.viewIndex, false);
+                CardViewer.instance.PinCard(viewCard.viewIndex, false);
+                viewCard.ActivateRaycasts(false);
+
+                ActionOptions.instance.Display_RezCard(RezCardChoice, currentServerCardEncountered.cardCost.costOfCard, true);
+                waitForRezRequest = true;
+            }
+        }
+    }
+
+
+
+
 
     private void Card_Program_OnProgramStrengthModified(Card_Program programCard)
     {
@@ -244,20 +276,39 @@ public class RunOperator : MonoBehaviour
 
     public void RezCardChoice(bool rezCard)
 	{
-		if (rezCard)
-		{
-            if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentIceEncountered.cardCost.costOfCard))
-			{
-                cardIsRezzed = true;
-                if (currentProgramEncountering)
-                    CardViewer.instance.ShowLinkIcon(currentProgramEncountering.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
-			}
+        if (isEncounteringIce)
+        {
+            if (rezCard)
+            {
+                if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentIceEncountered.cardCost.costOfCard))
+                {
+                    waitForRezRequest = false;
+                    if (currentProgramEncountering)
+                        CardViewer.instance.ShowLinkIcon(currentProgramEncountering.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
+                }
+            }
+            else
+            {
+                MoveToNextIce();
+            }
         }
         else
-        {
-            MoveToNextIce();
+		{
+            if (rezCard)
+			{
+                if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentServerCardEncountered.cardCost.costOfCard))
+                {
+                    currentServerCardEncountered.Rez();
+                    waitForRezRequest = false;
+                }
+            }
+            else
+			{
+                waitForRezRequest = false;
+            }
+
         }
-	}
+    }
 
 
     public bool IsCardStrongEnough(Card_Program programCard)
@@ -286,6 +337,7 @@ public class RunOperator : MonoBehaviour
             currentServerColumn?.ResetIceIndex();
             ResetAllIces();
 
+            isEncounteringIce = false;
             currentIceEncountered = null;
             currentProgramEncountering = null;
             currentPaidAbility = null;

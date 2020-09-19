@@ -7,10 +7,10 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 {
     ServerSpace serverSpace;
     Button button;
-    public PlayArea_Spot serverGO;
+    public GameObject serverGO;
     protected IAccessable serverProtected;
-    public IInstallable ssisd;
     public Transform iceColumnT;
+    public SelectorNR selectorIce, selectorRoot;
     public List<Card_Ice> iceInColumn = new List<Card_Ice>();
 
 
@@ -18,23 +18,20 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 	{
 		base.Awake();
         serverSpace = GetComponentInParent<ServerSpace>();
-        serverProtected = serverGO as IAccessable;
-        button = GetComponent<Button>();
+        serverProtected = serverGO.GetComponent<IAccessable>();
+        button = GetComponentInChildren<Button>();
         SetInteractable(false);
     }
 
+    public void InstallCardToServer(IAccessable accessableCard)
+	{
+        if (serverProtected is RemoteServer)
+        {
+            RemoteServer remoteServer = serverProtected as RemoteServer;
+            remoteServer.InstallCard(accessableCard);
+        }
+	}
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
 
     public int currentIceIndex = -1;
@@ -101,4 +98,55 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 	{
         serverSpace.ServerChosen(this);
 	}
+
+
+    public void ActivateSelector_Ice(bool activate = true)
+	{
+        selectorIce.Activate(activate);
+        SetInteractable(activate);
+    }
+    public void ActivateSelector_Root(bool activate = true)
+    {
+        selectorRoot.Activate(activate);
+    }
+
+
+    public bool IsRemoteServer()
+	{
+        return serverProtected is RemoteServer;
+	}
+
+    public IAccessable GetRemoteServerRoot()
+	{
+        if (serverProtected is RemoteServer)
+            return (serverProtected as RemoteServer).installedCard;
+        else return null;
+	}
+
+    public bool HasCardInServer(Card card)
+	{
+        if (IsRemoteServer())
+		{
+            RemoteServer remoteServer = serverProtected as RemoteServer;
+            if (remoteServer.installedCard != null) return (remoteServer.installedCard as Card) == card;
+		}
+        return new List<Card>(iceInColumn).Contains(card);
+    }
+
+    public bool HasAnyCardsInServer()
+	{
+        if (IsRemoteServer())
+        {
+            RemoteServer remoteServer = serverProtected as RemoteServer;
+            if (remoteServer.installedCard != null) return true;
+        }
+        return iceInColumn.Count > 0;
+    }
+
+    public bool HasRootInstalled()
+	{
+        if (IsRemoteServer()) return (serverProtected as RemoteServer).HasCardInstalled();
+        return true;
+	}
+
 }

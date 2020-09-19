@@ -64,6 +64,7 @@ public class CardViewWindow : MonoBehaviour
 			if (isPinning && card.viewIndex == currentViewIndex)
 			{
 				PinCard(null);
+				OnCardPinnedToView?.Invoke(null);
 			}
 			else
 			{
@@ -72,7 +73,11 @@ public class CardViewWindow : MonoBehaviour
 				OnCardPinnedToView?.Invoke(viewCard);
 			}
 		}
-		else cardViewer.PinCard(-1);
+		else
+		{
+			cardViewer.PinCard(-1);
+			OnCardPinnedToView?.Invoke(null);
+		}
 	}
 
 
@@ -120,9 +125,14 @@ public class CardViewWindow : MonoBehaviour
 		{
 			isPinning = true;
 			pinGO.SetActive(true);
-			cardViewer.GetCard(currentViewIndex, true)?.Pinned(false, isPrimaryView);
 			ViewCard(card.viewIndex, isPrimaryView && card.isInstalled && cardViewer.cardsClickableOnView);
-			cardViewer.GetCard(currentViewIndex, true).Pinned(true, isPrimaryView);
+			Card realCard = cardViewer.GetCard(currentViewIndex, true);
+			if (realCard)
+			{
+				realCard.Pinned(false, isPrimaryView);
+				realCard.Pinned(true, isPrimaryView);
+				CardViewer.currentPinnedCard = realCard;
+			}
 		}
 		else
 		{
@@ -132,6 +142,7 @@ public class CardViewWindow : MonoBehaviour
 			cardViewer.GetCard(currentViewIndex, true)?.Pinned(false, isPrimaryView);
 			cardViewer.ShowLinkIcon(false);
 			currentViewIndex = -1;
+			CardViewer.currentPinnedCard = null;
 		}
 	}
 }

@@ -19,7 +19,7 @@ public class CardFunction_AccessToGlobalsec : CardFunction
 
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
-		if (card == this.card)
+		if (card == this.card && installed)
 		{
 			AddLink();
 		}
