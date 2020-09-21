@@ -4,37 +4,61 @@ using UnityEngine;
 
 public class CardFunction_GabrielSantiago : CardFunction
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	public bool canBeActivated, runSuccessful;
+	public int numCredits;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-	protected override void SubscribeToConditions()
+	protected override void OnEnable()
 	{
-		base.SubscribeToConditions();
-		GameManager.OnRunFinished += GameManager_OnRunFinished;
+		GameManager.OnTurnChanged += GameManager_OnTurnChanged;
+		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
+	}
+	protected override void OnDisable()
+	{
+		GameManager.OnTurnChanged -= GameManager_OnTurnChanged;
+		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
 	}
 
-	protected override void UnSubscribeToConditions()
+	public override bool CanExecuteConditionalAbility(ConditionalAbility ability)
 	{
-		base.UnSubscribeToConditions();
-		GameManager.OnRunFinished -= GameManager_OnRunFinished;
+		return ability.AreConditionsMet();
 	}
 
-	private void GameManager_OnRunFinished(bool success, int serverType)
+	protected override void AssignConditionalAbilities()
 	{
-		if (serverType == 1)
+		for (int i = 0; i < conditionalAbilities.Length; i++)
 		{
-			// & This turn
-			// Gain 2 cc
+			ConditionalAbility ability = conditionalAbilities[i];
+			if (i == 0) ability.SetExecutionAndCondition(GainCredits, CanGainCredits);
 		}
 	}
+
+	private void GameManager_OnTurnChanged(bool isRunner)
+	{
+		canBeActivated = isRunner;
+		runSuccessful = false;
+	}
+	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
+	{
+		if (serverType == ServerColumn.ServerType.HQ)
+		{
+			if (canBeActivated)
+			{
+				runSuccessful = success;
+			}
+		}
+	}
+
+	bool CanGainCredits()
+	{
+		return canBeActivated && runSuccessful;
+	}
+
+	IEnumerator GainCredits()
+	{
+		PlayerNR.Runner.AddCredits(numCredits);
+		canBeActivated = false;
+		yield break;
+	}
+
+
 }

@@ -28,9 +28,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b52af16592f95d4f844732f787e3795, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  condition: 0
+  conditions: 00000000
   card: {fileID: 0}
-  myAbilityIndex: 0
 --- !u!1001 &1776416301793019604
 PrefabInstance:
   m_ObjectHideFlags: 0

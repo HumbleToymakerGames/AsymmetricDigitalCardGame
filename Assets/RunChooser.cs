@@ -62,7 +62,7 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 		PlayCardManager.instance.TryMakeRun(targetServer);
 	}
 
-	private void RunOperator_OnRunEnded(bool success)
+	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
 	{
 		RunOperator.OnCardBeingApproached -= RunOperator_OnCardBeingApproached;
 		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;

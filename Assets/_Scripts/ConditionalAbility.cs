@@ -1,23 +1,23 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
-[RequireComponent(typeof(CardFunction))]
 public class ConditionalAbility : MonoBehaviour
 {
-    public enum Condition { Turn_Begins, Card_Installed, Run_Ends, Run_Successful, Run_Failure, Card_Scored_This };
-    public Condition condition;
-	[HideInInspector]
-	public CardFunction cardFunction;
+    public enum Condition { Turn_Begins, Card_Installed, Run_Ends, Agenda_Scored, Agenda_Stolen };
+    public Condition[] conditions;
+
+	public delegate IEnumerator Ability();
+	public Ability IAbilityExecution;
+
+	public delegate bool eConditionsMet();
+	public eConditionsMet ConditionsMet;
+
 	[HideInInspector]
 	public Card card;
-	[HideInInspector]
-	public int myAbilityIndex;
 
 	private void Awake()
 	{
-		cardFunction = GetComponent<CardFunction>();
 		card = GetComponent<Card>();
 	}
 
@@ -31,22 +31,22 @@ public class ConditionalAbility : MonoBehaviour
 		if (!card.isViewCard) RemoveFromConditionsList();
 	}
 
-
-
-	public void ConditionsMet()
+	public void ExecuteAbility()
 	{
-		cardFunction.TryExecuteConditionalAbility(myAbilityIndex);
+		StartCoroutine(AbilityExecutionRoutine());
+	}
+
+	IEnumerator AbilityExecutionRoutine()
+	{
+		yield return IAbilityExecution();
+		ConditionResolved();
 	}
 
 	void ConditionResolved()
 	{
-
+		ConditionalAbilitiesManager.instance.ConditionalAbilityResolved();
+		Debug.Log("ConditionResolved - " + name);
 	}
-
-
-
-
-
 
 	void AddToConditionsList()
 	{
@@ -58,7 +58,21 @@ public class ConditionalAbility : MonoBehaviour
 		ConditionalAbilitiesManager.instance.RemoveConditional(this);
 	}
 
+	public void SetExecutionAndCondition(Ability _ability, eConditionsMet _conditionsMet)
+	{
+		IAbilityExecution = _ability; ConditionsMet = _conditionsMet;
+	}
 
+
+	public bool AreConditionsMet()
+	{
+		return ConditionsMet();
+	}
+
+	public bool HasCondition(Condition condition)
+	{
+		return conditions.Contains(condition);
+	}
 
 
 

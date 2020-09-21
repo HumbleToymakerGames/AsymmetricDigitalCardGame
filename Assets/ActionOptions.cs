@@ -17,6 +17,11 @@ public class ActionOptions : MonoBehaviour
 	public Button yesButton;
 	public TextMeshProUGUI yesText, yesnoTitleText;
 
+	public GameObject actionMessageGO;
+	public TextMeshProUGUI actionMessageText;
+
+	public GameObject continueGO;
+
 	const string rezCostFormat = "Yes ({0}cc)";
 
 	private void Awake()
@@ -42,8 +47,8 @@ public class ActionOptions : MonoBehaviour
 	{
 		if (card == null)
 		{
-			if (!RunOperator.instance.isRunning)
-				HideAllOptions();
+			//if (!RunOperator.instance.isRunning)
+			//	HideAllOptions();
 		}
 	}
 	private void OnCreditsChanged()
@@ -53,6 +58,7 @@ public class ActionOptions : MonoBehaviour
 
 	public void Display_FireRemainingSubs(bool showOnly = false)
 	{
+		if (isYesNo) return;
 		TryHideAllOptions(showOnly);
 		fireRemainingSubsButton.gameObject.SetActive(true);
 		UpdateInteractables();
@@ -60,6 +66,7 @@ public class ActionOptions : MonoBehaviour
 
 	public void Display_AdvanceCard(bool showOnly = false)
 	{
+		if (isYesNo) return;
 		TryHideAllOptions(showOnly);
 		advanceCardButton.gameObject.SetActive(true);
 		UpdateInteractables();
@@ -67,6 +74,7 @@ public class ActionOptions : MonoBehaviour
 
 	public void Display_ScoreAgenda(bool showOnly = false)
 	{
+		if (isYesNo) return;
 		TryHideAllOptions(showOnly);
 		if (CardViewer.currentPinnedCard)
 		{
@@ -78,20 +86,31 @@ public class ActionOptions : MonoBehaviour
 	UnityAction cancelBack;
 	public void Display_Cancel(UnityAction callBack, bool showOnly = false)
 	{
+		if (isYesNo) return;
 		TryHideAllOptions(showOnly);
 		cancelBack = callBack;
 		cancelButton.gameObject.SetActive(true);
 	}
 
+	UnityAction continueCallback;
+	public void Display_Continue(UnityAction callback, bool showonly = false)
+	{
+		if (isYesNo) return;
+		TryHideAllOptions(showonly);
+		continueGO.SetActive(true);
+		continueCallback = callback;
+	}
+
 	public void Display_RezCard(UnityAction<bool> callback, int rezCost, bool showOnly = false)
 	{
-		TryHideAllOptions(showOnly);
+		TryHideAllOptions(showOnly, false);
 		ActivateYesNo(callback, "Rez Card?");
 		yesButton.interactable = PlayCardManager.instance.CanAffordCost(PlayerNR.Corporation, rezCost);
 		yesText.text = string.Format(rezCostFormat, rezCost);
 	}
 
 	UnityAction<bool> yesnoCallback;
+	bool isYesNo;
 	public void ActivateYesNo(UnityAction<bool> callback, string title, int yesCost = -123)
 	{
 		HideAllOptions();
@@ -99,28 +118,47 @@ public class ActionOptions : MonoBehaviour
 		yesnoTitleText.text = title;
 		yesnoCallback = callback;
 		yesText.text = string.Format(rezCostFormat, yesCost == -123 ? "" : yesCost.ToString());
+		isYesNo = true;
 	}
 
+	public void ActivateActionMessage(string message)
+	{
+		if (isYesNo) return;
+		HideAllOptions();
+		actionMessageGO.SetActive(true);
+		actionMessageText.text = message;
+	}
 
-	void TryHideAllOptions(bool showOnly)
+	
+
+
+	void TryHideAllOptions(bool showOnly, bool isButton = true)
 	{
 		if (showOnly) HideAllOptions();
+		if (isButton)
+		{
+			yesNoPanelGO.SetActive(false);
+			actionMessageGO.SetActive(false);
+		}
 	}
 
 	public void HideAllOptions()
 	{
+		if (isYesNo) return;
+		print("HideAllOptions");
 		fireRemainingSubsButton.gameObject.SetActive(false);
 		advanceCardButton.gameObject.SetActive(false);
 		scoreAgendaButton.gameObject.SetActive(false);
 		cancelButton.gameObject.SetActive(false);
+		continueGO.SetActive(false);
 		yesNoPanelGO.SetActive(false);
+		actionMessageGO.SetActive(false);
 	}
 
 	public void UpdateInteractables()
 	{
 		advanceCardButton.interactable = CardViewer.currentPinnedCard && PlayCardManager.instance.CanAdvanceCard(CardViewer.currentPinnedCard);
 		scoreAgendaButton.interactable = CardViewer.currentPinnedCard && CardViewer.currentPinnedCard.CanBeScored();
-
 	}
 
 
@@ -160,8 +198,16 @@ public class ActionOptions : MonoBehaviour
 		cancelBack = null;
 	}
 
+	public void Button_Continue()
+	{
+		continueGO.SetActive(false);
+		continueCallback?.Invoke();
+		continueCallback = null;
+	}
+
 	public void Button_YesNo(bool yes)
 	{
+		isYesNo = false;
 		HideAllOptions();
 		yesnoCallback?.Invoke(yes);
 		yesnoCallback = null;

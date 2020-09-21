@@ -20,7 +20,6 @@ public class CardViewWindow : MonoBehaviour
 	private void Awake()
 	{
         cardViewer = GetComponentInParent<CardViewer>();
-		PinCard(null);
 	}
 
 	private void OnEnable()
@@ -80,18 +79,10 @@ public class CardViewWindow : MonoBehaviour
 		}
 	}
 
-
-	// Start is called before the first frame update
 	void Start()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+		PinCard(null);
+	}
 
 	public void ViewCard(int viewIndex, bool activateRaycasts = false)
 	{
@@ -101,7 +92,7 @@ public class CardViewWindow : MonoBehaviour
 		{
 			ParentCard(pair.viewCard);
 			pair.viewCard.ActivateVisuals(true);
-			pair.viewCard.ActivateRaycasts(activateRaycasts);
+			pair.viewCard.ActivateRaycasts(activateRaycasts && pair.realCard.myPlayer == GameManager.CurrentTurnPlayer);
 			currentViewIndex = viewIndex;
 			OnCardViewed?.Invoke(pair.viewCard);
 		}
@@ -125,13 +116,16 @@ public class CardViewWindow : MonoBehaviour
 		{
 			isPinning = true;
 			pinGO.SetActive(true);
-			ViewCard(card.viewIndex, isPrimaryView && card.isInstalled && cardViewer.cardsClickableOnView);
+			ViewCard(card.viewIndex, isPrimaryView && cardViewer.cardsClickableOnView && card.CanBeClickedInViewer());
 			Card realCard = cardViewer.GetCard(currentViewIndex, true);
 			if (realCard)
 			{
-				realCard.Pinned(false, isPrimaryView);
+				CardViewer.currentPinnedCard?.Pinned(false, isPrimaryView);
 				realCard.Pinned(true, isPrimaryView);
 				CardViewer.currentPinnedCard = realCard;
+
+				if (realCard.isInstalled && !RunOperator.instance.isRunning)
+					realCard.ActivateCardOptions();
 			}
 		}
 		else
@@ -142,7 +136,9 @@ public class CardViewWindow : MonoBehaviour
 			cardViewer.GetCard(currentViewIndex, true)?.Pinned(false, isPrimaryView);
 			cardViewer.ShowLinkIcon(false);
 			currentViewIndex = -1;
+			if (!RunOperator.instance.isRunning) ActionOptions.instance.HideAllOptions();
 			CardViewer.currentPinnedCard = null;
+
 		}
 	}
 }

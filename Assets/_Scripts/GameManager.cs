@@ -9,10 +9,6 @@ public class GameManager : MonoBehaviour
     public PlayerSide currentTurnSide;
     public static PlayerNR CurrentTurnPlayer;
 
-
-    public delegate void RunFinished(bool success, int serverType);
-    public static event RunFinished OnRunFinished;
-
     public delegate void TurnChanged(bool isRunner);
     public static event TurnChanged OnTurnChanged;
 

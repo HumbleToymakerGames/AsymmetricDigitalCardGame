@@ -18,44 +18,70 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	private void OnEnable()
 	{
 		GameManager.OnTurnChanged += GameManager_OnTurnChanged;
+		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored += PlayCardManager_OnCardScored;
+		PlayCardManager.OnCardStolen += PlayCardManager_OnCardStolen;
 	}
-
-	
-
 	private void OnDisable()
 	{
 		GameManager.OnTurnChanged -= GameManager_OnTurnChanged;
+		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
 		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored -= PlayCardManager_OnCardScored;
+		PlayCardManager.OnCardStolen -= PlayCardManager_OnCardStolen;
 	}
 
-	private void RunOperator_OnRunEnded(bool success)
+	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
 	{
-		if (success) StartResolvingConditionals(RunEnded_Successful);
+		if (success) StartResolvingConditionals(ConditionalAbility.Condition.Run_Ends);
 	}
-
 	private void GameManager_OnTurnChanged(bool isRunner)
 	{
-		StartResolvingConditionals(TurnBegins);
+		StartResolvingConditionals(ConditionalAbility.Condition.Turn_Begins);
 	}
-
-	Card lastCardScored;
 	private void PlayCardManager_OnCardScored(Card card)
 	{
-		lastCardScored = card;
-		StartResolvingConditionals(CardScoredThis);
+		StartResolvingConditionals(ConditionalAbility.Condition.Agenda_Scored);
+	}
+	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
+	{
+		StartResolvingConditionals(ConditionalAbility.Condition.Card_Installed);
+	}
+	private void PlayCardManager_OnCardStolen(Card card)
+	{
+		StartResolvingConditionals(ConditionalAbility.Condition.Agenda_Stolen);
 	}
 
-	
-	void StartResolvingConditionals(ConditionalCriteriaMet conditionalCriteriaMet)
+
+
+
+
+	void StartResolvingConditionals(ConditionalAbility.Condition condition)
 	{
+		if (resolvingRoutine != null)
+		{
+			StopCoroutine(resolvingRoutine);
+			print("resolvingRoutine stopped");
+		}
+		resolvingRoutine = StartCoroutine(ResolvingConditionalsRoutine(condition));
+	}
+
+
+	Coroutine resolvingRoutine;
+	IEnumerator ResolvingConditionalsRoutine(ConditionalAbility.Condition condition)
+	{
+		yield return new WaitForSeconds(0.25f);
+
 		List<ConditionalAbility> conditionalAbilities = new List<ConditionalAbility>();
 		for (int i = 0; i < allConditionalAbilities.Count; i++)
 		{
 			ConditionalAbility currentAbility = allConditionalAbilities[i];
-			if (conditionalCriteriaMet(currentAbility.condition, currentAbility.card)) conditionalAbilities.Add(currentAbility);
+			if (currentAbility.HasCondition(condition) && currentAbility.AreConditionsMet())
+			{
+				conditionalAbilities.Add(currentAbility);
+
+			}
 		}
 
 		// Resolve in order of priority
@@ -69,41 +95,26 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 			}
 		}
 
-		currentConditionalsRoutine = conditionalAbilities_CurrentTurn.GetEnumerator();
 
-		TryResolveNextAbility();
+		StartCoroutine(ConditionalsRoutine(conditionalAbilities_CurrentTurn));
+
 	}
 
 	public void ConditionalAbilityResolved()
 	{
-		TryResolveNextAbility();
+		waitForConditionResolved = false;
 	}
 
-	void TryResolveNextAbility()
-	{
-		if (currentConditionalsRoutine.MoveNext())
-		{
-			ConditionalAbility conditionalAbility = currentConditionalsRoutine.Current as ConditionalAbility;
-			//print("player: " + conditionalAbility.card.myPlayer);
-			conditionalAbility.ConditionsMet();
-		}
-		else
-		{
-			lastCardScored = null;
-		}
-	}
-
-
+	bool waitForConditionResolved;
 	IEnumerator currentConditionalsRoutine;
     IEnumerator ConditionalsRoutine(List<ConditionalAbility> conditionals)
 	{
-        List<ConditionalAbility> _conditionals = new List<ConditionalAbility>(conditionals);
-		for (int i = 0; i < _conditionals.Count; i++)
+		foreach (var ability in conditionals)
 		{
-			print("Resolving conditional - " + i);
-            _conditionals[i].ConditionsMet();
-            yield return null;
-        }
+			waitForConditionResolved = true;
+			ability.ExecuteAbility();
+			while (waitForConditionResolved) yield return null;
+		}
 	}
 
 
@@ -138,21 +149,21 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 
 	#region Conditional Criterias
 
-	bool RunEnded_Successful(ConditionalAbility.Condition conditionProcessed, Card card)
-	{
-		return (conditionProcessed == ConditionalAbility.Condition.Run_Successful);
-	}
+	//bool RunEnded_Successful(ConditionalAbility.Condition conditionProcessed, Card card)
+	//{
+	//	return (conditionProcessed == ConditionalAbility.Condition.Run_Successful);
+	//}
 
-	bool TurnBegins(ConditionalAbility.Condition conditionProcessed, Card card)
-	{
-		return (conditionProcessed == ConditionalAbility.Condition.Turn_Begins)
-			&& card.myPlayer == GameManager.CurrentTurnPlayer;
-	}
-	bool CardScoredThis(ConditionalAbility.Condition conditionProcessed, Card card)
-	{
-		return (conditionProcessed == ConditionalAbility.Condition.Card_Scored_This)
-			&& card == lastCardScored;
-	}
+	//bool TurnBegins(ConditionalAbility.Condition conditionProcessed, Card card)
+	//{
+	//	return (conditionProcessed == ConditionalAbility.Condition.Turn_Begins)
+	//		&& card.myPlayer == GameManager.CurrentTurnPlayer;
+	//}
+	//bool CardScoredThis(ConditionalAbility.Condition conditionProcessed, Card card)
+	//{
+	//	return (conditionProcessed == ConditionalAbility.Condition.Card_Scored_This)
+	//		&& card == lastCardScored;
+	//}
 
 
 	#endregion

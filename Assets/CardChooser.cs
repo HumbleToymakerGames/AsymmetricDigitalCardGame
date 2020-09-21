@@ -1,7 +1,7 @@
-﻿using System.Collections;
+﻿using DG.Tweening.Plugins;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,8 +15,10 @@ public class CardChooser : MonoBehaviour
 
     public bool isFocused;
     SelectorNR[] currentFocusedSelectors;
+    public List<SelectorNR> currentChosenSelectors = new List<SelectorNR>();
+    public int targetNumToSelect;
 
-    public Color focusColor;
+    public Color highlightColor, focusColor, selectedColor;
 
 	private void Awake()
 	{
@@ -33,10 +35,36 @@ public class CardChooser : MonoBehaviour
     }
     private void SelectorNR_OnSelectorClicked(SelectorNR selector)
 	{
-        if (isFocused && currentFocusedSelectors.Contains(selector))
+        if (isFocused)
 		{
-            DeactivateFocus(selector);
-		}
+            if (currentChosenSelectors.Contains(selector))
+            {
+                currentChosenSelectors.Remove(selector);
+                selector.FocusSelected(false);
+            }
+            else if (currentChosenSelectors.Count < targetNumToSelect)
+            {
+                currentChosenSelectors.Add(selector);
+                selector.FocusSelected();
+            }
+            if (currentChosenSelectors.Count == targetNumToSelect)
+			{
+                if (targetNumToSelect > 1)
+                ActionOptions.instance.Display_Continue(ContinuePressed, false);
+                else DeactivateFocus();
+
+            }
+			else
+			{
+                ActionOptions.instance.ActivateActionMessage(string.Format("Selected: {0}/{1}", currentChosenSelectors.Count, targetNumToSelect));
+            }
+
+            void ContinuePressed()
+			{
+                DeactivateFocus();
+			}
+
+        }
 	}
 
 	// Start is called before the first frame update
@@ -120,11 +148,12 @@ public class CardChooser : MonoBehaviour
 	}
 
 
-    UnityAction<SelectorNR> currentCallback;
-    public void ActivateFocus(UnityAction<SelectorNR> callback, params SelectorNR[] selectors)
+    UnityAction<SelectorNR[]> currentCallback;
+    public void ActivateFocus(UnityAction<SelectorNR[]> callback = null, int numToSelect = 1, params SelectorNR[] selectors)
 	{
         currentFocusedSelectors = selectors;
         isFocused = true;
+        targetNumToSelect = numToSelect;
         currentCallback = callback;
         if (selectors.Length == 0) Debug.LogWarning("Warning: CardChooser activated w/o selectors, no possible return");
 
@@ -134,29 +163,24 @@ public class CardChooser : MonoBehaviour
 		}
 	}
 
-    public void DeactivateFocus(SelectorNR clickedSelector = null)
+    public void DeactivateFocus()
 	{
         if (currentFocusedSelectors != null)
         {
             foreach (var selector in currentFocusedSelectors)
             {
                 selector.ActivateFocus(false);
+                selector.FocusSelected(false);
             }
         }
         currentFocusedSelectors = null;
         isFocused = false;
         print(currentCallback != null);
-        currentCallback?.Invoke(clickedSelector);
+        currentCallback?.Invoke(currentChosenSelectors.ToArray());
         currentCallback = null;
+        currentChosenSelectors.Clear();
         ActionOptions.instance.HideAllOptions();
     }
-
-
-
-
-
-
-
 
 
 

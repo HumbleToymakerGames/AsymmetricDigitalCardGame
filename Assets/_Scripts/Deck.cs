@@ -34,7 +34,7 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
         MakeAllDeckFaceDown();
     }
 
-    void UpdateCardsToParent()
+	void UpdateCardsToParent()
 	{
         // Reverse because lowest in hierarchy is visually on top of deck (first card, last child)
         for (int i = cardsInDeck.Count-1; i >= 0; i--)
@@ -111,12 +111,35 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
 	public void Access()
 	{
         RevealCard(cardsInDeck[0]);
+        //RevealCards(5);
     }
 
     public void RevealCard(Card card)
 	{
         CardRevealer.instance.RevealCard(card);
 	}
+
+    public void RevealCards(int numCards)
+	{
+        CardRevealer.instance.RevealCards(cardsInDeck.GetRange(0,5).ToArray(), true, this);
+    }
+
+    public override void RemoveCard(Card card)
+    {
+        cardsInDeck.Remove(card);
+    }
+
+	public override List<Card> MyDeck()
+	{
+        return cardsInDeck;
+	}
+
+	protected override void SetMyDeck(List<Card> deck)
+	{
+        cardsInDeck = deck;
+	}
+
+
 
 }
 

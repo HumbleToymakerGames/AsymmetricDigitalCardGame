@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
+using System.CodeDom;
 
 public class CardRevealer : MonoBehaviour
 {
@@ -15,7 +16,11 @@ public class CardRevealer : MonoBehaviour
     public Button cardButton_Return, cardButton_Trash, cardButton_Steal;
     public TextMeshProUGUI trashButtonText;
     const string trashTextFormat = "Trash ({0}cc)";
-    public Card[] currentCards;
+    public Card[] realCards, currentCards;
+    public CardMover cardMoverPrefab;
+    CardMover[] cardMovers = new CardMover[0];
+    bool isMovingCards, isRevealing;
+    PlayArea_Spot currentPlayAreaSpot;
 
     public Vector3 endRevealPos;
     public float transitionTime_Move;
@@ -46,25 +51,32 @@ public class CardRevealer : MonoBehaviour
 
     private void CardChooser_OnHoveredOverCard(Card card)
 	{
-        StartCoroutine(MoveEmptyDelay(card));
+        if (isRevealing && moveEmptyRoutine == null)
+            moveEmptyRoutine = StartCoroutine(MoveEmptyDelay(card));
 	}
 
+    Coroutine moveEmptyRoutine;
     IEnumerator MoveEmptyDelay(Card card)
 	{
-        for (int i = 0; i < currentCards.Length; i++)
+        for (int i = 0; i < cardMovers.Length; i++)
         {
-            if (currentCards[i] == card)
+            if (cardMovers[i].myCard == card)
             {
-                yield return new WaitForSeconds(0.1f);
-                emtpyImageT.SetSiblingIndex(i + 1);
+                emtpyImageT.SetSiblingIndex(cardMovers.Length);
+                int index = cardMovers[i].transform.GetSiblingIndex();
+                emtpyImageT.SetSiblingIndex(index+1);
+                break;
             }
         }
+        yield return new WaitForSeconds(0.1f);
+        moveEmptyRoutine = null;
     }
 
 	public void Activate(bool activate = true)
 	{
         panelGO.SetActive(activate);
-	}
+        isRevealing = activate;
+    }
 
     public void RevealCard(Card card)
 	{
@@ -138,20 +150,30 @@ public class CardRevealer : MonoBehaviour
     }
 
 
-    public void RevealCards(Card[] cards)
+    public void RevealCards(Card[] cards, bool moveable, PlayArea_Spot playArea_Spot)
 	{
         Activate();
+        realCards = cards;
+        isMovingCards = moveable;
+        currentPlayAreaSpot = playArea_Spot;
 
         currentCards = new Card[cards.Length];
+        cardMovers = new CardMover[cards.Length];
         for (int i = 0; i < cards.Length; i++)
 		{
+            CardMover mover = Instantiate(cardMoverPrefab, cardsT);
+
             Card revealedCard = Instantiate(cards[i], cardsT);
-            revealedCard.MoveCardTo(cardsT);
-            revealedCard.transform.localScale = Vector3.one * 2.5f;
             revealedCard.ActivateRaycasts(false);
             revealedCard.FlipCard(true, true);
+
+            mover.SetCard(revealedCard);
+            mover.SetMoveable(moveable);
+
             currentCards[i] = revealedCard;
+            cardMovers[i] = mover;
         }
+        emtpyImageT.SetSiblingIndex(1);
 
         cardButtonsGO.SetActive(false);
         cardsButtonsGO.SetActive(true);
@@ -159,12 +181,51 @@ public class CardRevealer : MonoBehaviour
 
     void DestroyAllCards()
 	{
-        for (int i = 0; i < currentCards.Length; i++)
+        for (int i = 0; i < cardMovers.Length; i++)
 		{
-            Destroy(currentCards[i].gameObject);
+            Destroy(cardMovers[i].gameObject);
 		}
+        currentCards = new Card[0];
+        cardMovers = new CardMover[0];
+        currentPlayAreaSpot = null;
         targetRealCard = null;
     }
+
+    void TryMoveRealCards()
+	{
+        if (isMovingCards)
+		{
+            int baseDeckIndex = 1000;
+            List<Card> deckFrom = currentPlayAreaSpot.MyDeck();
+			foreach (var card in realCards)
+			{
+                int cardIndex = deckFrom.IndexOf(card);
+                if (cardIndex < baseDeckIndex)
+				{
+                    baseDeckIndex = cardIndex;
+				}
+			}
+
+            emtpyImageT.SetSiblingIndex(cardsT.childCount);
+            (int, int)[] view_sibs = new (int, int)[realCards.Length];
+            int realCardCount = realCards.Length;
+			for (int i = 0; i < realCards.Length; i++)
+			{
+                Card card = realCards[i];
+				foreach (var moveCard in cardMovers)
+				{
+                    if (card.viewIndex == moveCard.myCard.viewIndex)
+					{
+                        int moveIndex = moveCard.transform.GetSiblingIndex();
+                        view_sibs[i] = (card.viewIndex, baseDeckIndex + moveIndex);
+					}
+				}
+			}
+
+            currentPlayAreaSpot.UpdateCardSiblings(view_sibs);
+            isMovingCards = false;
+		}
+	}
 
 
     void UpdateCardButtons()
@@ -196,7 +257,6 @@ public class CardRevealer : MonoBehaviour
         StopRevealRoutine();
         revealRoutine = StartCoroutine(UnrevealRoutine(targetRevealCard, targetRealCard_OGPosition, targetRealCard_OGScale));
         SetAllCardButtonsInteractable(false);
-
     }
 
     public void Button_TrashCard()
@@ -231,6 +291,7 @@ public class CardRevealer : MonoBehaviour
 
     public void Button_ReturnCards()
 	{
+        TryMoveRealCards();
         DestroyAllCards();
         Activate(false);
         cardsButtonsGO.SetActive(false);

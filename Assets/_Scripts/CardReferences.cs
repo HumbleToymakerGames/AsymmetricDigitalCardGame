@@ -10,7 +10,7 @@ public class CardReferences : MonoBehaviour
     public TextMeshProUGUI titleText;
     public TextMeshProUGUI cardTypeText, cardSubTypeText;
     public TextMeshProUGUI costText;
-    public Image cardPin_Primary, cardPin_Secondary;
+    public Image[] cardPin_Primary, cardPin_Secondary;
     public TextMeshProUGUI advancementText_Front, advancementText_Back;
     public GameObject advancementCost_BackGO;
 

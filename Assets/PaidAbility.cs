@@ -52,7 +52,7 @@ public class PaidAbility : MonoBehaviour
         }
 	}
 
-    private void RunOperator_OnRunEnded(bool success)
+    private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
     {
         if (cardFunction.card.IsCardType(CardType.Program))
         {
@@ -69,7 +69,10 @@ public class PaidAbility : MonoBehaviour
 	{
         TrySetAbleAbilitiesActive();
     }
-
+    public void ActivateOnActionPoints(int actionPoints)
+    {
+        TrySetAbleAbilitiesActive();
+    }
 
     public void Button_Clicked()
 	{
@@ -82,34 +85,48 @@ public class PaidAbility : MonoBehaviour
         //if (viewCardFunction) viewCardFunction.ActivatePaidAbility(myAbilityIndex);
     }
 
+    [ContextMenu("AbleAbilities")]
     public void TrySetAbleAbilitiesActive()
 	{
         bool interactable = false;
-        if (CanBeActive_Credits(cardFunction.card.myPlayer.Credits))
+        if (CanBeActive_Currency(cardFunction.card.myPlayer.Credits))
 		{
-            if (RunOperator.instance.isEncounteringIce)
+            if (cardFunction.card.IsCardType(CardType.Program))
             {
-                Card_Program programCard = cardFunction.card as Card_Program;
-                bool isStrongEnough = RunOperator.instance.IsCardStrongEnough(programCard);
-                if (CanBeActive_Strength(isStrongEnough))
+                if (RunOperator.instance.isEncounteringIce)
                 {
-                    if (CanBeActive_Type())
+                    Card_Program programCard = cardFunction.card as Card_Program;
+                    bool isStrongEnough = RunOperator.instance.IsCardStrongEnough(programCard);
+                    if (CanBeActive_Strength(isStrongEnough))
                     {
-                        interactable = true;
+                        if (CanBeActive_Type())
+                        {
+                            interactable = true;
+                        }
                     }
-                    else interactable = false;
                 }
+                else interactable = true;
             }
-            else interactable = true;
-		}
+            else
+			{
+                interactable = true;
+            }
+        }
 
         button.interactable = interactable;
 	}
 
-    bool CanBeActive_Credits(int playerCredits)
+    bool CanBeActive_Currency(int playerCredits)
 	{
-        return currency == Currency.Credits && playerCredits >= payAmount;
-
+        if (currency == Currency.Credits)
+		{
+            return cardFunction.card.myPlayer.Credits >= payAmount;
+        }
+        else if (currency == Currency.Clicks)
+		{
+            return cardFunction.card.myPlayer.CanAffordAction(payAmount);
+		}
+        return false;
     }
 
     bool CanBeActive_Strength(bool isStrongEnough)

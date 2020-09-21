@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class ServerColumn : PlayArea_Spot, ISelectableNR
 {
+    public enum ServerType { Archives, RnD, HQ, Remote };
+    [HideInInspector]
+    public ServerType serverType;
     ServerSpace serverSpace;
     Button button;
     public GameObject serverGO;
@@ -21,6 +24,7 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
         serverProtected = serverGO.GetComponent<IAccessable>();
         button = GetComponentInChildren<Button>();
         SetInteractable(false);
+        GetServerType();
     }
 
     public void InstallCardToServer(IAccessable accessableCard)
@@ -148,5 +152,17 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
         if (IsRemoteServer()) return (serverProtected as RemoteServer).HasCardInstalled();
         return true;
 	}
+
+
+
+    void GetServerType()
+	{
+        if (serverProtected is DiscardPile) serverType = ServerType.Archives;
+        else if (serverProtected is Hand) serverType = ServerType.HQ;
+        else if (serverProtected is Deck) serverType = ServerType.RnD;
+        else serverType = ServerType.Remote;
+    }
+
+
 
 }

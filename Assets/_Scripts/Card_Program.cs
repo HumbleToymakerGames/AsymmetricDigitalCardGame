@@ -31,7 +31,7 @@ public class Card_Program : Card, IInstallable
 	{
 		if (!base.CanSelect()) return false;
 
-		if (PlayArea.instance.HandNR(myPlayer).IsCardInHand(this))
+		if (IsCardInHand())
 		{
 			if (PlayCardManager.instance.CanInstallCard(this))
 			{
@@ -54,6 +54,11 @@ public class Card_Program : Card, IInstallable
 	{
 		return cardCost.CanAffordCard(myPlayer.Credits)
 			&& cardCost.CanUseMemorySpace(PlayerNR.Runner.MemoryUnitsAvailable);
+	}
+
+	public override bool CanBeClickedInViewer()
+	{
+		return base.CanBeClickedInViewer() && RunOperator.instance.isRunning;
 	}
 
 

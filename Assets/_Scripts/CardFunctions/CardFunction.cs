@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using JetBrains.Annotations;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ public abstract class CardFunction : MonoBehaviour
 	public delegate void PaidAbilityActivated();
 	public event PaidAbilityActivated OnPaidAbilityActivated;
 
+
 	protected virtual void Awake()
 	{
 		card = GetComponent<Card>();
@@ -22,46 +24,26 @@ public abstract class CardFunction : MonoBehaviour
 
 	protected virtual void OnEnable()
 	{
-		SubscribeToConditions();
 	}
 
 	protected virtual void OnDisable()
 	{
-		UnSubscribeToConditions();
 	}
 
-
-
-	protected virtual void SubscribeToConditions()
-	{
-
-	}
-
-	protected virtual void UnSubscribeToConditions()
-	{
-
-	}
 
 	#region Conditional Abilities
 
-	public void TryExecuteConditionalAbility(int abilityIndex)
-	{
-		if (CanExecuteConditionalAbility(abilityIndex))
-			ExecuteConditionalAbility(abilityIndex);
-		else ConditionalAbilityResolved();
-	}
 
-	protected virtual void ExecuteConditionalAbility(int abilityIndex)
-	{
-		// Add catch-all cavets here (check if installed)
 
-		// Do whatever action to resolve ability, then callback ConditionalAbilityResolved()
-	}
-
-	protected virtual bool CanExecuteConditionalAbility(int abilityIndex)
+	public virtual bool CanExecuteConditionalAbility(ConditionalAbility ability)
 	{
 		return true;
 	}
+
+	//public virtual bool IsConditionMet()
+	//{
+
+	//}
 
 
 	public void ConditionalAbilityResolved()
@@ -80,6 +62,14 @@ public abstract class CardFunction : MonoBehaviour
 	public virtual void ActivatePaidAbility(int index)
 	{
 		OnPaidAbilityActivated?.Invoke();
+	}
+
+	public void UpdatePaidAbilitesActive_ActionPoints(int actionPoints)
+	{
+		for (int i = 0; i < paidAbilities.Length; i++)
+		{
+			paidAbilities[i].ActivateOnActionPoints(actionPoints);
+		}
 	}
 
 	public void UpdatePaidAbilitesActive_Credits(int playerCredits)
@@ -112,10 +102,12 @@ public abstract class CardFunction : MonoBehaviour
 	void GetConditionalAbilities()
 	{
 		conditionalAbilities = GetComponentsInChildren<ConditionalAbility>();
-		for (int i = 0; i < conditionalAbilities.Length; i++)
-		{
-			conditionalAbilities[i].myAbilityIndex = i + 1;
-		}
+		AssignConditionalAbilities();
+	}
+
+	protected virtual void AssignConditionalAbilities()
+	{
+
 	}
 
 }

@@ -9,9 +9,9 @@ public class SelectorNR : MonoBehaviour
     public Image highlighter;
     public UnityEvent onHighlighted, onClicked;
     public ISelectableNR selectable;
-    Color ogColor;
+    Color highlightOGColor;
     BoxCollider2D boxCollider;
-    public bool isFocused;
+    public bool isFocused, isFocusSelected;
 
     public delegate void SelectorClicked(SelectorNR selector);
     public static event SelectorClicked OnSelectorClicked;
@@ -19,12 +19,12 @@ public class SelectorNR : MonoBehaviour
 	private void Awake()
 	{
         selectable = GetComponentInParent<ISelectableNR>();
-        ogColor = highlighter.color;
         boxCollider = GetComponent<BoxCollider2D>();
     }
 
 	void Start()
     {
+        highlightOGColor = highlighter.color = CardChooser.instance.highlightColor;
         highlighter.enabled = false;
         Highlight(false);
     }
@@ -38,16 +38,11 @@ public class SelectorNR : MonoBehaviour
 	{
         if (selectable != null && selectable.CanHighlight(highlight))
 		{
-
-            highlighter.enabled = isFocused ? true : highlight;
+            highlighter.enabled = highlight;
             
             if (selectable.CanSelect())
 			{
-                if (isFocused)
-                {
-                    highlighter.color = highlight ? ogColor : CardChooser.instance.focusColor;
-                }
-                else highlighter.color = ogColor;
+                highlighter.color = highlightOGColor;
             }
             else
 			{
@@ -57,6 +52,20 @@ public class SelectorNR : MonoBehaviour
             selectable.Highlighted();
             onHighlighted?.Invoke();
         }
+        if (isFocused)
+		{
+            highlighter.enabled = true;
+            if (highlight)
+			{
+                highlighter.color = highlightOGColor;
+			}
+            else
+			{
+                if (isFocusSelected) highlighter.color = CardChooser.instance.selectedColor;
+                else highlighter.color = CardChooser.instance.focusColor;
+            }
+        }
+
     }
 
 
@@ -64,12 +73,17 @@ public class SelectorNR : MonoBehaviour
 	{
         if (selectable != null && selectable.CanSelect())
 		{
-            OnSelectorClicked?.Invoke(this);
             selectable.Selected();
             onClicked?.Invoke();
             Highlight(true);
         }
-	}
+        if (isFocused)
+		{
+            OnSelectorClicked?.Invoke(this);
+            highlighter.color = isFocusSelected ? CardChooser.instance.selectedColor : CardChooser.instance.focusColor;
+            Highlight(true);
+        }
+    }
 
 
     public void Activate(bool activate = true)
@@ -83,5 +97,12 @@ public class SelectorNR : MonoBehaviour
         isFocused = activate;
         Highlight(false);
 	}
+
+    public void FocusSelected(bool selected = true)
+	{
+        isFocusSelected = selected;
+        if (selected) Highlight(true);
+
+    }
 
 }

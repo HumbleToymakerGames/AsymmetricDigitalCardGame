@@ -12,6 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1fafb423a5cdea44927f1e61ad91229, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  card: {fileID: 0}
+  paidAbilities: []
+  conditionalAbilities: []
+  myTurn: 0
+  numCredits: 2
+  canGainCredits: 0
+--- !u!114 &6306356397784706988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4492797211038889488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b52af16592f95d4f844732f787e3795, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  conditions: 02000000
+  card: {fileID: 0}
 --- !u!1001 &8582765610946662628
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52,7 +72,7 @@ PrefabInstance:
     - target: {fileID: 5279771941846355377, guid: eb4d0d3ba0320b645bd596fa6281c7b0,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 20.07
       objectReference: {fileID: 0}
     - target: {fileID: 5279771942001405337, guid: eb4d0d3ba0320b645bd596fa6281c7b0,
         type: 3}
@@ -242,6 +262,11 @@ PrefabInstance:
     - target: {fileID: 7164272447800901856, guid: eb4d0d3ba0320b645bd596fa6281c7b0,
         type: 3}
       propertyPath: baseLinkStrength
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7164272447800901856, guid: eb4d0d3ba0320b645bd596fa6281c7b0,
+        type: 3}
+      propertyPath: controllingPlayerSide
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8811911375791147458, guid: eb4d0d3ba0320b645bd596fa6281c7b0,

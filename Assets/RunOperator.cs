@@ -25,14 +25,15 @@ public class RunOperator : MonoBehaviour
     public delegate void RunEvent();
     public static event RunEvent OnRunStarted;
 
-    public delegate void RunEnded(bool success);
+    public delegate void RunEnded(bool success, ServerColumn.ServerType serverType);
     public static event RunEnded OnRunEnded;
-
+    public RunEnded lastRunEndedEvent;
 
     private void Awake()
     {
         instance = this;
     }
+
 
     private void OnEnable()
     {
@@ -124,7 +125,6 @@ public class RunOperator : MonoBehaviour
         Card_Program.OnProgramStrengthModified += Card_Program_OnProgramStrengthModified;
         currentServerColumn = serverColumn;
         MoveToNextIce();
-        OnRunStarted?.Invoke();
     }
 
     [ContextMenu("Move To Next Ice")]
@@ -142,8 +142,9 @@ public class RunOperator : MonoBehaviour
 		isRunning = true;
         waitForRezRequest = false;
         CardViewer.instance.PinCard(-1, false);
+        OnRunStarted?.Invoke();
 
-		if (currentServerColumn.GetNextIce(ref currentIceEncountered))
+        if (currentServerColumn.GetNextIce(ref currentIceEncountered))
 		{
             isEncounteringIce = true;
             Card viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
@@ -329,7 +330,7 @@ public class RunOperator : MonoBehaviour
         if (isRunning)
         {
             CardViewer.instance.PinCard(-1, false);
-            CardViewer.instance.SetCardsClickable(false);
+            //CardViewer.instance.SetCardsClickable(false);
 
             ResetAllStrengths();
             Card_Program.OnProgramStrengthModified -= Card_Program_OnProgramStrengthModified;
@@ -341,11 +342,12 @@ public class RunOperator : MonoBehaviour
             currentIceEncountered = null;
             currentProgramEncountering = null;
             currentPaidAbility = null;
+            ServerColumn.ServerType serverType = currentServerColumn.serverType;
             currentServerColumn = null;
             encounteredIceCards.Clear();
             ActionOptions.instance.HideAllOptions();
             isRunning = false;
-            OnRunEnded?.Invoke(success);
+            OnRunEnded?.Invoke(success, serverType);
             print("Run Ended.");
         }
 

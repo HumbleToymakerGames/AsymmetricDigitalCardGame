@@ -38,12 +38,12 @@ public class ServerSpace : MonoBehaviour
                 {
                     selectors.Add(server.selectorIce);
                 }
-                else if (server.IsRemoteServer() && !server.HasRootInstalled())
+                else if (server.IsRemoteServer())
                 {
                     selectors.Add(server.selectorRoot);
                 }
             }
-            CardChooser.instance.ActivateFocus(null, selectors.ToArray());
+            CardChooser.instance.ActivateFocus(null, 1, selectors.ToArray());
             ActionOptions.instance.Display_Cancel(
                 () =>
                 {
@@ -51,23 +51,22 @@ public class ServerSpace : MonoBehaviour
                     choosingInstallColumn = false;
                     ActivateAllColumnSelectors(false, true);
                     ActivateAllColumnSelectors(false, false);
-                    print("Cancelled ice");
                 }, true);
         }
     }
 
     public bool CanInstallCard(IInstallable installableCard)
 	{
-        Card card = installableCard as Card;
-        bool isIceCard = card.IsCardType(CardType.Ice);
-        if (!isIceCard)
-		{
-			foreach (var server in serverColumns)
-			{
-                if (!server.HasRootInstalled()) return true;
-			}
-            return false;
-		}
+  //      Card card = installableCard as Card;
+  //      bool isIceCard = card.IsCardType(CardType.Ice);
+  //      if (!isIceCard)
+		//{
+		//	foreach (var server in serverColumns)
+		//	{
+  //              if (!server.HasRootInstalled()) return true;
+		//	}
+  //          return false;
+		//}
         return true;
     }
 
@@ -108,6 +107,7 @@ public class ServerSpace : MonoBehaviour
             ActivateAllColumnSelectors(false, true);
             ActivateAllColumnSelectors(false, false);
             PlayCardManager.CardInstalled((Card)currentInstallableCard, true);
+            currentInstallableCard = null;
         }
     }
 

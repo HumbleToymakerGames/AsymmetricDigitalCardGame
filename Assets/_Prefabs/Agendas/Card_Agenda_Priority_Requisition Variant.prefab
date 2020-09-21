@@ -1,5 +1,19 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1658679852919900308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5232945188822911178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b52af16592f95d4f844732f787e3795, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  conditions: 03000000
+  card: {fileID: 0}
 --- !u!114 &7991152314023906495
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15,22 +29,7 @@ MonoBehaviour:
   card: {fileID: 0}
   paidAbilities: []
   conditionalAbilities: []
---- !u!114 &1658679852919900308
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5232945188822911178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b52af16592f95d4f844732f787e3795, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  condition: 5
-  cardFunction: {fileID: 0}
-  card: {fileID: 0}
-  myAbilityIndex: 0
+  cardScored: 0
 --- !u!1001 &3242541301172046615
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -237,7 +236,7 @@ PrefabInstance:
     - target: {fileID: 7233051270308341912, guid: 2cf8896d28ce54841b675bd81e8e5207,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 31.23
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2cf8896d28ce54841b675bd81e8e5207, type: 3}

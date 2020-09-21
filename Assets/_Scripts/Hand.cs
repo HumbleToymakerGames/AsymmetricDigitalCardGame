@@ -9,8 +9,7 @@ public class Hand : PlayArea_Spot, IAccessable
     int maximumHandSize = 5;
     public float cardScaleInHand;
 
-	[SerializeField]
-	List<Card> cardsInHand = new List<Card>();
+	public List<Card> cardsInHand = new List<Card>();
 
 	[Header("Show Toggler")]
     bool isShowing = false;

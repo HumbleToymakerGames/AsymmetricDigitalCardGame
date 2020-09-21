@@ -1,25 +1,42 @@
-﻿using Boo.Lang;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 public class CardFunction_PriorityRequisition : CardFunction
 {
-	protected override bool CanExecuteConditionalAbility(int abilityIndex)
+	public bool cardScored;
+
+	protected override void OnEnable()
 	{
-		return card.isInstalled && card.isRezzed && card.cardAdvancer.isScored;
+		base.OnEnable();
+		PlayCardManager.OnCardScored += PlayCardManager_OnCardScored;
+	}
+	protected override void OnDisable()
+	{
+		base.OnDisable();
+		PlayCardManager.OnCardScored -= PlayCardManager_OnCardScored;
 	}
 
-	protected override void ExecuteConditionalAbility(int abilityIndex)
+	private void PlayCardManager_OnCardScored(Card card)
 	{
-		if (abilityIndex == 1) RezIce();
-
-		ConditionalAbilityResolved();
+		cardScored = card == this.card;
 	}
 
-	void RezIce()
+	protected override void AssignConditionalAbilities()
 	{
-		print("ICE REZZED!!!");
+		for (int i = 0; i < conditionalAbilities.Length; i++)
+		{
+			ConditionalAbility ability = conditionalAbilities[i];
+			if (i == 0) ability.SetExecutionAndCondition(RezIce, CanRezIce);
+		}
+	}
 
-		CardChooser.instance.ActivateFocus(null);
+	bool CanRezIce()
+	{
+		return cardScored;
+	}
 
+	IEnumerator RezIce()
+	{
 		Card_Ice[] iceCards = FindObjectsOfType<Card_Ice>();
 		List<SelectorNR> selectors = new List<SelectorNR>();
 		foreach (var ice in iceCards)
@@ -30,29 +47,33 @@ public class CardFunction_PriorityRequisition : CardFunction
 			}
 		}
 
-		if (selectors.Count > 0) ActionOptions.instance.ActivateYesNo(RezChoice, "Rez Ice?", 0);
-
-
-		void RezChoice(bool yes)
+		ActionOptions.instance.HideAllOptions();
+		if (selectors.Count > 0)
 		{
-			if (yes)
+			CardChooser.instance.ActivateFocus(null);
+			bool madeChoice = false;
+			ActionOptions.instance.ActivateYesNo(RezChoice, "Rez Ice?", 0);
+			while (!madeChoice) yield return null;
+
+			void RezChoice(bool yes)
 			{
-				print("YESES");
-
-				CardChooser.instance.ActivateFocus(IceChosen, selectors.ToArray());
-
-				void IceChosen(SelectorNR selector)
+				madeChoice = true;
+				if (yes)
 				{
-					selector.GetComponentInParent<Card>().Rez();
+					CardChooser.instance.ActivateFocus(IceChosen, 1, selectors.ToArray());
+					ActionOptions.instance.ActivateActionMessage("Select Ice to Rez");
+
+					void IceChosen(SelectorNR[] selectorsChosen)
+					{
+						selectorsChosen[0].GetComponentInParent<Card>().Rez();
+					}
+				}
+				else
+				{
+					CardChooser.instance.DeactivateFocus();
 				}
 			}
-			else
-			{
-				CardChooser.instance.DeactivateFocus();
-			}
 		}
-
-		//PlayerNR.Corporation.AddCredits(numCredits);
 	}
 
 

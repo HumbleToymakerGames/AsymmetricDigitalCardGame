@@ -12,7 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b1de2f9c319fee47a789bc575797dd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  card: {fileID: 0}
+  paidAbilities: []
+  conditionalAbilities: []
   amountLinks: 1
+--- !u!114 &2164690125873612172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4293138933976302732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b52af16592f95d4f844732f787e3795, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  conditions: 01000000
+  card: {fileID: 0}
 --- !u!1001 &4496243186949228775
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -442,7 +459,7 @@ PrefabInstance:
     - target: {fileID: 7398013463416641765, guid: 17e5a4220be2c6347949d2770b8bbac7,
         type: 3}
       propertyPath: m_Name
-      value: Card_Resource_AccessToGlobalsec Variant
+      value: Card_Resource_AccessToGlobalsec
       objectReference: {fileID: 0}
     - target: {fileID: 8081638699663568004, guid: 17e5a4220be2c6347949d2770b8bbac7,
         type: 3}

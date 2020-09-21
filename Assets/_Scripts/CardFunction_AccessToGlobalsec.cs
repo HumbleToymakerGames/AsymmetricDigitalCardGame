@@ -5,29 +5,48 @@ using UnityEngine;
 public class CardFunction_AccessToGlobalsec : CardFunction
 {
 	public int amountLinks;
-	protected override void SubscribeToConditions()
+	bool cardInstalled;
+
+	protected override void OnEnable()
 	{
-		base.SubscribeToConditions();
+		base.OnEnable();
 		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
 	}
 
-	protected override void UnSubscribeToConditions()
+	protected override void OnDisable()
 	{
-		base.UnSubscribeToConditions();
+		base.OnDisable();
 		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
+	}
+
+
+	protected override void AssignConditionalAbilities()
+	{
+		for (int i = 0; i < conditionalAbilities.Length; i++)
+		{
+			ConditionalAbility ability = conditionalAbilities[i];
+			if (i == 0) ability.SetExecutionAndCondition(AddLink, CanAddLink);
+		}
 	}
 
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
 		if (card == this.card && installed)
 		{
-			AddLink();
+			cardInstalled = true;
 		}
 	}
 
-	void AddLink()
+	bool CanAddLink()
+	{
+		return card.isInstalled && cardInstalled;
+	}
+
+	IEnumerator AddLink()
 	{
 		PlayerNR.Runner.LinkStrength += amountLinks;
+		cardInstalled = false;
+		yield break;
 	}
 
 }

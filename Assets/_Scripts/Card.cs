@@ -62,6 +62,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 	{
 		PlayCardManager.OnCardInstalled += OnCardInstalled;
 		myPlayer.OnCreditsChanged += MyPlayer_OnCreditsChanged;
+		myPlayer.OnActionPointsChanged += MyPlayer_OnActionPointsChanged;
 		CardViewWindow.OnCardPinnedToView += CardViewWindow_OnCardPinnedToView;
 	}
 
@@ -71,7 +72,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     {
         PlayCardManager.OnCardInstalled -= OnCardInstalled;
 		myPlayer.OnCreditsChanged -= MyPlayer_OnCreditsChanged;
-		CardViewWindow.OnCardPinnedToView -= CardViewWindow_OnCardPinnedToView;
+		myPlayer.OnActionPointsChanged -= MyPlayer_OnActionPointsChanged;
+        CardViewWindow.OnCardPinnedToView -= CardViewWindow_OnCardPinnedToView;
     }
     protected virtual void OnCardInstalled(Card card, bool installed)
 	{
@@ -82,16 +84,26 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     {
         cardFunction?.UpdatePaidAbilitesActive_Credits(myPlayer.Credits);
     }
+    private void MyPlayer_OnActionPointsChanged()
+    {
+        cardFunction?.UpdatePaidAbilitesActive_ActionPoints(myPlayer.ActionPoints);
+    }
     private void CardViewWindow_OnCardPinnedToView(Card card)
     {
+        return;
         if (card)
         {
             Card realCard = CardViewer.instance.GetCard(card.viewIndex, true);
             if (realCard && realCard == this)
             {
-                ActivateCardOptions();
+                if (isInstalled && !RunOperator.instance.isRunning)
+                    ActivateCardOptions();
             }
         }
+        else if (!RunOperator.instance.isRunning)
+		{
+            ActionOptions.instance.HideAllOptions();
+		}
     }
 
     protected virtual void Start()
@@ -209,7 +221,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 		}
         else if (isInstalled)
 		{
-            CardViewer.instance.viewWindow_Primary.CardChooser_OnCardPinned(this);
+            if (!CardChooser.instance.isFocused)
+                CardViewer.instance.viewWindow_Primary.CardChooser_OnCardPinned(this);
         }
         //FlipCard();
         //print(IsCardInHand());
@@ -234,32 +247,39 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 				{
                     if (!isRezzed)
 					{
-                        int costOfCard = cardCost.costOfCard;
-                        ActionOptions.instance.Display_RezCard(RezChoice, costOfCard);
+                        if (!IsCardType(CardType.Ice))
+                        {
+                            int costOfCard = cardCost.costOfCard;
+                            ActionOptions.instance.Display_RezCard(RezChoice, costOfCard);
 
-                        void RezChoice(bool yes)
-						{
-                            if (yes)
-							{
-                                if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, costOfCard))
-								{
-                                    Rez();
+                            void RezChoice(bool yes)
+                            {
+                                if (yes)
+                                {
+                                    if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, costOfCard))
+                                    {
+                                        Rez();
+                                    }
                                 }
                             }
-						}
+                        }
 					}
 				}
             }
 		}
 
-
     }
 
     public void Pinned(bool pinned = true, bool primary = true)
     {
-        Image pin = primary ? cardRefs.cardPin_Primary : cardRefs.cardPin_Secondary;
-        pin.enabled = pinned;
+		foreach (var pin in primary ? cardRefs.cardPin_Primary : cardRefs.cardPin_Secondary)
+            pin.enabled = pinned;
     }
+
+    public virtual bool CanBeClickedInViewer()
+	{
+        return isInstalled && myPlayer == GameManager.CurrentTurnPlayer;
+	}
 
     public void ActivateCardFromHand()
 	{

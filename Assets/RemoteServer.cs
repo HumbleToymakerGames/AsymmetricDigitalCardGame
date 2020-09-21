@@ -31,6 +31,11 @@ public class RemoteServer : PlayArea_Spot, IAccessable
 
     public void InstallCard(IAccessable accessableCard)
 	{
+		if (HasCardInstalled())
+		{
+			PlayCardManager.instance.TrashCard(PlayerNR.Corporation, installedCard as Card);
+		}
+
         installedCard = accessableCard;
 		Card card = accessableCard as Card;
 		card.MoveCardTo(serverRootT);

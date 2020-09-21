@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayCardManager : MonoBehaviour
 {
@@ -31,6 +32,7 @@ public class PlayCardManager : MonoBehaviour
     public static event eCardEvent OnCardActivated;
     public static event eCardEvent OnCardTrashed;
     public static event eCardEvent OnCardScored;
+    public static event eCardEvent OnCardStolen;
 
     [Header("Starting Points")]
     public int numActionPointsStart;
@@ -214,9 +216,10 @@ public class PlayCardManager : MonoBehaviour
 		{
             if (GameManager.CurrentTurnPlayer.CanAffordAction(paidAbility.payAmount))
 			{
-                // Activate card on clicks
-			}
-		}
+                paidAbility.ActivateAbility();
+                GameManager.CurrentTurnPlayer.ActionPointsUsed(paidAbility.payAmount);
+            }
+        }
 	}
 
     public void ReversePaidAbility(PaidAbility paidAbility)
@@ -410,7 +413,7 @@ public class PlayCardManager : MonoBehaviour
         PlayArea.instance.DiscardNR(player).AddCardToDiscard(card);
 	}
 
-    void TrashCard(PlayerNR trashedPlayer, Card card)
+    public void TrashCard(PlayerNR trashedPlayer, Card card)
 	{
         SendCardToDiscard(trashedPlayer, card);
         if (card.isInstalled)
@@ -425,8 +428,36 @@ public class PlayCardManager : MonoBehaviour
         PlayArea.instance.ScoringAreaNR(scoringPlayer).AddCardToScoringArea(agenda);
         scoringPlayer.AddScore(agenda.scoringAmount);
         agenda.cardAdvancer.CardScored();
-        OnCardScored?.Invoke(agenda);
+
+        if (!scoringPlayer.IsRunner()) OnCardScored?.Invoke(agenda);
+        else OnCardStolen?.Invoke(agenda);
     }
+
+
+    public void DoNetDamage(UnityAction callBack, int numDamage)
+	{
+        List<SelectorNR> selectorNRs = new List<SelectorNR>();
+		foreach (var card in PlayArea.instance.HandNR(PlayerNR.Runner).cardsInHand)
+		{
+            selectorNRs.Add(card.selector);
+		}
+        CardChooser.instance.ActivateFocus(NetDamageDone, numDamage, selectorNRs.ToArray());
+        ActionOptions.instance.ActivateActionMessage(string.Format("Net Damage:\nRemove ({0}) cards", numDamage));
+
+        void NetDamageDone(SelectorNR[] selectors)
+		{
+			foreach (var selector in selectors)
+			{
+                PlayArea.instance.DiscardNR(PlayerNR.Runner).AddCardToDiscard(selector.GetComponentInParent<Card>());
+			}
+
+            callBack?.Invoke();
+		}
+	}
+
+
+
+
 
 
     public void StartTurn(PlayerNR playerTurn, bool isFirstTurn)

@@ -26,15 +26,21 @@ public class CardViewer : MonoBehaviour
 	private void OnEnable()
 	{
 		RunOperator.OnRunStarted += RunOperator_OnRunStarted;
+		GameManager.OnTurnChanged += GameManager_OnTurnChanged;
 	}
 	private void OnDisable()
 	{
 		RunOperator.OnRunStarted -= RunOperator_OnRunStarted;
+		GameManager.OnTurnChanged -= GameManager_OnTurnChanged;
 	}
 
 	private void RunOperator_OnRunStarted()
 	{
-
+		UpdateCardsClickable();
+	}
+	private void GameManager_OnTurnChanged(bool isRunner)
+	{
+		UpdateCardsClickable();
 	}
 
 	void Start()
@@ -64,10 +70,12 @@ public class CardViewer : MonoBehaviour
 	{
 		bool viewer = false;
 		if (IsCardBeingViewed(viewIndex, ref viewer)) return;
+		Card realCard = GetCard(viewIndex, true);
+		bool clickable = cardsClickableOnView && realCard.CanBeClickedInViewer();
 
 		ReplicateCardState(viewIndex);
-		if (primary) viewWindow_Primary.ViewCard(viewIndex, cardsClickableOnView);
-		else viewWindow_Secondary.ViewCard(viewIndex, cardsClickableOnView);
+		if (primary) viewWindow_Primary.ViewCard(viewIndex, clickable);
+		else viewWindow_Secondary.ViewCard(viewIndex, clickable);
 	}
 
 	public void HideAllCards(bool primary)
@@ -109,6 +117,7 @@ public class CardViewer : MonoBehaviour
 			deckCard.isViewCard = true;
 			Card viewCard = Instantiate(deckCard);
 			deckCard.isViewCard = false;
+			viewCard.name += "_VIEW";
 
 			viewCards[i] = viewCard;
 			cardPairDict[viewIndex] = new CardPair() { realCard = deckCard, viewCard = viewCard };
@@ -122,14 +131,17 @@ public class CardViewer : MonoBehaviour
 			Card identityCard = i == 0 ? PlayerNR.Runner.identity : PlayerNR.Corporation.identity;
 			identityCard.viewIndex = viewIndex;
 
+			identityCard.isViewCard = true;
 			Card viewCard = Instantiate(identityCard);
+			identityCard.isViewCard = false;
+
 			cardPairDict[viewIndex] = new CardPair() { realCard = identityCard, viewCard = viewCard };
 			ParentCard_Start(viewCard);
 			viewIndex++;
 		}
 
 		yield return new WaitForSeconds(0.25f);
-		SetCardsClickable(false);
+		SetCardsClickable(true);
 
 		HideAllCards(true);
 		HideAllCards(false);
@@ -193,8 +205,13 @@ public class CardViewer : MonoBehaviour
 	public void SetCardsClickable(bool clickable = true)
 	{
 		cardsClickableOnView = clickable;
+		UpdateCardsClickable();
+	}
+
+	public void UpdateCardsClickable()
+	{
 		Card primaryViewCard = GetCard(viewWindow_Primary.currentViewIndex, false);
-		if (primaryViewCard && primaryViewCard.isInstalled) primaryViewCard.ActivateRaycasts(clickable);
+		if (primaryViewCard) primaryViewCard.ActivateRaycasts(cardsClickableOnView && primaryViewCard.CanBeClickedInViewer());
 	}
 
 

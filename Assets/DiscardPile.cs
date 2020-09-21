@@ -16,7 +16,7 @@ public class DiscardPile : PlayArea_Spot, IAccessable
 	{
         card.MoveCardTo(cardsParentT);
         card.FlipCard(false);
-        cardsInDiscard.Add(card);
+        cardsInDiscard.Insert(0, card);
     }
 
 	public override void RemoveCard(Card card)
@@ -27,7 +27,19 @@ public class DiscardPile : PlayArea_Spot, IAccessable
 
 	public void Access()
 	{
-        CardRevealer.instance.RevealCards(cardsInDiscard.ToArray());
+        CardRevealer.instance.RevealCards(cardsInDiscard.ToArray(), true, this);
 	}
+
+
+	public override List<Card> MyDeck()
+	{
+		return cardsInDiscard;
+	}
+
+	protected override void SetMyDeck(List<Card> deck)
+	{
+		cardsInDiscard = deck;
+	}
+
 
 }
