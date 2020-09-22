@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ConditionalAbility : MonoBehaviour
 {
-    public enum Condition { Turn_Begins, Card_Installed, Run_Ends, Agenda_Scored, Agenda_Stolen };
+    public enum Condition { Turn_Begins, Card_Installed, Run_Ends, Agenda_Scored, Agenda_Stolen, Card_Accessed };
     public Condition[] conditions;
 
 	public delegate IEnumerator Ability();
@@ -44,7 +44,7 @@ public class ConditionalAbility : MonoBehaviour
 
 	void ConditionResolved()
 	{
-		ConditionalAbilitiesManager.instance.ConditionalAbilityResolved();
+		ConditionalAbilitiesManager.instance.ConditionalAbilityResolved(this);
 		Debug.Log("ConditionResolved - " + name);
 	}
 
@@ -66,6 +66,7 @@ public class ConditionalAbility : MonoBehaviour
 
 	public bool AreConditionsMet()
 	{
+		if (ConditionsMet == null) Debug.Log("NOPE", this);
 		return ConditionsMet();
 	}
 

@@ -436,6 +436,11 @@ public class PlayCardManager : MonoBehaviour
 
     public void DoNetDamage(UnityAction callBack, int numDamage)
 	{
+        if (numDamage <= 0)
+        {
+            callBack?.Invoke();
+            return;
+        }
         List<SelectorNR> selectorNRs = new List<SelectorNR>();
 		foreach (var card in PlayArea.instance.HandNR(PlayerNR.Runner).cardsInHand)
 		{

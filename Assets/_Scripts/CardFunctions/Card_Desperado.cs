@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class CardFunction_Desperado : CardFunction
+public class Card_Desperado : CardFunction
 {
 	public int amountMemory;
 	public int numCredits;

@@ -151,11 +151,17 @@ public class CardChooser : MonoBehaviour
     UnityAction<SelectorNR[]> currentCallback;
     public void ActivateFocus(UnityAction<SelectorNR[]> callback = null, int numToSelect = 1, params SelectorNR[] selectors)
 	{
+        if (selectors.Length == 0) Debug.LogWarning("Warning: CardChooser activated w/o selectors, no possible return");
+        if (selectors.Length < numToSelect)
+        {
+            Debug.LogWarning("Warning: CardChooser target number lower than possible choices, revising");
+            numToSelect = selectors.Length;
+        }
+
         currentFocusedSelectors = selectors;
         isFocused = true;
         targetNumToSelect = numToSelect;
         currentCallback = callback;
-        if (selectors.Length == 0) Debug.LogWarning("Warning: CardChooser activated w/o selectors, no possible return");
 
         foreach (var selector in selectors)
 		{

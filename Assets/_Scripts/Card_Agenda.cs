@@ -39,7 +39,7 @@ public class Card_Agenda : Card, IInstallable, IAccessable
 	public void Access()
 	{
 		print("Agenda Accessed");
-		CardRevealer.instance.RevealCard(this);
+		CardRevealer.instance.RevealCard(this, true);
 	}
 
 

@@ -17,7 +17,6 @@ public class gogo : MonoBehaviour
         bool t = false;
         ganger((g) => g.banger(t));
 
-        print(transform.GetSiblingIndex());
 
     }
 
@@ -40,7 +39,6 @@ public class gogo : MonoBehaviour
 
     void banger(bool i)
 	{
-        print("bool - " + i);
 	}
 
     void banger(int i, string s)

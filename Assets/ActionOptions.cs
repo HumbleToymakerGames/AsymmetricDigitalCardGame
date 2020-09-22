@@ -105,7 +105,6 @@ public class ActionOptions : MonoBehaviour
 	{
 		TryHideAllOptions(showOnly, false);
 		ActivateYesNo(callback, "Rez Card?");
-		yesButton.interactable = PlayCardManager.instance.CanAffordCost(PlayerNR.Corporation, rezCost);
 		yesText.text = string.Format(rezCostFormat, rezCost);
 	}
 
@@ -114,11 +113,12 @@ public class ActionOptions : MonoBehaviour
 	public void ActivateYesNo(UnityAction<bool> callback, string title, int yesCost = -123)
 	{
 		HideAllOptions();
-		yesNoPanelGO.SetActive(true);
 		yesnoTitleText.text = title;
 		yesnoCallback = callback;
+		yesButton.interactable = PlayCardManager.instance.CanAffordCost(PlayerNR.Corporation, yesCost);
 		yesText.text = string.Format(rezCostFormat, yesCost == -123 ? "" : yesCost.ToString());
 		isYesNo = true;
+		yesNoPanelGO.SetActive(true);
 	}
 
 	public void ActivateActionMessage(string message)

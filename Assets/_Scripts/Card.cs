@@ -335,6 +335,11 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     //}
 
 
+    public void ExposeCard()
+	{
+        CardRevealer.instance.RevealCard(this, false);
+	}
+
 
 
 

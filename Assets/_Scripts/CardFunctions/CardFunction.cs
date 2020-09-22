@@ -40,18 +40,6 @@ public abstract class CardFunction : MonoBehaviour
 		return true;
 	}
 
-	//public virtual bool IsConditionMet()
-	//{
-
-	//}
-
-
-	public void ConditionalAbilityResolved()
-	{
-		ConditionalAbilitiesManager.instance.ConditionalAbilityResolved();
-	}
-
-
 	#endregion
 
 	public virtual void ActivateFunction()

@@ -19,7 +19,7 @@ public class CardRevealer : MonoBehaviour
     public Card[] realCards, currentCards;
     public CardMover cardMoverPrefab;
     CardMover[] cardMovers = new CardMover[0];
-    bool isMovingCards, isRevealing;
+    bool isMovingCards, isRevealing, isAccessing;
     PlayArea_Spot currentPlayAreaSpot;
 
     public Vector3 endRevealPos;
@@ -78,9 +78,10 @@ public class CardRevealer : MonoBehaviour
         isRevealing = activate;
     }
 
-    public void RevealCard(Card card)
+    public void RevealCard(Card card, bool accessed)
 	{
         targetRealCard = card;
+        isAccessing = accessed;
         Activate();
 
         targetRealCard_OGPosition = card.transform.position;
@@ -232,22 +233,29 @@ public class CardRevealer : MonoBehaviour
 	{
         SetAllCardButtonsInteractable(false);
         cardButton_Return.interactable = true;
-        
-        if (targetRealCard is Card_Asset)
+
+        if (isAccessing)
         {
-            cardButton_Return.interactable = true;
+            if (targetRealCard is Card_Asset)
+            {
+                cardButton_Return.interactable = true;
 
-            bool cardIsTrashable = PlayCardManager.instance.CanTrashCard(GameManager.CurrentTurnPlayer, targetRealCard);
-            if (targetRealCard.CanBeTrashed()) trashButtonText.text = string.Format(trashTextFormat, targetRealCard.cardTrasher.CostOfTrash());
-            else trashButtonText.text = "Trash";
-            cardButton_Trash.interactable = cardIsTrashable;
+                bool cardIsTrashable = PlayCardManager.instance.CanTrashCard(GameManager.CurrentTurnPlayer, targetRealCard);
+                if (targetRealCard.CanBeTrashed()) trashButtonText.text = string.Format(trashTextFormat, targetRealCard.cardTrasher.CostOfTrash());
+                else trashButtonText.text = "Trash";
+                cardButton_Trash.interactable = cardIsTrashable;
 
-            cardButton_Steal.interactable = false;
+                cardButton_Steal.interactable = false;
+            }
+            else if (targetRealCard is Card_Agenda)
+            {
+                SetAllCardButtonsInteractable(false);
+                cardButton_Steal.interactable = true;
+            }
         }
-        else if (targetRealCard is Card_Agenda)
+        else
 		{
-            SetAllCardButtonsInteractable(false);
-            cardButton_Steal.interactable = true;
+            cardButton_Return.interactable = true;
         }
     }
 

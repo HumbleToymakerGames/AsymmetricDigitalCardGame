@@ -22,6 +22,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored += PlayCardManager_OnCardScored;
 		PlayCardManager.OnCardStolen += PlayCardManager_OnCardStolen;
+		RunOperator.OnCardAccessed += RunOperator_OnCardAccessed;
 	}
 	private void OnDisable()
 	{
@@ -30,6 +31,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored -= PlayCardManager_OnCardScored;
 		PlayCardManager.OnCardStolen -= PlayCardManager_OnCardStolen;
+		RunOperator.OnCardAccessed -= RunOperator_OnCardAccessed;
 	}
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
@@ -52,7 +54,10 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	{
 		StartResolvingConditionals(ConditionalAbility.Condition.Agenda_Stolen);
 	}
-
+	private void RunOperator_OnCardAccessed(Card card)
+	{
+		StartResolvingConditionals(ConditionalAbility.Condition.Card_Accessed);
+	}
 
 
 
@@ -68,9 +73,11 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	}
 
 
-	Coroutine resolvingRoutine;
+	static Coroutine resolvingRoutine;
+	static ConditionalAbility.Condition currentConditionResolving;
 	IEnumerator ResolvingConditionalsRoutine(ConditionalAbility.Condition condition)
 	{
+		currentConditionResolving = condition;
 		yield return new WaitForSeconds(0.25f);
 
 		List<ConditionalAbility> conditionalAbilities = new List<ConditionalAbility>();
@@ -100,8 +107,9 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 
 	}
 
-	public void ConditionalAbilityResolved()
+	public void ConditionalAbilityResolved(ConditionalAbility ability)
 	{
+		Debug.Log("ConditionalAbilityResolved - " + currentConditionResolving.ToString(), ability);
 		waitForConditionResolved = false;
 	}
 
@@ -111,10 +119,14 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	{
 		foreach (var ability in conditionals)
 		{
+			print("ConditionalAbilityResolving..." + currentConditionResolving.ToString());
+
 			waitForConditionResolved = true;
 			ability.ExecuteAbility();
 			while (waitForConditionResolved) yield return null;
 		}
+		print("resolvingRoutine Over!");
+		resolvingRoutine = null;
 	}
 
 
@@ -144,7 +156,10 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		allConditionalAbilities.Remove(conditionalAbility);
 	}
 
-
+	public static bool IsResolvingConditionals(ConditionalAbility.Condition condition)
+	{
+		return resolvingRoutine != null && currentConditionResolving == condition;
+	}
 
 
 	#region Conditional Criterias

@@ -31,7 +31,7 @@ public class Card_Asset : Card, IInstallable, IAccessable
 	public void Access()
 	{
 		print("Asset Accessed");
-		CardRevealer.instance.RevealCard(this);
+		CardRevealer.instance.RevealCard(this, true);
 	}
 
 

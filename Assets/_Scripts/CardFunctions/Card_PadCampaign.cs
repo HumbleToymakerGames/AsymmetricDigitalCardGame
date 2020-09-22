@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-public class CardFunction_PadCampaign : CardFunction
+public class Card_PadCampaign : CardFunction
 {
 	public int numCredits;
 	bool myTurn;

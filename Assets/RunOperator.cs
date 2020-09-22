@@ -16,6 +16,8 @@ public class RunOperator : MonoBehaviour
     public bool isBreakingSubroutines;
     public bool isEncounteringIce;
 
+    public ServerColumn.ServerType? serverTypeOverride = null;
+
     List<Card_Program> strengthModifiedProgramCards = new List<Card_Program>();
     List<Card_Ice> encounteredIceCards = new List<Card_Ice>();
 
@@ -27,7 +29,9 @@ public class RunOperator : MonoBehaviour
 
     public delegate void RunEnded(bool success, ServerColumn.ServerType serverType);
     public static event RunEnded OnRunEnded;
-    public RunEnded lastRunEndedEvent;
+
+    public delegate void CardAccessed(Card card);
+    public static event CardAccessed OnCardAccessed;
 
     private void Awake()
     {
@@ -70,7 +74,7 @@ public class RunOperator : MonoBehaviour
 
     private void CardFunction_OnPaidAbilityActivated()
     {
-        OnCardBeingApproached?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
+        if (isRunning) OnCardBeingApproached?.Invoke(currentIceEncountered, currentServerColumn.currentIceIndex);
     }
 
 
@@ -172,19 +176,8 @@ public class RunOperator : MonoBehaviour
 
             ActionOptions.instance.Display_FireRemainingSubs(true);
 
-			//currentRunChooser.
-			//int 
-
-			// Put ice into secondary View Window (pinned)
-
-			//bool strongEnough = IsCardStrongEnough(currentProgramEncountering, currentIceEncountered));
-			//print("Strong enough - " + CanCardEncounter_Strength(currentProgramEncountering, currentIceEncountered));
 
 			CardViewer.instance.SetCardsClickable(true);
-
-			//if (currentProgramEncountering) SetAbleAbilitiesActive();
-
-
 
 		}
 		else
@@ -201,8 +194,22 @@ public class RunOperator : MonoBehaviour
 
         while (waitForRezRequest) yield return null;
 
-        currentServerColumn.AccessServer();
+        ServerColumn serverColumnAccessed = serverTypeOverride.HasValue? ServerSpace.instance.GetServerOfType(serverTypeOverride.Value) : currentServerColumn;
         EndRun(true);
+
+        while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Run_Ends)) yield return null;
+
+        Card installedCard = null;
+        if (serverColumnAccessed.HasRootInstalled(ref installedCard))
+		{
+            OnCardAccessed?.Invoke(installedCard);
+
+            while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
+            print("RunCompleted Over!");
+
+            serverColumnAccessed.AccessServer();
+        }
+
     }
 
 
@@ -237,6 +244,7 @@ public class RunOperator : MonoBehaviour
 
     public void BreakingSubroutines(PaidAbility paidAbility)
     {
+        if (!isRunning) return;
         currentPaidAbility = paidAbility;
         currentIceEncountered.ShowSubroutinesBreakable(true);
         currentIceEncountered.ActivateRaycasts();
@@ -342,15 +350,15 @@ public class RunOperator : MonoBehaviour
             currentIceEncountered = null;
             currentProgramEncountering = null;
             currentPaidAbility = null;
-            ServerColumn.ServerType serverType = currentServerColumn.serverType;
+            ServerColumn.ServerType serverType = serverTypeOverride.HasValue? serverTypeOverride.Value : currentServerColumn.serverType;
             currentServerColumn = null;
             encounteredIceCards.Clear();
             ActionOptions.instance.HideAllOptions();
             isRunning = false;
             OnRunEnded?.Invoke(success, serverType);
+            SetServerTypeOverride(null);
             print("Run Ended.");
         }
-
     }
 
     public void ResetAllStrengths()
@@ -370,6 +378,13 @@ public class RunOperator : MonoBehaviour
             encounteredIceCards[i].ResetSubroutinesToFire();
         }
     }
+
+
+    public void SetServerTypeOverride(ServerColumn.ServerType? serverType)
+	{
+        serverTypeOverride = serverType;
+	}
+
 
 
 }

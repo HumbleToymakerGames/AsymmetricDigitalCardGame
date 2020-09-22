@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_Ninja : CardFunction
+public class Card_Ninja : CardFunction
 {
     public int strengthToAdd;
 

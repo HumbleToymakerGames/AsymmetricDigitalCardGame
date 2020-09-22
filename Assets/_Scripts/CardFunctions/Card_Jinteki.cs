@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_Jinteki : CardFunction
+public class Card_Jinteki : CardFunction
 {
 	public int numNetDamage;
 
@@ -56,17 +56,6 @@ public class CardFunction_Jinteki : CardFunction
 			print("net damage done.");
 			damageDone = true;
 		}
-
-
-
-
-
-
-
-
-
-
-		yield break;
 	}
 
 

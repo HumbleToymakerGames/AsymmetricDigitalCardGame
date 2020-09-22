@@ -36,7 +36,20 @@ public class SelectorNR : MonoBehaviour
 
     public void Highlight(bool highlight = true)
 	{
-        if (selectable != null && selectable.CanHighlight(highlight))
+        if (isFocused)
+        {
+            highlighter.enabled = true;
+            if (highlight)
+            {
+                highlighter.color = highlightOGColor;
+            }
+            else
+            {
+                if (isFocusSelected) highlighter.color = CardChooser.instance.selectedColor;
+                else highlighter.color = CardChooser.instance.focusColor;
+            }
+        }
+        else if (selectable != null && selectable.CanHighlight(highlight))
 		{
             highlighter.enabled = highlight;
             
@@ -52,37 +65,26 @@ public class SelectorNR : MonoBehaviour
             selectable.Highlighted();
             onHighlighted?.Invoke();
         }
-        if (isFocused)
-		{
-            highlighter.enabled = true;
-            if (highlight)
-			{
-                highlighter.color = highlightOGColor;
-			}
-            else
-			{
-                if (isFocusSelected) highlighter.color = CardChooser.instance.selectedColor;
-                else highlighter.color = CardChooser.instance.focusColor;
-            }
-        }
+        
 
     }
 
 
     public void Click()
 	{
-        if (selectable != null && selectable.CanSelect())
+        if (isFocused)
+        {
+            OnSelectorClicked?.Invoke(this);
+            highlighter.color = isFocusSelected ? CardChooser.instance.selectedColor : CardChooser.instance.focusColor;
+            //Highlight(true);
+        }
+        else if (selectable != null && selectable.CanSelect())
 		{
             selectable.Selected();
             onClicked?.Invoke();
             Highlight(true);
         }
-        if (isFocused)
-		{
-            OnSelectorClicked?.Invoke(this);
-            highlighter.color = isFocusSelected ? CardChooser.instance.selectedColor : CardChooser.instance.focusColor;
-            Highlight(true);
-        }
+        
     }
 
 

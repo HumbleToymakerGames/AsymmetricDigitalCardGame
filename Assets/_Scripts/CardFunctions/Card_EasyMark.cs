@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_EasyMark : CardFunction
+public class Card_EasyMark : CardFunction
 {
 
 	public int numCredits;

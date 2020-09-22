@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_MelangeMiningCorp : CardFunction
+public class Card_MelangeMiningCorp : CardFunction
 {
     public int numCredits;
 	public override void ActivateFunction()

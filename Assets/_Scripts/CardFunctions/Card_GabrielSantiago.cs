@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_GabrielSantiago : CardFunction
+public class Card_GabrielSantiago : CardFunction
 {
 	public bool canBeActivated, runSuccessful;
 	public int numCredits;

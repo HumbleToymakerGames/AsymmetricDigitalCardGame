@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_HedgeFund : CardFunction
+public class Card_HedgeFund : CardFunction
 {
     public int numCredits;
 

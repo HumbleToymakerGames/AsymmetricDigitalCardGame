@@ -58,7 +58,7 @@ public class Card_Program : Card, IInstallable
 
 	public override bool CanBeClickedInViewer()
 	{
-		return base.CanBeClickedInViewer() && RunOperator.instance.isRunning;
+		return base.CanBeClickedInViewer();// && RunOperator.instance.isRunning;
 	}
 
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-public class CardFunction_PriorityRequisition : CardFunction
+public class Card_PriorityRequisition : CardFunction
 {
 	public bool cardScored;
 
@@ -41,7 +41,7 @@ public class CardFunction_PriorityRequisition : CardFunction
 		List<SelectorNR> selectors = new List<SelectorNR>();
 		foreach (var ice in iceCards)
 		{
-			if (ice.isInstalled && !ice.isRezzed)
+			if (!ice.isViewCard && ice.isInstalled && !ice.isRezzed)
 			{
 				selectors.Add(ice.selector);
 			}
@@ -51,32 +51,30 @@ public class CardFunction_PriorityRequisition : CardFunction
 		if (selectors.Count > 0)
 		{
 			CardChooser.instance.ActivateFocus(null);
-			bool madeChoice = false;
+			bool? madeChoice = null;
 			ActionOptions.instance.ActivateYesNo(RezChoice, "Rez Ice?", 0);
-			while (!madeChoice) yield return null;
+			while (!madeChoice.HasValue) yield return null;
 
 			void RezChoice(bool yes)
 			{
-				madeChoice = true;
-				if (yes)
-				{
-					CardChooser.instance.ActivateFocus(IceChosen, 1, selectors.ToArray());
-					ActionOptions.instance.ActivateActionMessage("Select Ice to Rez");
+				madeChoice = yes;
+			}
 
-					void IceChosen(SelectorNR[] selectorsChosen)
-					{
-						selectorsChosen[0].GetComponentInParent<Card>().Rez();
-					}
-				}
-				else
+			if (madeChoice.Value)
+			{
+				CardChooser.instance.ActivateFocus(IceChosen, 1, selectors.ToArray());
+				ActionOptions.instance.ActivateActionMessage("Select Ice to Rez");
+				madeChoice = null;
+				while (!madeChoice.HasValue) yield return null;
+
+				void IceChosen(SelectorNR[] selectorsChosen)
 				{
-					CardChooser.instance.DeactivateFocus();
+					madeChoice = true;
+					selectorsChosen[0].GetComponentInParent<Card>().Rez();
 				}
 			}
+
+			CardChooser.instance.DeactivateFocus();
 		}
 	}
-
-
-
-
 }

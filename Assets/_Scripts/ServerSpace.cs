@@ -43,7 +43,7 @@ public class ServerSpace : MonoBehaviour
                     selectors.Add(server.selectorRoot);
                 }
             }
-            CardChooser.instance.ActivateFocus(null, 1, selectors.ToArray());
+            CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
             ActionOptions.instance.Display_Cancel(
                 () =>
                 {
@@ -52,6 +52,8 @@ public class ServerSpace : MonoBehaviour
                     ActivateAllColumnSelectors(false, true);
                     ActivateAllColumnSelectors(false, false);
                 }, true);
+
+            void Chosen(SelectorNR[] selectorsChosen) { if (selectorsChosen.Length > 0) ServerChosen(selectorsChosen[0].GetComponentInParent<ServerColumn>()); }
         }
     }
 
@@ -123,6 +125,15 @@ public class ServerSpace : MonoBehaviour
 
     }
 
+
+    public ServerColumn GetServerOfType(ServerColumn.ServerType serverType)
+	{
+		foreach (var server in serverColumns)
+		{
+            if (server.serverType == serverType) return server;
+		}
+        return null;
+	}
 
 
 

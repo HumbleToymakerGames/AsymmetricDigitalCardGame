@@ -97,7 +97,7 @@ public class Hand : PlayArea_Spot, IAccessable
 	void RevealRandomCardFromHand()
 	{
 		Card randomCard = RandomCard();
-		if (randomCard) CardRevealer.instance.RevealCard(randomCard);
+		if (randomCard) CardRevealer.instance.RevealCard(randomCard, true);
 	}
 
 

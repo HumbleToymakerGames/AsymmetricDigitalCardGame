@@ -100,7 +100,6 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 
 	public void Selected()
 	{
-        serverSpace.ServerChosen(this);
 	}
 
 
@@ -147,9 +146,13 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
         return iceInColumn.Count > 0;
     }
 
-    public bool HasRootInstalled()
+    public bool HasRootInstalled(ref Card rootCard)
 	{
-        if (IsRemoteServer()) return (serverProtected as RemoteServer).HasCardInstalled();
+        if (IsRemoteServer())
+        {
+            rootCard = (serverProtected as RemoteServer).installedCard as Card;
+            return (serverProtected as RemoteServer).HasCardInstalled();
+        }
         return true;
 	}
 
