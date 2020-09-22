@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class ServerColumn : PlayArea_Spot, ISelectableNR
 {
-    public enum ServerType { Archives, RnD, HQ, Remote };
+    public enum ServerType { Archives, RND, HQ, Remote };
     [HideInInspector]
     public ServerType serverType;
     ServerSpace serverSpace;
@@ -27,12 +27,12 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
         GetServerType();
     }
 
-    public void InstallCardToServer(IAccessable accessableCard)
+    public void InstallCardToServer(Card card)
 	{
         if (serverProtected is RemoteServer)
         {
             RemoteServer remoteServer = serverProtected as RemoteServer;
-            remoteServer.InstallCard(accessableCard);
+            remoteServer.InstallCard(card);
         }
 	}
 
@@ -72,9 +72,9 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 	}
 
 
-    public void AccessServer()
+    public void AccessServer(ServerColumn.ServerType serverType)
 	{
-        serverProtected.Access();
+        serverProtected.Access(serverType);
     }
 
     public void SetInteractable(bool interactable = true)
@@ -119,7 +119,7 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
         return serverProtected is RemoteServer;
 	}
 
-    public IAccessable GetRemoteServerRoot()
+    public Card GetRemoteServerRoot()
 	{
         if (serverProtected is RemoteServer)
             return (serverProtected as RemoteServer).installedCard;
@@ -162,7 +162,7 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 	{
         if (serverProtected is DiscardPile) serverType = ServerType.Archives;
         else if (serverProtected is Hand) serverType = ServerType.HQ;
-        else if (serverProtected is Deck) serverType = ServerType.RnD;
+        else if (serverProtected is Deck) serverType = ServerType.RND;
         else serverType = ServerType.Remote;
     }
 

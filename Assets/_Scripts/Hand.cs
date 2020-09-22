@@ -87,18 +87,16 @@ public class Hand : PlayArea_Spot, IAccessable
 		return null;
 	}
 
-	public void Access()
-	{
-		RevealRandomCardFromHand();
-		print("Hand accesssed");
-	}
-
-
-	void RevealRandomCardFromHand()
+	public void Access(ServerColumn.ServerType serverAccessed)
 	{
 		Card randomCard = RandomCard();
-		if (randomCard) CardRevealer.instance.RevealCard(randomCard, true);
-	}
+		if (randomCard)
+		{
+			randomCard.Accessed(serverAccessed);
+			CardRevealer.instance.RevealCard(randomCard, true);
+		}
 
+		print("Hand accesssed");
+	}
 
 }

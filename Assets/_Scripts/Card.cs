@@ -40,7 +40,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public bool isInstalled;
     public SelectorNR selector;
 
-
+    public delegate void CardAccessed(Card card, ServerColumn.ServerType serverType);
+    public static event CardAccessed OnCardAccessed;
 
     protected virtual void Awake()
 	{
@@ -340,9 +341,10 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         CardRevealer.instance.RevealCard(this, false);
 	}
 
-
-
-
+	public void Accessed(ServerColumn.ServerType serverAccessed)
+	{
+        OnCardAccessed?.Invoke(this, serverAccessed);
+    }
 }
 
 

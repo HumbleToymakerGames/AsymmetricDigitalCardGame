@@ -108,10 +108,11 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
         PlayCardManager.instance.TryDrawNextCard();
 	}
 
-	public void Access()
+	public void Access(ServerColumn.ServerType serverAccessed)
 	{
-        RevealCard(cardsInDeck[0]);
-        //RevealCards(5);
+        Card card = cardsInDeck[0];
+        card.Accessed(serverAccessed);
+        RevealCard(card);
     }
 
     public void RevealCard(Card card)

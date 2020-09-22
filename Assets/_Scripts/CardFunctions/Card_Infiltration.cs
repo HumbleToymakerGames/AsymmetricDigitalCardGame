@@ -48,7 +48,7 @@ public class Card_Infiltration : CardFunction
 
     void CardChosen(SelectorNR[] selectors)
 	{
-        selectors[0].GetComponentInParent<Card>().ExposeCard();
+        PlayCardManager.instance.ExposeCard(selectors[0].GetComponentInParent<Card>());
     }
 
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Card_Asset : Card, IInstallable, IAccessable
+public class Card_Asset : Card, IInstallable
 {
 
 
@@ -26,13 +26,5 @@ public class Card_Asset : Card, IInstallable, IAccessable
     {
         return cardCost.CanAffordCard(PlayerNR.Corporation.Credits);
     }
-
-
-	public void Access()
-	{
-		print("Asset Accessed");
-		CardRevealer.instance.RevealCard(this, true);
-	}
-
 
 }

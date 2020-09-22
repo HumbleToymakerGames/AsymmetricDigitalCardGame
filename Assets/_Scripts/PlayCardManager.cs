@@ -33,6 +33,8 @@ public class PlayCardManager : MonoBehaviour
     public static event eCardEvent OnCardTrashed;
     public static event eCardEvent OnCardScored;
     public static event eCardEvent OnCardStolen;
+    public static event eCardEvent OnCardExposed_Pre;
+    public static event eCardEvent OnCardExposed;
 
     [Header("Starting Points")]
     public int numActionPointsStart;
@@ -460,7 +462,27 @@ public class PlayCardManager : MonoBehaviour
 		}
 	}
 
+    public void ExposeCard(Card card)
+	{
+        exposeCardRoutine = StartCoroutine(ExposeCardRoutine(card));
+    }
 
+    public void StopExposeCard()
+	{
+        if (exposeCardRoutine != null) StopCoroutine(exposeCardRoutine);
+	}
+
+    Coroutine exposeCardRoutine;
+    IEnumerator ExposeCardRoutine(Card card)
+	{
+        OnCardExposed_Pre?.Invoke(card);
+        while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Exposed_Pre))
+            yield return null;
+        card.ExposeCard();
+        OnCardExposed?.Invoke(card);
+        while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Exposed))
+            yield return null;
+    }
 
 
 

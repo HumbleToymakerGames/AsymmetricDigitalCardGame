@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class Card_Agenda : Card, IInstallable, IAccessable
+public class Card_Agenda : Card, IInstallable
 {
 	public int scoringAmount;
 	public int advancementTargetAmount;
@@ -34,15 +34,6 @@ public class Card_Agenda : Card, IInstallable, IAccessable
 	{
 		return cardCost.CanAffordCard(PlayerNR.Corporation.Credits);
 	}
-
-
-	public void Access()
-	{
-		print("Agenda Accessed");
-		CardRevealer.instance.RevealCard(this, true);
-	}
-
-
 
 
 	public void UpdateScoringText()

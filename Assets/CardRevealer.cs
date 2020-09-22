@@ -76,13 +76,19 @@ public class CardRevealer : MonoBehaviour
 	{
         panelGO.SetActive(activate);
         isRevealing = activate;
+        if (!activate)
+		{
+            cardButtonsGO.SetActive(false);
+            cardsButtonsGO.SetActive(false);
+        }
     }
 
     public void RevealCard(Card card, bool accessed)
 	{
         targetRealCard = card;
         isAccessing = accessed;
-        Activate();
+
+        StartCoroutine(PanelActivationWaiter(true));
 
         targetRealCard_OGPosition = card.transform.position;
 
@@ -97,13 +103,20 @@ public class CardRevealer : MonoBehaviour
         targetRevealCard.FlipCard(false, true);
         //revealedCard.transform.localScale = card.transform.lossyScale;
 
-        cardButtonsGO.SetActive(true);
-        UpdateCardButtons();
 
         StopRevealRoutine();
         revealRoutine = StartCoroutine(RevealRoutine(targetRevealCard));
 
         
+    }
+
+    IEnumerator PanelActivationWaiter(bool isSingleCard)
+	{
+        while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
+        Activate();
+        cardButtonsGO.SetActive(isSingleCard);
+        cardsButtonsGO.SetActive(!isSingleCard);
+        UpdateCardButtons();
     }
 
     Coroutine revealRoutine;
@@ -176,8 +189,6 @@ public class CardRevealer : MonoBehaviour
         }
         emtpyImageT.SetSiblingIndex(1);
 
-        cardButtonsGO.SetActive(false);
-        cardsButtonsGO.SetActive(true);
     }
 
     void DestroyAllCards()

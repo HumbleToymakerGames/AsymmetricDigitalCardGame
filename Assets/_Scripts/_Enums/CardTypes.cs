@@ -52,7 +52,7 @@ public enum CardSubType
     Icebreaker,
 
     // Event
-    
+    Run
 
 
 

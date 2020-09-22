@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RemoteServer : PlayArea_Spot, IAccessable
 {
-    public IAccessable installedCard;
+    public Card installedCard;
 	public Transform serverRootT;
 
 	// Start is called before the first frame update
@@ -23,21 +23,20 @@ public class RemoteServer : PlayArea_Spot, IAccessable
 	}
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
-		if (card == installedCard as Card && !installed)
+		if (card == installedCard && !installed)
 		{
 			UnInstallCard();
 		}
 	}
 
-    public void InstallCard(IAccessable accessableCard)
+    public void InstallCard(Card card)
 	{
 		if (HasCardInstalled())
 		{
-			PlayCardManager.instance.TrashCard(PlayerNR.Corporation, installedCard as Card);
+			PlayCardManager.instance.TrashCard(PlayerNR.Corporation, installedCard);
 		}
 
-        installedCard = accessableCard;
-		Card card = accessableCard as Card;
+        installedCard = card;
 		card.MoveCardTo(serverRootT);
 	}
 
@@ -46,9 +45,13 @@ public class RemoteServer : PlayArea_Spot, IAccessable
 		installedCard = null;
 	}
 
-    public void Access()
+    public void Access(ServerColumn.ServerType serverAccessed)
 	{
-        installedCard?.Access();
+		if (installedCard != null)
+		{
+			installedCard.Accessed(serverAccessed);
+			CardRevealer.instance.RevealCard(installedCard, true);
+		}
 	}
 
 	public override void RemoveCard(Card card)

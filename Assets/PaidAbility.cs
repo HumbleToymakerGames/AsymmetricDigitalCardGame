@@ -12,13 +12,13 @@ public class PaidAbility : MonoBehaviour
     bool isBreakerRoutine;
     Button button;
 
-	CardFunction cardFunction;
+    public delegate IEnumerator Ability();
+    public Ability IAbilityExecution;
+
+    CardFunction cardFunction;
     [HideInInspector]
     public int myAbilityIndex;
 
-    //public CardFunction viewCardFunction;
-
-	//public string AbilityText;
 	private void Awake()
 	{
         cardFunction = GetComponentInParent<CardFunction>();
@@ -151,6 +151,29 @@ public class PaidAbility : MonoBehaviour
 			}
 		}
         return true;
+    }
+
+    public void ExecuteAbility()
+    {
+        StartCoroutine(AbilityExecutionRoutine());
+    }
+
+    IEnumerator AbilityExecutionRoutine()
+    {
+        yield return IAbilityExecution();
+        ConditionResolved();
+    }
+
+    void ConditionResolved()
+    {
+        //ConditionalAbilitiesManager.instance.ConditionalAbilityResolved(this);
+        Debug.Log("ConditionResolved - " + name);
+    }
+
+    public void SetAbilityAndCondition(Ability _ability)
+	{
+        IAbilityExecution = _ability;
+
     }
 
 

@@ -30,8 +30,7 @@ public class RunOperator : MonoBehaviour
     public delegate void RunEnded(bool success, ServerColumn.ServerType serverType);
     public static event RunEnded OnRunEnded;
 
-    public delegate void CardAccessed(Card card);
-    public static event CardAccessed OnCardAccessed;
+    
 
     private void Awake()
     {
@@ -182,15 +181,21 @@ public class RunOperator : MonoBehaviour
 		}
 		else
 		{
-			StartCoroutine(RunCompleted());
+            runRoutine = StartCoroutine(RunCompleted());
 		}
 	}
 
+    public void StopRunRoutine()
+	{
+        if (runRoutine != null) StopCoroutine(runRoutine);
+	}
+
+    Coroutine runRoutine;
 	IEnumerator RunCompleted()
     {
         yield return new WaitForSeconds(0.5f);
         isEncounteringIce = false;
-        TryRequestRezServerRoot();
+        TryRequestRezOnRemoteServer();
 
         while (waitForRezRequest) yield return null;
 
@@ -202,24 +207,23 @@ public class RunOperator : MonoBehaviour
         Card installedCard = null;
         if (serverColumnAccessed.HasRootInstalled(ref installedCard))
 		{
-            OnCardAccessed?.Invoke(installedCard);
+            serverColumnAccessed.AccessServer(serverColumnAccessed.serverType);
 
             while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
+
             print("RunCompleted Over!");
 
-            serverColumnAccessed.AccessServer();
         }
 
     }
 
 
-    void TryRequestRezServerRoot()
+    void TryRequestRezOnRemoteServer()
     {
-        IAccessable accessableCard = currentServerColumn.GetRemoteServerRoot();
-        if (accessableCard != null)
+        currentServerCardEncountered = currentServerColumn.GetRemoteServerRoot();
+        if (currentServerCardEncountered != null)
         {
-            currentServerCardEncountered = (Card)accessableCard;
-            if (accessableCard is Card_Asset && !currentServerCardEncountered.isRezzed)
+            if (currentServerCardEncountered.IsCardType(CardType.Asset) && !currentServerCardEncountered.isRezzed)
             {
                 OnCardBeingApproached?.Invoke(currentServerCardEncountered, currentServerColumn.iceInColumn.Count);
                 Card viewCard = CardViewer.instance.GetCard(currentServerCardEncountered.viewIndex, false);
@@ -350,7 +354,8 @@ public class RunOperator : MonoBehaviour
             currentIceEncountered = null;
             currentProgramEncountering = null;
             currentPaidAbility = null;
-            ServerColumn.ServerType serverType = serverTypeOverride.HasValue? serverTypeOverride.Value : currentServerColumn.serverType;
+            ServerColumn.ServerType serverType = currentServerColumn.serverType;
+            if (serverTypeOverride.HasValue && success) serverType = serverTypeOverride.Value;
             currentServerColumn = null;
             encounteredIceCards.Clear();
             ActionOptions.instance.HideAllOptions();

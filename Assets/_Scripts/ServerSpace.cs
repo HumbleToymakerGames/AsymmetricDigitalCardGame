@@ -84,20 +84,10 @@ public class ServerSpace : MonoBehaviour
             Card_Ice iceCard = installableCard as Card_Ice;
             targetServer.InstallIce(iceCard);
         }
-        else if (card is IAccessable)
+        else
 		{
-            IAccessable accessableCard = card as IAccessable;
-            targetServer.InstallCardToServer(accessableCard);
+            targetServer.InstallCardToServer(card);
 		}
-
-        if (card is IRezzable)
-		{
-            IRezzable rezCard = card as IRezzable;
-            //if (rezCard.CanRez())
-        }
-
-
-
     }
 
     public void ServerChosen(ServerColumn serverColumn)

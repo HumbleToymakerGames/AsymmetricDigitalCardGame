@@ -2,7 +2,7 @@
 public interface IAccessable
 {
 
-	void Access();
+	void Access(ServerColumn.ServerType serverAccessed);
 
 
 

@@ -22,7 +22,9 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored += PlayCardManager_OnCardScored;
 		PlayCardManager.OnCardStolen += PlayCardManager_OnCardStolen;
-		RunOperator.OnCardAccessed += RunOperator_OnCardAccessed;
+		Card.OnCardAccessed += Card_OnCardAccessed;
+		PlayCardManager.OnCardExposed += PlayCardManager_OnCardExposed;
+		PlayCardManager.OnCardExposed_Pre += PlayCardManager_OnCardExposed_Pre;
 	}
 	private void OnDisable()
 	{
@@ -31,7 +33,9 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored -= PlayCardManager_OnCardScored;
 		PlayCardManager.OnCardStolen -= PlayCardManager_OnCardStolen;
-		RunOperator.OnCardAccessed -= RunOperator_OnCardAccessed;
+		Card.OnCardAccessed -= Card_OnCardAccessed;
+		PlayCardManager.OnCardExposed -= PlayCardManager_OnCardExposed;
+		PlayCardManager.OnCardExposed_Pre -= PlayCardManager_OnCardExposed_Pre;
 	}
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
@@ -54,10 +58,19 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	{
 		StartResolvingConditionals(ConditionalAbility.Condition.Agenda_Stolen);
 	}
-	private void RunOperator_OnCardAccessed(Card card)
+	private void Card_OnCardAccessed(Card card, ServerColumn.ServerType serverType)
 	{
 		StartResolvingConditionals(ConditionalAbility.Condition.Card_Accessed);
 	}
+	private void PlayCardManager_OnCardExposed(Card card)
+	{
+
+	}
+	private void PlayCardManager_OnCardExposed_Pre(Card card)
+	{
+		StartResolvingConditionals(ConditionalAbility.Condition.Card_Exposed_Pre);
+	}
+
 
 
 
@@ -156,9 +169,10 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		allConditionalAbilities.Remove(conditionalAbility);
 	}
 
-	public static bool IsResolvingConditionals(ConditionalAbility.Condition condition)
+	public static bool IsResolvingConditionals(ConditionalAbility.Condition? condition = null)
 	{
-		return resolvingRoutine != null && currentConditionResolving == condition;
+		bool conditionalsCheck = condition.HasValue ? currentConditionResolving == condition : true;
+		return resolvingRoutine != null && conditionalsCheck;
 	}
 
 
