@@ -25,6 +25,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		Card.OnCardAccessed += Card_OnCardAccessed;
 		PlayCardManager.OnCardExposed += PlayCardManager_OnCardExposed;
 		PlayCardManager.OnCardExposed_Pre += PlayCardManager_OnCardExposed_Pre;
+		RunOperator.OnIceEncountered += RunOperator_OnIceEncountered;
 	}
 	private void OnDisable()
 	{
@@ -36,6 +37,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		Card.OnCardAccessed -= Card_OnCardAccessed;
 		PlayCardManager.OnCardExposed -= PlayCardManager_OnCardExposed;
 		PlayCardManager.OnCardExposed_Pre -= PlayCardManager_OnCardExposed_Pre;
+		RunOperator.OnIceEncountered -= RunOperator_OnIceEncountered;
 	}
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
@@ -70,10 +72,10 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	{
 		StartResolvingConditionals(ConditionalAbility.Condition.Card_Exposed_Pre);
 	}
-
-
-
-
+	private void RunOperator_OnIceEncountered(Card_Ice iceCard)
+	{
+		StartResolvingConditionals(ConditionalAbility.Condition.Ice_Encountered);
+	}
 
 	void StartResolvingConditionals(ConditionalAbility.Condition condition)
 	{
@@ -83,6 +85,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 			print("resolvingRoutine stopped");
 		}
 		resolvingRoutine = StartCoroutine(ResolvingConditionalsRoutine(condition));
+		PaidAbilitiesManager.instance.PausePaidWindow();
 	}
 
 
@@ -140,10 +143,11 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		}
 		print("resolvingRoutine Over!");
 		resolvingRoutine = null;
+		PaidAbilitiesManager.instance.ResumePaidWindow();
 	}
 
 
-    public void AddConditional(ConditionalAbility conditionalAbility)
+	public void AddConditional(ConditionalAbility conditionalAbility)
 	{
 		TryAddToList(conditionalAbility);
 	}

@@ -5,21 +5,25 @@ using UnityEngine;
 public class Card_MelangeMiningCorp : CardFunction
 {
     public int numCredits;
-	public override void ActivateFunction()
+
+	protected override void AssignPaidAbilities()
 	{
-		base.ActivateFunction();
+		for (int i = 0; i < paidAbilities.Length; i++)
+		{
+			PaidAbility ability = paidAbilities[i];
+			if (i == 0) ability.SetAbilityAndCondition(GainCredits, CanBeClickable);
+		}
 	}
 
-	public override void ActivatePaidAbility(int index)
+	bool CanBeClickable()
 	{
-		base.ActivatePaidAbility(index);
-		if (index == 1) GainCredits();
+		return true;
 	}
 
-
-	void GainCredits()
+	IEnumerator GainCredits()
     {
         PlayerNR.Corporation.AddCredits(numCredits);
+		yield break;
     }
 
 

@@ -24,6 +24,7 @@ public class gogo : MonoBehaviour
     {
     }
 
+
     void ganger(UnityAction<gogo> action)
 	{
         action.Invoke(this);

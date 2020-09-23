@@ -35,9 +35,9 @@ public class Card_AccountSiphon : CardFunction
 		}
 	}
 
-	public override void ActivateFunction()
+	public override void ActivateInstantFunction()
 	{
-		base.ActivateFunction();
+		base.ActivateInstantFunction();
 		MakeRunForCredits();
 	}
 
@@ -73,7 +73,7 @@ public class Card_AccountSiphon : CardFunction
 
 		if (choiceMade.Value)
 		{
-			RunOperator.instance.StopRunRoutine();
+			RunOperator.instance.StopRunCompletedRoutine();
 
 			int numCreditsToLose = Mathf.Min(numCreditsLost, PlayerNR.Corporation.Credits);
 			if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, numCreditsToLose))

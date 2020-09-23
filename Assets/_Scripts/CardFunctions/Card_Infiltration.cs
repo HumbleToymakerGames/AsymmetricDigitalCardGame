@@ -6,9 +6,9 @@ public class Card_Infiltration : CardFunction
 {
     public int numCredits;
 
-    public override void ActivateFunction()
+    public override void ActivateInstantFunction()
     {
-        base.ActivateFunction();
+        base.ActivateInstantFunction();
         GainCreditsOrExpose();
     }
 

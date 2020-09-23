@@ -110,6 +110,12 @@ public class GameManager : MonoBehaviour
         return currentTurnSide == playerSide;
 	}
 
+    public void SetPriority(PlayerNR player)
+	{
+        PlayerNR.Runner.hasPriority = player.IsRunner();
+        PlayerNR.Corporation.hasPriority = !player.IsRunner();
+    }
+
 
 
 }

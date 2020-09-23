@@ -11,53 +11,25 @@ public class PaidAbility : MonoBehaviour
     public CardSubType breakerType;
     bool isBreakerRoutine;
     Button button;
+    CanvasGroup canvasGroup;
 
     public delegate IEnumerator Ability();
     public Ability IAbilityExecution;
 
+    public delegate bool ClickableConditions();
+    public ClickableConditions ClickableConditionsMet;
+
+    public delegate void PaidAbilityActivated();
+    public static event PaidAbilityActivated OnPaidAbilityActivated;
+
     CardFunction cardFunction;
-    [HideInInspector]
-    public int myAbilityIndex;
 
 	private void Awake()
 	{
         cardFunction = GetComponentInParent<CardFunction>();
         button = GetComponent<Button>();
+        canvasGroup = GetComponent<CanvasGroup>();
         isBreakerRoutine = breakerType != CardSubType.NULL;
-    }
-
-	private void OnEnable()
-	{
-        if (cardFunction.card.isViewCard)
-        {
-			RunOperator.OnCardBeingApproached += RunOperator_OnCardBeingApproached;
-			RunOperator.OnRunEnded += RunOperator_OnRunEnded;
-        }
-	}
-
-	private void OnDisable()
-    {
-        if (cardFunction.card.isViewCard)
-        {
-            RunOperator.OnCardBeingApproached -= RunOperator_OnCardBeingApproached;
-            RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
-        }
-    }
-
-    private void RunOperator_OnCardBeingApproached(Card card, int encounterIndex)
-	{
-        if (card.IsCardType(CardType.Ice) && cardFunction.card.IsCardType(CardType.Program))
-        {
-            TrySetAbleAbilitiesActive();
-        }
-	}
-
-    private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
-    {
-        if (cardFunction.card.IsCardType(CardType.Program))
-        {
-            TrySetAbleAbilitiesActive();
-        }
     }
 
     void Start()
@@ -65,35 +37,20 @@ public class PaidAbility : MonoBehaviour
         
     }
 
-    public void ActivateOnCredits(int playerCredits)
+	private void Update()
 	{
-        TrySetAbleAbilitiesActive();
-    }
-    public void ActivateOnActionPoints(int actionPoints)
-    {
-        TrySetAbleAbilitiesActive();
-    }
+        SetClickable(AreConditionsMet());
+	}
 
-    public void Button_Clicked()
-	{
-        PlayCardManager.instance.TryActivatePaidAbility(this);
-    }
-
-    public void ActivateAbility()
-	{
-        cardFunction.ActivatePaidAbility(myAbilityIndex);
-        //if (viewCardFunction) viewCardFunction.ActivatePaidAbility(myAbilityIndex);
-    }
-
-    [ContextMenu("AbleAbilities")]
-    public void TrySetAbleAbilitiesActive()
+	[ContextMenu("AbleAbilities")]
+    public void UpdateAbilityInteractable()
 	{
         bool interactable = false;
         if (CanBeActive_Currency(cardFunction.card.myPlayer.Credits))
 		{
             if (cardFunction.card.IsCardType(CardType.Program))
             {
-                if (RunOperator.instance.isEncounteringIce)
+                if (RunOperator.instance.isEncounteringIce && RunOperator.instance.currentIceEncountered.isRezzed)
                 {
                     Card_Program programCard = cardFunction.card as Card_Program;
                     bool isStrongEnough = RunOperator.instance.IsCardStrongEnough(programCard);
@@ -153,9 +110,33 @@ public class PaidAbility : MonoBehaviour
         return true;
     }
 
+
+    public void Button_Clicked()
+    {
+        PlayCardManager.instance.TryActivatePaidAbility(this);
+    }
+
+    public void SetInteractable(bool interactable = true)
+	{
+        button.interactable = interactable;
+	}
+
+    public void SetClickable(bool clickable = true)
+	{
+        canvasGroup.blocksRaycasts = clickable;
+	}
+
+
+
+
+
+
+
+
     public void ExecuteAbility()
     {
         StartCoroutine(AbilityExecutionRoutine());
+        OnPaidAbilityActivated?.Invoke();
     }
 
     IEnumerator AbilityExecutionRoutine()
@@ -170,10 +151,16 @@ public class PaidAbility : MonoBehaviour
         Debug.Log("ConditionResolved - " + name);
     }
 
-    public void SetAbilityAndCondition(Ability _ability)
+
+    public bool AreConditionsMet()
+    {
+        return ClickableConditionsMet();
+    }
+
+    public void SetAbilityAndCondition(Ability _ability, ClickableConditions _conditionsMet)
 	{
         IAbilityExecution = _ability;
-
+        ClickableConditionsMet = _conditionsMet;
     }
 
 

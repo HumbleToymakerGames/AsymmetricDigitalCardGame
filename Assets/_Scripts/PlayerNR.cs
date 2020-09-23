@@ -18,6 +18,9 @@ public class PlayerNR : MonoBehaviour
     int maximumHandSize = 5;
 
     [Header("Data")]
+    public bool hasPriority;
+
+
     [SerializeField]
     int credits;
     public int Credits

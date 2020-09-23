@@ -6,9 +6,11 @@ public class CardViewer : MonoBehaviour
 {
 	public static CardViewer instance;
 	public CardViewWindow viewWindow_Primary, viewWindow_Secondary;
-	public bool cardsClickableOnView;
 	public GameObject linkIcon;
 	public static Card currentPinnedCard;
+
+	public delegate void eCardPinned(Card card, bool primary);
+	public static event eCardPinned OnCardPinned;
 
 	public class CardPair
 	{
@@ -71,7 +73,7 @@ public class CardViewer : MonoBehaviour
 		bool viewer = false;
 		if (IsCardBeingViewed(viewIndex, ref viewer)) return;
 		Card realCard = GetCard(viewIndex, true);
-		bool clickable = cardsClickableOnView && realCard.CanBeClickedInViewer();
+		bool clickable = realCard.CanBeClicked();
 
 		ReplicateCardState(viewIndex);
 		if (primary) viewWindow_Primary.ViewCard(viewIndex, clickable);
@@ -87,7 +89,7 @@ public class CardViewer : MonoBehaviour
 			if (viewCard.transform.parent == cardsT)
 			{
 				kvp.Value.viewCard.ActivateVisuals(false);
-				kvp.Value.viewCard.ActivateRaycasts(false);
+				kvp.Value.viewCard.SetClickable(false);
 			}
 		}
 	}
@@ -141,7 +143,6 @@ public class CardViewer : MonoBehaviour
 		}
 
 		yield return new WaitForSeconds(0.25f);
-		SetCardsClickable(true);
 
 		HideAllCards(true);
 		HideAllCards(false);
@@ -149,21 +150,6 @@ public class CardViewer : MonoBehaviour
 	}
 
 	public int targetIndex;
-    // Update is called once per frame
-    void Update()
-    {
-		if (Input.GetKeyDown(KeyCode.G))
-		{
-			CardPair pair;
-			if(cardPairDict.TryGetValue(targetIndex, out pair))
-			{
-				Debug.Log(pair.realCard.name, pair.realCard);
-				//ViewCard(targetIndex, false);
-				//ViewCard(targetIndex);
-				PinCard(targetIndex, false);
-			}
-		}
-    }
 
 	public Card GetCard(int viewIndex, bool real)
 	{
@@ -201,17 +187,10 @@ public class CardViewer : MonoBehaviour
 		return primary || secondary;
 	}
 
-
-	public void SetCardsClickable(bool clickable = true)
-	{
-		cardsClickableOnView = clickable;
-		UpdateCardsClickable();
-	}
-
 	public void UpdateCardsClickable()
 	{
 		Card primaryViewCard = GetCard(viewWindow_Primary.currentViewIndex, false);
-		if (primaryViewCard) primaryViewCard.ActivateRaycasts(cardsClickableOnView && primaryViewCard.CanBeClickedInViewer());
+		if (primaryViewCard) primaryViewCard.SetClickable(primaryViewCard.CanBeClicked());
 	}
 
 
@@ -236,6 +215,11 @@ public class CardViewer : MonoBehaviour
 		linkIcon.SetActive(show);
 	}
 
+
+	public void CardPinned(Card card, bool primary)
+	{
+		OnCardPinned?.Invoke(card, primary);
+	}
 
 
 

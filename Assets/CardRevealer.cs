@@ -99,7 +99,7 @@ public class CardRevealer : MonoBehaviour
         targetRealCard_OGScale = targetRevealCard.transform.localScale;
         targetRevealCard.MoveCardTo(cardT);
         targetRevealCard.transform.localScale = targetRealCard_OGScale;
-        targetRevealCard.ActivateRaycasts(false);
+        targetRevealCard.SetClickable(false);
         targetRevealCard.FlipCard(false, true);
         //revealedCard.transform.localScale = card.transform.lossyScale;
 
@@ -166,10 +166,11 @@ public class CardRevealer : MonoBehaviour
 
     public void RevealCards(Card[] cards, bool moveable, PlayArea_Spot playArea_Spot)
 	{
-        Activate();
         realCards = cards;
         isMovingCards = moveable;
         currentPlayAreaSpot = playArea_Spot;
+
+        StartCoroutine(PanelActivationWaiter(false));
 
         currentCards = new Card[cards.Length];
         cardMovers = new CardMover[cards.Length];
@@ -178,7 +179,7 @@ public class CardRevealer : MonoBehaviour
             CardMover mover = Instantiate(cardMoverPrefab, cardsT);
 
             Card revealedCard = Instantiate(cards[i], cardsT);
-            revealedCard.ActivateRaycasts(false);
+            revealedCard.SetClickable(false);
             revealedCard.FlipCard(true, true);
 
             mover.SetCard(revealedCard);

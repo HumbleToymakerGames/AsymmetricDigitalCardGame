@@ -22,6 +22,12 @@ public class ActionOptions : MonoBehaviour
 
 	public GameObject continueGO;
 
+	[Header("CounterVars")]
+	public GameObject counterGO;
+	public TextMeshProUGUI counterTitleText, counterText;
+	int currentCounterCount, currentCounterMax;
+
+
 	const string rezCostFormat = "Yes ({0}cc)";
 
 	private void Awake()
@@ -32,18 +38,18 @@ public class ActionOptions : MonoBehaviour
 
 	private void OnEnable()
 	{
-		CardViewWindow.OnCardPinnedToView += CardViewWindow_OnCardPinnedToView;
+		CardViewer.OnCardPinned += CardViewer_OnCardPinned;
 		PlayerNR.Corporation.OnCreditsChanged += OnCreditsChanged;
 		PlayerNR.Runner.OnCreditsChanged += OnCreditsChanged;
 	}
-
 	private void OnDisable()
 	{
-		CardViewWindow.OnCardPinnedToView -= CardViewWindow_OnCardPinnedToView;
+		CardViewer.OnCardPinned -= CardViewer_OnCardPinned;
 		PlayerNR.Corporation.OnCreditsChanged -= OnCreditsChanged;
 		PlayerNR.Runner.OnCreditsChanged -= OnCreditsChanged;
 	}
-	private void CardViewWindow_OnCardPinnedToView(Card card)
+
+	private void CardViewer_OnCardPinned(Card card, bool primary)
 	{
 		if (card == null)
 		{
@@ -129,7 +135,16 @@ public class ActionOptions : MonoBehaviour
 		actionMessageText.text = message;
 	}
 
-	
+	UnityAction<int> currentCounterCallback;
+	public void ActivateCounter(UnityAction<int> callback, string title, int maxCount)
+	{
+		HideAllOptions();
+		SetCounterCount(1);
+		currentCounterCallback = callback;
+		counterGO.SetActive(true);
+		currentCounterMax = maxCount;
+	}
+
 
 
 	void TryHideAllOptions(bool showOnly, bool isButton = true)
@@ -145,7 +160,7 @@ public class ActionOptions : MonoBehaviour
 	public void HideAllOptions()
 	{
 		if (isYesNo) return;
-		print("HideAllOptions");
+		//print("HideAllOptions");
 		fireRemainingSubsButton.gameObject.SetActive(false);
 		advanceCardButton.gameObject.SetActive(false);
 		scoreAgendaButton.gameObject.SetActive(false);
@@ -153,12 +168,24 @@ public class ActionOptions : MonoBehaviour
 		continueGO.SetActive(false);
 		yesNoPanelGO.SetActive(false);
 		actionMessageGO.SetActive(false);
+		counterGO.SetActive(false);
 	}
 
 	public void UpdateInteractables()
 	{
 		advanceCardButton.interactable = CardViewer.currentPinnedCard && PlayCardManager.instance.CanAdvanceCard(CardViewer.currentPinnedCard);
 		scoreAgendaButton.interactable = CardViewer.currentPinnedCard && CardViewer.currentPinnedCard.CanBeScored();
+	}
+
+	public void SetCounterCount(int count)
+	{
+		currentCounterCount = Mathf.Clamp(count, 0, currentCounterMax);
+		UpdateCounterDisplay();
+	}
+
+	public void UpdateCounterDisplay()
+	{
+		counterText.text = currentCounterCount.ToString();
 	}
 
 
@@ -212,6 +239,28 @@ public class ActionOptions : MonoBehaviour
 		yesnoCallback?.Invoke(yes);
 		yesnoCallback = null;
 	}
+
+
+	public void Button_Counter(bool positive)
+	{
+		if (positive)
+		{
+			SetCounterCount(currentCounterCount + 1);
+		}
+		else
+		{
+			SetCounterCount(currentCounterCount - 1);
+		}
+	}
+
+	public void Button_CounterAccept()
+	{
+		currentCounterCallback?.Invoke(currentCounterCount);
+		currentCounterCallback = null;
+		currentCounterCount = 0;
+	}
+
+
 
 	#endregion
 

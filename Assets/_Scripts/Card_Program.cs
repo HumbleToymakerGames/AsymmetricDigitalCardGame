@@ -40,9 +40,9 @@ public class Card_Program : Card, IInstallable
 		}
 		else if (RunnerRIG.instance.IsCardInRIG(this))
 		{
+				return true;
 			if (RunOperator.instance.isRunning)
 			{
-				return true;
 			}
 		}
 
@@ -55,12 +55,6 @@ public class Card_Program : Card, IInstallable
 		return cardCost.CanAffordCard(myPlayer.Credits)
 			&& cardCost.CanUseMemorySpace(PlayerNR.Runner.MemoryUnitsAvailable);
 	}
-
-	public override bool CanBeClickedInViewer()
-	{
-		return base.CanBeClickedInViewer();// && RunOperator.instance.isRunning;
-	}
-
 
 	public void ModifyStrength(int modification)
 	{

@@ -42,24 +42,10 @@ public class PlayCardManager : MonoBehaviour
     public int numTagsStart;
 
 
-
     private void Awake()
 	{
         instance = this;
     }
-
-	// Start is called before the first frame update
-	void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
 
     public void DrawCards(PlayerNR player, int numberOfCards)
 	{
@@ -208,25 +194,25 @@ public class PlayCardManager : MonoBehaviour
 	{
         if (paidAbility.currency == Currency.Credits)
 		{
-            if (CanAffordCost(GameManager.CurrentTurnPlayer, paidAbility.payAmount))
+            if (CanAffordCost(PaidAbilitiesManager.PriorityPlayer, paidAbility.payAmount))
 			{
-                paidAbility.ActivateAbility();
-                PayCost(GameManager.CurrentTurnPlayer, paidAbility.payAmount);
+                paidAbility.ExecuteAbility();
+                PayCost(PaidAbilitiesManager.PriorityPlayer, paidAbility.payAmount);
 			}
 		}
         else if (paidAbility.currency == Currency.Clicks)
 		{
-            if (GameManager.CurrentTurnPlayer.CanAffordAction(paidAbility.payAmount))
+            if (PaidAbilitiesManager.PriorityPlayer.CanAffordAction(paidAbility.payAmount))
 			{
-                paidAbility.ActivateAbility();
-                GameManager.CurrentTurnPlayer.ActionPointsUsed(paidAbility.payAmount);
+                paidAbility.ExecuteAbility();
+                PaidAbilitiesManager.PriorityPlayer.ActionPointsUsed(paidAbility.payAmount);
             }
         }
 	}
 
     public void ReversePaidAbility(PaidAbility paidAbility)
 	{
-        GameManager.CurrentTurnPlayer.AddCredits(paidAbility.payAmount);
+        PaidAbilitiesManager.PriorityPlayer.AddCredits(paidAbility.payAmount);
 	}
 
     public bool TryTrashCard(PlayerNR trashingPlayer, Card card)
@@ -277,7 +263,7 @@ public class PlayCardManager : MonoBehaviour
     #region Actions
     void Action_DrawNextCard(PlayerNR player)
 	{
-        int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Runner, player.IsRunner() ? RUNNER_DRAW_CARD : CORP_DRAW_CARD);
+        int costOfAction = PlayArea.instance.CostOfAction(player, player.IsRunner() ? RUNNER_DRAW_CARD : CORP_DRAW_CARD);
         player.ActionPointsUsed(costOfAction);
         DrawNextCard(player);
     }

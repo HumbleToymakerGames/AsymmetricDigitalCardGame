@@ -3,6 +3,7 @@
 public class TurnUI : MonoBehaviour, ISelectableNR
 {
 	public GameObject runnerGO, corpGO, nextTurnDisplayGO;
+	public GameObject priorityGO_Corp, priorityGO_Runner;
 
 	private void Awake()
 	{
@@ -14,13 +15,14 @@ public class TurnUI : MonoBehaviour, ISelectableNR
 		GameManager.OnTurnChanged += GameManager_OnTurnChanged;
 		PlayerNR.Corporation.OnActionPointsChanged += Corporation_OnActionPointsChanged;
 		PlayerNR.Runner.OnActionPointsChanged += Runner_OnActionPointsChanged;
+		PaidAbilitiesManager.OnPaidWindowChanged += PaidAbilitiesManager_OnPaidWindowChanged;
 	}
-
 	private void OnDisable()
 	{
 		GameManager.OnTurnChanged -= GameManager_OnTurnChanged;
 		PlayerNR.Corporation.OnActionPointsChanged -= Corporation_OnActionPointsChanged;
 		PlayerNR.Runner.OnActionPointsChanged -= Runner_OnActionPointsChanged;
+		PaidAbilitiesManager.OnPaidWindowChanged -= PaidAbilitiesManager_OnPaidWindowChanged;
 	}
 
 	private void GameManager_OnTurnChanged(bool isRunner)
@@ -36,6 +38,19 @@ public class TurnUI : MonoBehaviour, ISelectableNR
 	private void Corporation_OnActionPointsChanged()
 	{
 		TryActivateNextTurnDisplay();
+	}
+	private void PaidAbilitiesManager_OnPaidWindowChanged(PlayerNR newPriority)
+	{
+		if (newPriority == null)
+		{
+			priorityGO_Corp.SetActive(false);
+			priorityGO_Runner.SetActive(false);
+		}
+		else
+		{
+			priorityGO_Corp.SetActive(!newPriority.IsRunner());
+			priorityGO_Runner.SetActive(newPriority.IsRunner());
+		}
 	}
 
 	void TryActivateNextTurnDisplay()

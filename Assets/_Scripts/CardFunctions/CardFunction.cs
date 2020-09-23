@@ -10,8 +10,7 @@ public abstract class CardFunction : MonoBehaviour
 	public PaidAbility[] paidAbilities;
 	public ConditionalAbility[] conditionalAbilities;
 
-	public delegate void PaidAbilityActivated();
-	public event PaidAbilityActivated OnPaidAbilityActivated;
+	
 
 
 	protected virtual void Awake()
@@ -24,15 +23,61 @@ public abstract class CardFunction : MonoBehaviour
 
 	protected virtual void OnEnable()
 	{
+		card.myPlayer.OnCreditsChanged += MyPlayer_OnCreditsChanged;
+		card.myPlayer.OnActionPointsChanged += MyPlayer_OnActionPointsChanged;
+		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
+		Card.OnCardRezzed += Card_OnCardRezzed;
+		PaidAbility.OnPaidAbilityActivated += PaidAbility_OnPaidAbilityActivated;
+		RunOperator.OnApproached += RunOperator_OnCardBeingApproached;
+		RunOperator.OnIceEncountered += RunOperator_OnIceEncountered;
+	}
+
+	private void RunOperator_OnIceEncountered(Card_Ice iceCard)
+	{
+		//UpdatePaidAbilitesInteractable();
+	}
+
+	private void RunOperator_OnCardBeingApproached(int encounterIndex)
+	{
+		//UpdatePaidAbilitesInteractable();
+	}
+
+	private void PaidAbility_OnPaidAbilityActivated()
+	{
+		UpdatePaidAbilitesInteractable();
+	}
+
+	private void MyPlayer_OnCreditsChanged()
+	{
+		UpdatePaidAbilitesInteractable();
+	}
+	private void MyPlayer_OnActionPointsChanged()
+	{
+		UpdatePaidAbilitesInteractable();
+	}
+
+	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
+	{
+		UpdatePaidAbilitesInteractable();
+	}
+	private void Card_OnCardRezzed(Card card)
+	{
+		UpdatePaidAbilitesInteractable();
 	}
 
 	protected virtual void OnDisable()
 	{
+		card.myPlayer.OnCreditsChanged -= MyPlayer_OnCreditsChanged;
+		card.myPlayer.OnActionPointsChanged -= MyPlayer_OnActionPointsChanged;
+		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
+		Card.OnCardRezzed -= Card_OnCardRezzed;
+		PaidAbility.OnPaidAbilityActivated -= PaidAbility_OnPaidAbilityActivated;
+		RunOperator.OnApproached -= RunOperator_OnCardBeingApproached;
+		RunOperator.OnIceEncountered -= RunOperator_OnIceEncountered;
 	}
 
 
 	#region Conditional Abilities
-
 
 
 	public virtual bool CanExecuteConditionalAbility(ConditionalAbility ability)
@@ -42,29 +87,17 @@ public abstract class CardFunction : MonoBehaviour
 
 	#endregion
 
-	public virtual void ActivateFunction()
+	public virtual void ActivateInstantFunction()
 	{
 
 	}
 
-	public virtual void ActivatePaidAbility(int index)
-	{
-		OnPaidAbilityActivated?.Invoke();
-	}
 
-	public void UpdatePaidAbilitesActive_ActionPoints(int actionPoints)
+	public void UpdatePaidAbilitesInteractable()
 	{
 		for (int i = 0; i < paidAbilities.Length; i++)
 		{
-			paidAbilities[i].ActivateOnActionPoints(actionPoints);
-		}
-	}
-
-	public void UpdatePaidAbilitesActive_Credits(int playerCredits)
-	{
-		for (int i = 0; i < paidAbilities.Length; i++)
-		{
-			paidAbilities[i].ActivateOnCredits(playerCredits);
+			paidAbilities[i].UpdateAbilityInteractable();
 		}
 	}
 
@@ -81,10 +114,7 @@ public abstract class CardFunction : MonoBehaviour
 	void GetPaidAbilities()
 	{
 		paidAbilities = GetComponentsInChildren<PaidAbility>();
-		for (int i = 0; i < paidAbilities.Length; i++)
-		{
-			paidAbilities[i].myAbilityIndex = i + 1;
-		}
+		AssignPaidAbilities();
 	}
 
 	void GetConditionalAbilities()
@@ -94,6 +124,11 @@ public abstract class CardFunction : MonoBehaviour
 	}
 
 	protected virtual void AssignConditionalAbilities()
+	{
+
+	}
+
+	protected virtual void AssignPaidAbilities()
 	{
 
 	}

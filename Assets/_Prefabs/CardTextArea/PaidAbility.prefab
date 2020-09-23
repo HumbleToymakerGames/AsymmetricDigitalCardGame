@@ -251,6 +251,7 @@ GameObject:
   - component: {fileID: 6864098351085792836}
   - component: {fileID: 9006151616092137601}
   - component: {fileID: 8192410155235291424}
+  - component: {fileID: 1852388950935328774}
   m_Layer: 5
   m_Name: PaidAbility
   m_TagString: Untagged
@@ -386,6 +387,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!225 &1852388950935328774
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6864098351085792858}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &6864098351738798586
 GameObject:
   m_ObjectHideFlags: 0

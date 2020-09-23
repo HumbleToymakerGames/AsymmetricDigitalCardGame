@@ -7,7 +7,8 @@ using UnityEngine.UI;
 
 public abstract class Card : MonoBehaviour, ISelectableNR
 {
-    CardReferences cardRefs;
+    [HideInInspector]
+    public CardReferences cardRefs;
     CanvasGroup canvasGroup;
     [HideInInspector]
     public CardFunction cardFunction;
@@ -43,6 +44,9 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public delegate void CardAccessed(Card card, ServerColumn.ServerType serverType);
     public static event CardAccessed OnCardAccessed;
 
+    public delegate void CardRezzed(Card card);
+    public static event CardRezzed OnCardRezzed;
+
     protected virtual void Awake()
 	{
         isFaceUp = true;
@@ -54,7 +58,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         canvasGroup = GetComponent<CanvasGroup>();
         selector = GetComponentInChildren<SelectorNR>();
         myPlayer = controllingPlayerSide == PlayerSide.Runner ? PlayerNR.Runner : PlayerNR.Corporation;
-        ActivateRaycasts(false);
+        SetClickable(false);
         Pinned(false, true);
         Pinned(false, false);
     }
@@ -62,49 +66,43 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     protected virtual void OnEnable()
 	{
 		PlayCardManager.OnCardInstalled += OnCardInstalled;
-		myPlayer.OnCreditsChanged += MyPlayer_OnCreditsChanged;
-		myPlayer.OnActionPointsChanged += MyPlayer_OnActionPointsChanged;
-		CardViewWindow.OnCardPinnedToView += CardViewWindow_OnCardPinnedToView;
+		CardViewer.OnCardPinned += CardViewer_OnCardPinned;
+		PaidAbilitiesManager.OnPaidWindowChanged += PaidAbilitiesManager_OnPaidWindowChanged;
+		RunOperator.OnRunStarted += RunOperator_OnRunStarted;
+		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 	}
-
-	
 
 	protected virtual void OnDisable()
     {
         PlayCardManager.OnCardInstalled -= OnCardInstalled;
-		myPlayer.OnCreditsChanged -= MyPlayer_OnCreditsChanged;
-		myPlayer.OnActionPointsChanged -= MyPlayer_OnActionPointsChanged;
-        CardViewWindow.OnCardPinnedToView -= CardViewWindow_OnCardPinnedToView;
-    }
-    protected virtual void OnCardInstalled(Card card, bool installed)
-	{
-        if (card == this) isInstalled = installed;
+        CardViewer.OnCardPinned -= CardViewer_OnCardPinned;
+		PaidAbilitiesManager.OnPaidWindowChanged -= PaidAbilitiesManager_OnPaidWindowChanged;
+        RunOperator.OnRunStarted -= RunOperator_OnRunStarted;
+        RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
     }
 
-    private void MyPlayer_OnCreditsChanged()
-    {
-        cardFunction?.UpdatePaidAbilitesActive_Credits(myPlayer.Credits);
-    }
-    private void MyPlayer_OnActionPointsChanged()
-    {
-        cardFunction?.UpdatePaidAbilitesActive_ActionPoints(myPlayer.ActionPoints);
-    }
-    private void CardViewWindow_OnCardPinnedToView(Card card)
-    {
-        return;
-        if (card)
+    protected virtual void OnCardInstalled(Card card, bool installed)
+	{
+        if (card == this)
         {
-            Card realCard = CardViewer.instance.GetCard(card.viewIndex, true);
-            if (realCard && realCard == this)
-            {
-                if (isInstalled && !RunOperator.instance.isRunning)
-                    ActivateCardOptions();
-            }
+            SetInstall();
         }
-        else if (!RunOperator.instance.isRunning)
-		{
-            ActionOptions.instance.HideAllOptions();
-		}
+    }
+    private void CardViewer_OnCardPinned(Card card, bool primary)
+    {
+        if (card == this) UpdateClickable();
+    }
+    private void PaidAbilitiesManager_OnPaidWindowChanged(PlayerNR newPriority)
+    {
+        UpdateClickable();
+    }
+    private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
+    {
+        UpdateClickable();
+    }
+    private void RunOperator_OnRunStarted()
+    {
+        UpdateClickable();
     }
 
     protected virtual void Start()
@@ -112,9 +110,15 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         UpdateCardTitle();
         UpdateCardTypes();
         UpdateCardCost();
+        cardRefs.UpdateNeutralCounter(0);
     }
 
-    public bool IsCardType(CardType _cardType)
+	private void Update()
+	{
+        //UpdateClickable();
+	}
+
+	public bool IsCardType(CardType _cardType)
 	{
         return cardType == _cardType;
 	}
@@ -143,6 +147,13 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         cardRefs.UpdateCardTypes(cardType.TypeToString(), cardSubType.TypeToString());
     }
 
+    public void SetInstall(bool installed = true)
+	{
+        isInstalled = installed;
+        UpdateClickable();
+        if (!isViewCard) CardViewer.instance.GetCard(viewIndex, false).SetInstall(installed);
+    }
+
     [ContextMenu("FlipCardOver")]
     public void FlipCardOver()
 	{
@@ -160,7 +171,11 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 	{
         isRezzed = true;
         FlipCard(true);
-        if (!isViewCard) CardViewer.instance.GetCard(viewIndex, false)?.Rez();
+        if (!isViewCard)
+        {
+            CardViewer.instance.GetCard(viewIndex, false)?.Rez();
+            OnCardRezzed?.Invoke(this);
+        }
     }
 
     public void DeRez()
@@ -277,10 +292,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
             pin.enabled = pinned;
     }
 
-    public virtual bool CanBeClickedInViewer()
-	{
-        return isInstalled && myPlayer == GameManager.CurrentTurnPlayer;
-	}
+   
 
     public void ActivateCardFromHand()
 	{
@@ -301,10 +313,25 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         canvasGroup.alpha = activate ? 1 : 0;
     }
 
-    public void ActivateRaycasts(bool activate = true)
+    public void UpdateClickable()
+	{
+        SetClickable(CanBeClicked());
+	}
+
+    public void SetClickable(bool activate = true)
 	{
         canvasGroup.blocksRaycasts = activate;
 	}
+
+    public virtual bool CanBeClicked()
+    {
+        bool hasPriority = false;
+        if (PaidAbilitiesManager.instance.IsResolving())
+        {
+            hasPriority = PaidAbilitiesManager.instance.IsMyPriority(myPlayer);
+        }
+        return isInstalled && hasPriority && isViewCard && viewIndex == CardViewer.currentPinnedCard?.viewIndex;  
+    }
 
     public bool IsTrashable() { return cardTrasher != null; }
 

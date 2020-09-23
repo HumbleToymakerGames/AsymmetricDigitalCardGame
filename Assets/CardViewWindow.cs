@@ -14,7 +14,6 @@ public class CardViewWindow : MonoBehaviour
 	public Vector2 anchor;
 
 	public delegate void CardViewEvent(Card card);
-	public static event CardViewEvent OnCardPinnedToView;
 	public static event CardViewEvent OnCardViewed;
 
 	private void Awake()
@@ -63,19 +62,19 @@ public class CardViewWindow : MonoBehaviour
 			if (isPinning && card.viewIndex == currentViewIndex)
 			{
 				PinCard(null);
-				OnCardPinnedToView?.Invoke(null);
+				cardViewer.CardPinned(null, isPrimaryView);
 			}
 			else
 			{
 				cardViewer.PinCard(card.viewIndex);
 				Card viewCard = cardViewer.GetCard(card.viewIndex, false);
-				OnCardPinnedToView?.Invoke(viewCard);
+				cardViewer.CardPinned(viewCard, isPrimaryView);
 			}
 		}
 		else
 		{
 			cardViewer.PinCard(-1);
-			OnCardPinnedToView?.Invoke(null);
+			cardViewer.CardPinned(null, isPrimaryView);
 		}
 	}
 
@@ -92,7 +91,7 @@ public class CardViewWindow : MonoBehaviour
 		{
 			ParentCard(pair.viewCard);
 			pair.viewCard.ActivateVisuals(true);
-			pair.viewCard.ActivateRaycasts(activateRaycasts && pair.realCard.myPlayer == GameManager.CurrentTurnPlayer);
+			pair.viewCard.SetClickable(activateRaycasts && pair.realCard.myPlayer == GameManager.CurrentTurnPlayer);
 			currentViewIndex = viewIndex;
 			OnCardViewed?.Invoke(pair.viewCard);
 		}
@@ -116,13 +115,14 @@ public class CardViewWindow : MonoBehaviour
 		{
 			isPinning = true;
 			pinGO.SetActive(true);
-			ViewCard(card.viewIndex, isPrimaryView && cardViewer.cardsClickableOnView && card.CanBeClickedInViewer());
+			Card realCard_Old = cardViewer.GetCard(currentViewIndex, true);
+			realCard_Old?.Pinned(false, isPrimaryView);
+			ViewCard(card.viewIndex, isPrimaryView && card.CanBeClicked());
 			Card realCard = cardViewer.GetCard(currentViewIndex, true);
 			if (realCard)
 			{
-				CardViewer.currentPinnedCard?.Pinned(false, isPrimaryView);
 				realCard.Pinned(true, isPrimaryView);
-				CardViewer.currentPinnedCard = realCard;
+				if (isPrimaryView) CardViewer.currentPinnedCard = realCard;
 
 				if (realCard.isInstalled && !RunOperator.instance.isRunning)
 					realCard.ActivateCardOptions();

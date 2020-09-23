@@ -28,6 +28,7 @@ public class Card_Jinteki : CardFunction
 
 	}
 
+
 	protected override void AssignConditionalAbilities()
 	{
 		for (int i = 0; i < conditionalAbilities.Length; i++)

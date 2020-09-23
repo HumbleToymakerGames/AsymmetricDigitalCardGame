@@ -6,33 +6,36 @@ public class Card_Aurora : CardFunction
 {
     public int strengthToAdd;
 
-	
-
-	public override void ActivateFunction()
+	protected override void AssignPaidAbilities()
 	{
-		base.ActivateFunction();
+		for (int i = 0; i < paidAbilities.Length; i++)
+		{
+			PaidAbility ability = paidAbilities[i];
+			if (i == 0) ability.SetAbilityAndCondition(BreakSubroutine, CanBeClickable);
+			if (i == 1) ability.SetAbilityAndCondition(AddStrength, CanBeClickable);
+		}
 	}
 
 
-	public override void ActivatePaidAbility(int index)
+	bool CanBeClickable()
 	{
-		base.ActivatePaidAbility(index);
-		if (index == 1) BreakSubroutine(index);
-		else if (index == 2) AddStrength();
+		return RunOperator.instance.isRunning;
 	}
 
-	void BreakSubroutine(int index)
+	IEnumerator BreakSubroutine()
 	{
-		RunOperator.instance.BreakingSubroutines(paidAbilities[index-1]);
+		RunOperator.instance.BreakingSubroutines(paidAbilities[0]);
+		yield break;
 	}
 
-	void AddStrength()
+	IEnumerator AddStrength()
 	{
 		Card_Program programCard = card as Card_Program;
 		programCard.ModifyStrength(strengthToAdd);
+		yield break;
 	}
 
-	
+
 
 
 

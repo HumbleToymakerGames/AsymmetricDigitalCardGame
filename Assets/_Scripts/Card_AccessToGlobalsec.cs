@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardFunction_AccessToGlobalsec : CardFunction
+public class Card_AccessToGlobalsec : CardFunction
 {
 	public int amountLinks;
 	bool cardInstalled;

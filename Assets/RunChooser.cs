@@ -56,7 +56,7 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	[ContextMenu("Make Run")]
 	public void Selected()
 	{
-		RunOperator.OnCardBeingApproached += RunOperator_OnCardBeingApproached;
+		RunOperator.OnApproached += RunOperator_OnCardBeingApproached;
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		numIceInColumn = targetServer.iceInColumn.Count;
 		PlayCardManager.instance.TryMakeRun(targetServer);
@@ -64,13 +64,13 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
 	{
-		RunOperator.OnCardBeingApproached -= RunOperator_OnCardBeingApproached;
+		RunOperator.OnApproached -= RunOperator_OnCardBeingApproached;
 		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
 		if (success) StartCoroutine(SetArrowToCardSpot(numIceInColumn));
 		StartCoroutine(ResetArrow(success));
 	}
 
-	private void RunOperator_OnCardBeingApproached(Card card, int encounterIndex)
+	private void RunOperator_OnCardBeingApproached(int encounterIndex)
 	{
 		StartCoroutine(SetArrowToCardSpot(encounterIndex));
 	}

@@ -6,21 +6,6 @@ public class Card_ZaibatsuLoyalty : CardFunction
 {
 	public int numCreditsToPayForAbility;
 
-	public override void ActivatePaidAbility(int index)
-	{
-		base.ActivatePaidAbility(index);
-		if (index == 1) TryBlockExposure();
-	}
-
-
-	void TryBlockExposure()
-	{
-		print("TryBlockExposure");
-		//RunOperator.instance.SetServerTypeOverride(ServerColumn.ServerType.HQ);
-		//ServerColumn archivesServer = ServerSpace.instance.GetServerOfType(ServerColumn.ServerType.Archives);
-		//RunOperator.instance.MakeRun(archivesServer);
-	}
-
 	protected override void OnEnable()
 	{
 		base.OnEnable();

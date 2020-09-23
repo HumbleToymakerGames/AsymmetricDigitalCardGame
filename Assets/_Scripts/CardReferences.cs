@@ -13,6 +13,7 @@ public class CardReferences : MonoBehaviour
     public Image[] cardPin_Primary, cardPin_Secondary;
     public TextMeshProUGUI advancementText_Front, advancementText_Back;
     public GameObject advancementCost_BackGO;
+    public TextMeshProUGUI neutralCounterText;
 
     public void UpdateCardTitle(string cardTitle)
 	{
@@ -28,6 +29,11 @@ public class CardReferences : MonoBehaviour
     public void UpdateCardCost(int cardCost)
 	{
         costText.text = cardCost.ToString();
+    }
+
+    public void UpdateNeutralCounter(int neutralCount)
+	{
+        neutralCounterText.text = neutralCount.ToString();
     }
 
 

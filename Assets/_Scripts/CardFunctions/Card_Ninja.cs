@@ -6,28 +6,38 @@ public class Card_Ninja : CardFunction
 {
     public int strengthToAdd;
 
-	public override void ActivateFunction()
+	public override void ActivateInstantFunction()
 	{
-		base.ActivateFunction();
+		base.ActivateInstantFunction();
 	}
 
 
-	public override void ActivatePaidAbility(int index)
+	protected override void AssignPaidAbilities()
 	{
-		base.ActivatePaidAbility(index);
-		if (index == 1) BreakSubroutine(index);
-		else if (index == 2) AddStrength();
+		for (int i = 0; i < paidAbilities.Length; i++)
+		{
+			PaidAbility ability = paidAbilities[i];
+			if (i == 0) ability.SetAbilityAndCondition(BreakSubroutine, CanBeClickable);
+			if (i == 1) ability.SetAbilityAndCondition(AddStrength, CanBeClickable);
+		}
 	}
 
-	void BreakSubroutine(int index)
+	bool CanBeClickable()
 	{
-		RunOperator.instance.BreakingSubroutines(paidAbilities[index - 1]);
+		return true;
 	}
 
-	void AddStrength()
+	IEnumerator BreakSubroutine()
+	{
+		RunOperator.instance.BreakingSubroutines(paidAbilities[0]);
+		yield break;
+	}
+
+	IEnumerator AddStrength()
 	{
 		Card_Program programCard = card as Card_Program;
 		programCard.ModifyStrength(strengthToAdd);
+		yield break;
 	}
 
 }

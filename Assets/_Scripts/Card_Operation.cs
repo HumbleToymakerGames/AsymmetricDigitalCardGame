@@ -16,7 +16,7 @@ public class Card_Operation : Card, IActivateable
 
     public virtual void ActivateCard()
     {
-        cardFunction.ActivateFunction();
+        cardFunction.ActivateInstantFunction();
     }
 
 }

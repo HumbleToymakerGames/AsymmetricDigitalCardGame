@@ -6,9 +6,9 @@ public class Card_Precognition : CardFunction
 {
     public int numCards;
 
-    public override void ActivateFunction()
+    public override void ActivateInstantFunction()
     {
-        base.ActivateFunction();
+        base.ActivateInstantFunction();
         LookAtDeck();
     }
 
