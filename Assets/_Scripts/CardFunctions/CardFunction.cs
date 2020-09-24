@@ -77,6 +77,11 @@ public abstract class CardFunction : MonoBehaviour
 	}
 
 
+	private void Update()
+	{
+		UpdatePaidAbilitesInteractable();
+	}
+
 	#region Conditional Abilities
 
 

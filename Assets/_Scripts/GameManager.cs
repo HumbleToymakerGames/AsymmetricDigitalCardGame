@@ -67,6 +67,7 @@ public class GameManager : MonoBehaviour
 		{
             e_deckCards[i].controllingPlayerSide = player.playerSide;
             Card card = Instantiate(e_deckCards[i]);
+            card.name = card.name.Replace("(Clone)", "");
             deckCards[i] = card;
         }
 

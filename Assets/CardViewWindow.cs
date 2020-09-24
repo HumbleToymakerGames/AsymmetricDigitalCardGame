@@ -47,7 +47,6 @@ public class CardViewWindow : MonoBehaviour
 		{
 			cardViewer.HideAllCards(isPrimaryView);
 			currentViewIndex = -1;
-			cardViewer.ShowLinkIcon(false);
 		}
 		else
 		{
@@ -134,10 +133,9 @@ public class CardViewWindow : MonoBehaviour
 			pinGO.SetActive(false);
 			cardViewer.HideAllCards(isPrimaryView);
 			cardViewer.GetCard(currentViewIndex, true)?.Pinned(false, isPrimaryView);
-			cardViewer.ShowLinkIcon(false);
 			currentViewIndex = -1;
 			if (!RunOperator.instance.isRunning) ActionOptions.instance.HideAllOptions();
-			CardViewer.currentPinnedCard = null;
+			if (isPrimaryView) CardViewer.currentPinnedCard = null;
 
 		}
 	}

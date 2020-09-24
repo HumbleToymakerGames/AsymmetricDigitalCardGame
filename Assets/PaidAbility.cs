@@ -59,6 +59,10 @@ public class PaidAbility : MonoBehaviour
                         if (CanBeActive_Type())
                         {
                             interactable = true;
+                            if (CanBeActive_Breaker())
+                            {
+
+                            }
                         }
                     }
                 }
@@ -85,6 +89,16 @@ public class PaidAbility : MonoBehaviour
 		}
         return false;
     }
+
+    bool CanBeActive_Breaker()
+	{
+        if (isBreakerRoutine && !RunOperator.instance.canBreakSubroutines)
+		{
+            return false;
+		}
+        return true;
+	}
+
 
     bool CanBeActive_Strength(bool isStrongEnough)
 	{

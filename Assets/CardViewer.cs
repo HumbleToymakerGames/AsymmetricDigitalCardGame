@@ -73,7 +73,7 @@ public class CardViewer : MonoBehaviour
 		bool viewer = false;
 		if (IsCardBeingViewed(viewIndex, ref viewer)) return;
 		Card realCard = GetCard(viewIndex, true);
-		bool clickable = realCard.CanBeClicked();
+		bool clickable = realCard ? realCard.CanBeClicked() : false;
 
 		ReplicateCardState(viewIndex);
 		if (primary) viewWindow_Primary.ViewCard(viewIndex, clickable);
@@ -119,6 +119,7 @@ public class CardViewer : MonoBehaviour
 			deckCard.isViewCard = true;
 			Card viewCard = Instantiate(deckCard);
 			deckCard.isViewCard = false;
+			viewCard.name = viewCard.name.Replace("(Clone)", "");
 			viewCard.name += "_VIEW";
 
 			viewCards[i] = viewCard;

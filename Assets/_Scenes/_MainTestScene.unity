@@ -18045,7 +18045,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentTurnSide: 0
   numCardsToDrawFirstHand: 4
-  numCreditsToStartWith: 12
+  numCreditsToStartWith: 24
   hasGameStarted: 0
 --- !u!114 &1374242825
 MonoBehaviour:
@@ -18107,6 +18107,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberAbilitiesUsed: 0
+  isPaused: 0
+  isResolving: 0
 --- !u!1 &1374612357
 GameObject:
   m_ObjectHideFlags: 0
@@ -19790,7 +19792,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewWindow_Primary: {fileID: 977215072}
   viewWindow_Secondary: {fileID: 1836042652}
-  cardsClickableOnView: 0
   linkIcon: {fileID: 681347075}
   targetIndex: 0
 --- !u!1001 &1483619649
@@ -24844,11 +24845,11 @@ MonoBehaviour:
   currentProgramEncountering: {fileID: 0}
   currentPaidAbility: {fileID: 0}
   currentServerColumn: {fileID: 0}
-  currentServerCardEncountered: {fileID: 0}
   isRunning: 0
   isBreakingSubroutines: 0
   isEncounteringIce: 0
-  waitForRezRequest: 0
+  bypassedIce: 0
+  canBreakSubroutines: 0
 --- !u!4 &1761954976
 Transform:
   m_ObjectHideFlags: 0

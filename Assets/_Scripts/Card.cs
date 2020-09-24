@@ -90,7 +90,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     }
     private void CardViewer_OnCardPinned(Card card, bool primary)
     {
-        if (card == this) UpdateClickable();
+        UpdateClickable();
     }
     private void PaidAbilitiesManager_OnPaidWindowChanged(PlayerNR newPriority)
     {
@@ -115,7 +115,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
 	private void Update()
 	{
-        //UpdateClickable();
+        UpdateClickable();
 	}
 
 	public bool IsCardType(CardType _cardType)
@@ -313,9 +313,11 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         canvasGroup.alpha = activate ? 1 : 0;
     }
 
+    [ContextMenu("UpdateClickable")]
     public void UpdateClickable()
 	{
-        SetClickable(CanBeClicked());
+        if (viewIndex == CardViewer.currentPinnedCard?.viewIndex)
+            SetClickable(CanBeClicked());
 	}
 
     public void SetClickable(bool activate = true)

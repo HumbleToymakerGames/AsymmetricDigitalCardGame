@@ -87,7 +87,7 @@ public class PaidAbilitiesManager : MonoBehaviour
 		print("PaidAbilitiesWindow Executing...");
 		numberAbilitiesUsed = 0;
 		bool waitingForContinue = true;
-		ActionOptions.instance.Display_Continue(Continue);
+		ActionOptions.instance.Display_Continue(Continue, true);
 		while (waitingForContinue) yield return null;
 
 		void Continue()
@@ -101,6 +101,7 @@ public class PaidAbilitiesManager : MonoBehaviour
 	public void SetPriorityPlayer(PlayerNR newPriorityPlayer)
 	{
 		PriorityPlayer = newPriorityPlayer;
+		if (isPaused) pausedPriorityPlayer = newPriorityPlayer;
 		OnPaidWindowChanged?.Invoke(newPriorityPlayer);
 	}
 
@@ -115,10 +116,10 @@ public class PaidAbilitiesManager : MonoBehaviour
 	public void PausePaidWindow()
 	{
 		print("Paused");
-		if (IsResolving())
+		if (IsResolving() && !isPaused)
 		{
 			pausedPriorityPlayer = PriorityPlayer;
-			PriorityPlayer = null;
+			SetPriorityPlayer(null);
 			isPaused = true;
 		}
 	}
@@ -128,7 +129,7 @@ public class PaidAbilitiesManager : MonoBehaviour
 		print("Resumed	");
 		if (isPaused)
 		{
-			PriorityPlayer = pausedPriorityPlayer;
+			SetPriorityPlayer(pausedPriorityPlayer);
 			pausedPriorityPlayer = null;
 			isPaused = false;
 		}

@@ -54,12 +54,21 @@ public class RunOperator : MonoBehaviour
 
     private void CardViewWindow_OnCardViewed(Card card)
     {
-        if (currentIceEncountered && card.cardFunction)
-            CardViewer.instance.ShowLinkIcon(currentIceEncountered.isRezzed && card.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
+        if (card.IsCardType(CardType.Program))
+		{
+            //currentProgramEncountering = card as Card_Program;
+		}
     }
 
 
-    void RunStructure()
+
+
+	private void Update()
+	{
+        CardViewer.instance.ShowLinkIcon(isEncounteringIce && currentIceEncountered.isRezzed && CardViewer.currentPinnedCard && CardViewer.currentPinnedCard.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
+	}
+
+	void RunStructure()
 	{
         // Initiate 'Run' and declare attacked server
 
@@ -146,7 +155,8 @@ public class RunOperator : MonoBehaviour
 
     }
 
-    bool bypassedIce = false;
+    public bool bypassedIce, canBreakSubroutines;
+
     void BypassedIce()
 	{
         bypassedIce = true;
@@ -166,7 +176,7 @@ public class RunOperator : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         CardViewer.instance.PinCard(-1, false);
 
-        bypassedIce = false;
+        bypassedIce = canBreakSubroutines = false;
         isEncounteringIce = true;
         Card viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
         CardViewer.instance.PinCard(viewCard.viewIndex, false);
@@ -183,6 +193,7 @@ public class RunOperator : MonoBehaviour
 
         if (!currentIceEncountered.isRezzed)
 		{
+            PaidAbilitiesManager.instance.PausePaidWindow();
             bool? rezChoice = null;
             ActionOptions.instance.Display_RezCard(RezChoice, currentIceEncountered.cardCost.costOfCard, true);
             while (!rezChoice.HasValue) yield return null;
@@ -195,11 +206,10 @@ public class RunOperator : MonoBehaviour
                     if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentIceEncountered.cardCost.costOfCard))
 					{
                         rezChoice = true;
-                        if (currentProgramEncountering)
-                            CardViewer.instance.ShowLinkIcon(currentProgramEncountering.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
                     }
 
                 }
+                PaidAbilitiesManager.instance.ResumePaidWindow();
             }
 
             if (rezChoice.Value)
@@ -219,16 +229,20 @@ public class RunOperator : MonoBehaviour
             currentIceEncountered = viewCard as Card_Ice;
             if (!encounteredIceCards.Contains(currentIceEncountered)) encounteredIceCards.Add(currentIceEncountered);
 
+            canBreakSubroutines = true;
             ActionOptions.instance.Display_FireRemainingSubs(true);
             while (!bypassedIce) yield return null;
+            canBreakSubroutines = false;
         }
 
-
+        isEncounteringIce = false;
     }
 
 
     IEnumerator JackOutRoutine()
 	{
+        PaidAbilitiesManager.instance.PausePaidWindow();
+
         bool choiceMade = false;
         ActionOptions.instance.ActivateYesNo(Choice, "Jack Out?");
         while (!choiceMade) yield return null;
@@ -237,8 +251,9 @@ public class RunOperator : MonoBehaviour
         {
             choiceMade = true;
             if (yes) EndRun(false);
+            PaidAbilitiesManager.instance.ResumePaidWindow();
         }
-	}
+    }
 
     Coroutine StartRunCompletedRoutine()
 	{
@@ -255,14 +270,17 @@ public class RunOperator : MonoBehaviour
     {
         OnApproached?.Invoke(currentServerColumn.currentIceIndex);
 
+        CardViewer.instance.PinCard(-1, false);
+        Card serverCard = currentServerColumn.GetRemoteServerRoot();
+        if (serverCard)
+        {
+            CardViewer.instance.PinCard(serverCard.viewIndex, false);
+        }
+
         yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
         yield return JackOutRoutine();
 
-        yield return new WaitForSeconds(0.5f);
-        isEncounteringIce = false;
-
         bool? rezChoice = null;
-        Card serverCard = currentServerColumn.GetRemoteServerRoot();
         if (serverCard)
         {
             if (TryRequestRezOnRemoteServer(serverCard, Choice))
@@ -283,6 +301,8 @@ public class RunOperator : MonoBehaviour
 				}
             }
 		}
+
+        yield return new WaitForSeconds(0.25f);
 
         ServerColumn serverColumnAccessed = serverTypeOverride.HasValue? ServerSpace.instance.GetServerOfType(serverTypeOverride.Value) : currentServerColumn;
         EndRun(true);
@@ -396,6 +416,7 @@ public class RunOperator : MonoBehaviour
             ResetAllIces();
 
             isEncounteringIce = false;
+            canBreakSubroutines = false;
             currentIceEncountered = null;
             currentProgramEncountering = null;
             currentPaidAbility = null;
