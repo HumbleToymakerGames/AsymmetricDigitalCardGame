@@ -25,7 +25,7 @@ public class DiscardPile : PlayArea_Spot, IAccessable
         cardsInDiscard.Remove(card);
 	}
 
-	public void Access(ServerColumn.ServerType serverAccessed)
+	public void Access()
 	{
         CardRevealer.instance.RevealCards(cardsInDiscard.ToArray(), true, this);
 	}

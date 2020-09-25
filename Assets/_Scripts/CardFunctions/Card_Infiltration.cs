@@ -15,7 +15,9 @@ public class Card_Infiltration : CardFunction
     void GainCreditsOrExpose()
 	{
         CardChooser.instance.ActivateFocus(null);
-        ActionOptions.instance.ActivateYesNo(YesNoChoice, "Gain 2 credits?");
+        string gainCreditsString = string.Format("Gain ({0})cc", numCredits);
+        string exposeCardString = "Expose Card";
+        ActionOptions.instance.ActivateYesNo(YesNoChoice, card.cardTitle, -123, gainCreditsString, exposeCardString);
 	}
 
     void YesNoChoice(bool yes)

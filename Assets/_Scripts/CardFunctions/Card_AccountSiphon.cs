@@ -68,10 +68,10 @@ public class Card_AccountSiphon : CardFunction
 
 		CardChooser.instance.ActivateFocus(null);
 		bool? choiceMade = null;
-		ActionOptions.instance.ActivateYesNo(ChoiceMade, string.Format("Activate ability {0}?", card.cardTitle));
+		ActionOptions.instance.ActivateYesNo(ChoiceMade, card.cardTitle, -123, "Access cards", "Siphon credits");
 		while (!choiceMade.HasValue) yield return null;
 
-		if (choiceMade.Value)
+		if (!choiceMade.Value)
 		{
 			RunOperator.instance.StopRunCompletedRoutine();
 
@@ -80,7 +80,7 @@ public class Card_AccountSiphon : CardFunction
 			{
 				int numCreditsToGain = numCreditsGained * numCreditsToLose;
 				PlayerNR.Runner.AddCredits(numCreditsToGain);
-				PlayerNR.Runner.Tags += numTagsTaken;
+				yield return PlayCardManager.instance.TagRunner(numTagsTaken);
 			}
 
 		}

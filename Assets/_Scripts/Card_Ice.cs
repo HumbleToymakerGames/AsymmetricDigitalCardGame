@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Linq;
+using UnityEngine.Events;
 
 public class Card_Ice : Card, IInstallable
 {
     public TextMeshProUGUI strengthText;
     public int strength;
+    int baseStrength;
 
     Subroutine[] subroutines;
     public bool[] subroutinesToFire;
@@ -15,15 +17,15 @@ public class Card_Ice : Card, IInstallable
 	protected override void Awake()
 	{
 		base.Awake();
-        subroutines = GetComponentsInChildren<Subroutine>();
-        subroutinesToFire = new bool[subroutines.Length];
+        GetSubroutines();
         ResetSubroutinesToFire();
     }
 
 	protected override void Start()
     {
         base.Start();
-        strengthText.text = strength.ToString();
+        baseStrength = strength;
+        SetStrength(strength);
     }
 
     public override bool CanSelect()
@@ -73,16 +75,23 @@ public class Card_Ice : Card, IInstallable
         return true;
 	}
 
-    public void FireAllRemainingSubroutines()
-	{
+    public Coroutine FireAllRemainingSubroutines(UnityAction callback)
+    {
+        return StartCoroutine(FireAllSubroutinesRoutine(callback));
+    }
+
+    IEnumerator FireAllSubroutinesRoutine(UnityAction callback)
+    {
 		for (int i = 0; i < subroutines.Length; i++)
 		{
             if (subroutinesToFire[i])
 			{
-                subroutines[i].Fire();
+                yield return subroutines[i].Fire();
 			}
 		}
-	}
+        callback?.Invoke();
+
+    }
 
     public void ResetSubroutinesToFire()
 	{
@@ -107,5 +116,22 @@ public class Card_Ice : Card, IInstallable
 	}
 
 
+    void GetSubroutines()
+	{
+        subroutines = GetComponentsInChildren<Subroutine>();
+        subroutinesToFire = new bool[subroutines.Length];
+        cardFunction.AssignSubroutines(subroutines);
+	}
+
+    public void SetStrength(int _strength)
+	{
+        strength = _strength;
+        strengthText.text = strength.ToString();
+	}
+
+    public void ResetStrength()
+	{
+        SetStrength(baseStrength);
+	}
 
 }

@@ -9,19 +9,6 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
     public List<Card> cardsInDeck;
 
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
     public void SetCardsToDeck(Card[] cards)
 	{
         cardsInDeck = new List<Card>();
@@ -108,10 +95,10 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
         PlayCardManager.instance.TryDrawNextCard();
 	}
 
-	public void Access(ServerColumn.ServerType serverAccessed)
+	public void Access()
 	{
         Card card = cardsInDeck[0];
-        card.Accessed(serverAccessed);
+        card.Accessed();
         RevealCard(card);
     }
 

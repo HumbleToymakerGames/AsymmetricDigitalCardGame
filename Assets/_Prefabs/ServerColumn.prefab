@@ -30,8 +30,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 25889531904872515}
-  m_RootOrder: 2
+  m_Father: {fileID: 7191130565007672159}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -253,9 +253,8 @@ RectTransform:
   m_Children:
   - {fileID: 1696150395430543414}
   - {fileID: 733647811212649439}
-  - {fileID: 5952911336578078627}
   m_Father: {fileID: 7191130565007672159}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -363,9 +362,10 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 5952911336578078627}
   - {fileID: 25889531904872515}
-  - {fileID: 8606853942299827217}
   - {fileID: 2544676339940707149}
+  - {fileID: 8606853942299827217}
   m_Father: {fileID: 7191130565686150597}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -746,8 +746,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerSide: 0
   myPlayer: {fileID: 0}
-  serverGO: {fileID: 0}
-  serverRootT: {fileID: 8606853942299827217}
+  serverType: 0
+  serverRoot: {fileID: 0}
   iceColumnT: {fileID: 7191130565646206073}
   selectorIce: {fileID: 6628900357582926273}
   selectorRoot: {fileID: 2544676339940707155}
@@ -782,11 +782,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7191130565007672159}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -5}
+  m_AnchoredPosition: {x: -20, y: 20}
   m_SizeDelta: {x: 135, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5497011198022613597

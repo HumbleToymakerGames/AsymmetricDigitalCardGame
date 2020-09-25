@@ -182,10 +182,10 @@ public class CardChooser : MonoBehaviour
         currentFocusedSelectors = null;
         isFocused = false;
         print(currentCallback != null);
+        ActionOptions.instance.HideAllOptions();
         currentCallback?.Invoke(currentChosenSelectors.ToArray());
         currentCallback = null;
         currentChosenSelectors.Clear();
-        ActionOptions.instance.HideAllOptions();
     }
 
 

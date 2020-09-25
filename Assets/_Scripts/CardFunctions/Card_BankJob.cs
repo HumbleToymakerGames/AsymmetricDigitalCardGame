@@ -6,7 +6,6 @@ public class Card_BankJob : CardFunction
 {
 	public int numCreditsToStart;
 	[SerializeField]
-	int currentCredits;
 	bool cardInstalled, runSuccessful;
 
 	protected override void OnEnable()
@@ -64,7 +63,7 @@ public class Card_BankJob : CardFunction
 
 		CardChooser.instance.ActivateFocus(null);
 		bool? choiceMade = null;
-		ActionOptions.instance.ActivateYesNo(ChoiceMade, string.Format("Activate ability {0}?", card.cardTitle));
+		ActionOptions.instance.ActivateYesNo(ChoiceMade, string.Format("Activate {0}?", card.cardTitle));
 		while (!choiceMade.HasValue) yield return null;
 
 		if (choiceMade.Value)
@@ -74,7 +73,7 @@ public class Card_BankJob : CardFunction
 
 			choiceMade = null;
 			int counterCount = 0;
-			ActionOptions.instance.ActivateCounter(Counter, "Number credits", currentCredits);
+			ActionOptions.instance.ActivateCounter(Counter, "Number credits", card.NeutralCounters);
 
 			void Counter(int count)
 			{
@@ -85,10 +84,10 @@ public class Card_BankJob : CardFunction
 			while (!choiceMade.HasValue) yield return null;
 
 			PlayerNR.Runner.AddCredits(counterCount);
-			
-			currentCredits -= counterCount;
-			card.cardRefs.UpdateNeutralCounter(currentCredits);
-			if (currentCredits <= 0)
+
+			card.NeutralCounters -= counterCount;
+			card.cardRefs.UpdateNeutralCounter(card.NeutralCounters);
+			if (card.NeutralCounters <= 0)
 			{
 				PlayCardManager.instance.TrashCard(PlayerNR.Runner, card);
 			}
@@ -109,8 +108,8 @@ public class Card_BankJob : CardFunction
 
 	void UpdateCounter(int count)
 	{
-		currentCredits = count;
-		card.cardRefs.UpdateNeutralCounter(currentCredits);
+		card.NeutralCounters = count;
+		card.cardRefs.UpdateNeutralCounter(card.NeutralCounters);
 	}
 
 }

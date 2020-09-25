@@ -26,6 +26,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		PlayCardManager.OnCardExposed += PlayCardManager_OnCardExposed;
 		PlayCardManager.OnCardExposed_Pre += PlayCardManager_OnCardExposed_Pre;
 		RunOperator.OnIceEncountered += RunOperator_OnIceEncountered;
+		PlayCardManager.OnTagGiven_Pre += PlayCardManager_OnTagGiven_Pre;
 	}
 	private void OnDisable()
 	{
@@ -38,6 +39,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		PlayCardManager.OnCardExposed -= PlayCardManager_OnCardExposed;
 		PlayCardManager.OnCardExposed_Pre -= PlayCardManager_OnCardExposed_Pre;
 		RunOperator.OnIceEncountered -= RunOperator_OnIceEncountered;
+		PlayCardManager.OnTagGiven_Pre -= PlayCardManager_OnTagGiven_Pre;
 	}
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
@@ -76,6 +78,11 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	{
 		StartResolvingConditionals(ConditionalAbility.Condition.Ice_Encountered);
 	}
+	private void PlayCardManager_OnTagGiven_Pre(TagWrapper tagWrapper)
+	{
+		StartResolvingConditionals(ConditionalAbility.Condition.Tag_Received_Pre);
+	}
+
 
 	void StartResolvingConditionals(ConditionalAbility.Condition condition)
 	{

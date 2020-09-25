@@ -207,6 +207,8 @@ public class CardViewer : MonoBehaviour
 			viewCard.isRezzed = realCard.isRezzed;
 			viewCard.isInstalled = realCard.isInstalled;
 
+			viewCard.NeutralCounters = realCard.NeutralCounters;
+
 		}
 	}
 

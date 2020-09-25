@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -35,6 +36,9 @@ public class PlayCardManager : MonoBehaviour
     public static event eCardEvent OnCardStolen;
     public static event eCardEvent OnCardExposed_Pre;
     public static event eCardEvent OnCardExposed;
+
+    public delegate void TagGiven(TagWrapper tagWrapper);
+    public static event TagGiven OnTagGiven_Pre;
 
     [Header("Starting Points")]
     public int numActionPointsStart_Runner;
@@ -193,27 +197,16 @@ public class PlayCardManager : MonoBehaviour
 
     public void TryActivatePaidAbility(PaidAbility paidAbility)
 	{
-        if (paidAbility.currency == Currency.Credits)
+        if (paidAbility.CanAfford(PaidAbilitiesManager.PriorityPlayer))
 		{
-            if (CanAffordCost(PaidAbilitiesManager.PriorityPlayer, paidAbility.payAmount))
-			{
-                paidAbility.ExecuteAbility();
-                PayCost(PaidAbilitiesManager.PriorityPlayer, paidAbility.payAmount);
-			}
-		}
-        else if (paidAbility.currency == Currency.Clicks)
-		{
-            if (PaidAbilitiesManager.PriorityPlayer.CanAffordAction(paidAbility.payAmount))
-			{
-                paidAbility.ExecuteAbility();
-                PaidAbilitiesManager.PriorityPlayer.ActionPointsUsed(paidAbility.payAmount);
-            }
+            paidAbility.PayCosts(PaidAbilitiesManager.PriorityPlayer);
+            paidAbility.ExecuteAbility();
         }
-	}
+    }
 
     public void ReversePaidAbility(PaidAbility paidAbility)
 	{
-        PaidAbilitiesManager.PriorityPlayer.AddCredits(paidAbility.payAmount);
+        paidAbility.ReverseCosts(PaidAbilitiesManager.PriorityPlayer);
 	}
 
     public bool TryTrashCard(PlayerNR trashingPlayer, Card card)
@@ -395,7 +388,7 @@ public class PlayCardManager : MonoBehaviour
 
     void RemoveTag()
 	{
-        PlayerNR.Runner.Tags--;
+        PlayerNR.Runner.RemoveTags(1);
 	}
 
     void AdvanceCard(Card card)
@@ -428,6 +421,28 @@ public class PlayCardManager : MonoBehaviour
         else OnCardStolen?.Invoke(agenda);
     }
 
+    public void ForfeitAgenda(PlayerNR player, Card_Agenda agenda)
+	{
+        Forfeiture.instance.AddCardToForfeiture(agenda);
+        player.RemoveScore(agenda.scoringAmount);
+        agenda.cardAdvancer.CardScored(false);
+    }
+
+
+    public Coroutine TagRunner(int numTags)
+	{
+        return StartCoroutine(TagRunnerRoutine(numTags));
+    }
+
+    IEnumerator TagRunnerRoutine(int numTags)
+	{
+        TagWrapper tagWrapper = new TagWrapper(numTags);
+        OnTagGiven_Pre?.Invoke(tagWrapper);
+        while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
+
+        PlayerNR.Runner.AddTags(tagWrapper.Tags);
+    }
+
 
     public void DoNetDamage(UnityAction callBack, int numDamage)
 	{
@@ -441,6 +456,8 @@ public class PlayCardManager : MonoBehaviour
 		{
             selectorNRs.Add(card.selector);
 		}
+        if (selectorNRs.Count <= 0) return;
+
         CardChooser.instance.ActivateFocus(NetDamageDone, numDamage, selectorNRs.ToArray());
         ActionOptions.instance.ActivateActionMessage(string.Format("Net Damage:\nRemove ({0}) cards", numDamage));
 

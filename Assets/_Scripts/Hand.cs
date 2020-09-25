@@ -101,12 +101,12 @@ public class Hand : PlayArea_Spot, IAccessable
 		return null;
 	}
 
-	public void Access(ServerColumn.ServerType serverAccessed)
+	public void Access()
 	{
 		Card randomCard = RandomCard();
 		if (randomCard)
 		{
-			randomCard.Accessed(serverAccessed);
+			randomCard.Accessed();
 			CardRevealer.instance.RevealCard(randomCard, true);
 		}
 

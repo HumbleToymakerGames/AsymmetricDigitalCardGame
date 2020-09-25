@@ -44,6 +44,7 @@ MonoBehaviour:
   paidAbilities: []
   conditionalAbilities: []
   numCredits: 4
+  numTags: 1
   serverType: 1
 --- !u!1001 &1809207971976352761
 PrefabInstance:

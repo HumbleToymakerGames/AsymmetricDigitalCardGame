@@ -41,7 +41,7 @@ public class Card_ProjectJunebug : CardFunction
 	IEnumerator TryDoNetDamage()
 	{
 		bool? payOption = null;
-		ActionOptions.instance.ActivateYesNo(PayOption, "Pay to activate?", numCredits);
+		ActionOptions.instance.ActivateYesNo(PayOption, string.Format("Activate {0}?", card.cardTitle), numCredits);
 		while (!payOption.HasValue) yield return null;
 		if (!payOption.Value) yield break;
 

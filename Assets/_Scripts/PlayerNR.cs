@@ -198,6 +198,11 @@ public class PlayerNR : MonoBehaviour
         Score += scoreAmount;
 	}
 
+    public void RemoveScore(int scoreAmount)
+	{
+        Score -= scoreAmount;
+	}
+
 
 
 

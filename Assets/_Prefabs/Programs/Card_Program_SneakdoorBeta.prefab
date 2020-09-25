@@ -246,12 +246,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
+      propertyPath: payments.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
+        type: 3}
       propertyPath: payAmount
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: currency
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
+        type: 3}
+      propertyPath: payments.Array.data[0].amount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
+        type: 3}
+      propertyPath: payments.Array.data[0].currency
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []

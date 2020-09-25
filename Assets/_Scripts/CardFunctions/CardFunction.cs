@@ -138,4 +138,14 @@ public abstract class CardFunction : MonoBehaviour
 
 	}
 
+	public virtual void AssignSubroutines(Subroutine[] subroutines)
+	{
+
+	}
+
+	public virtual bool CanPlay()
+	{
+		return true;
+	}
+
 }

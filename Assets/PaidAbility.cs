@@ -6,21 +6,29 @@ using UnityEngine.UI;
 public class PaidAbility : MonoBehaviour
 {
     [Header("Ability")]
-    public int payAmount;
-    public Currency currency;
+    public Payment[] payments;
     public CardSubType breakerType;
     bool isBreakerRoutine;
     Button button;
     CanvasGroup canvasGroup;
+
+    [System.Serializable]
+    public struct Payment
+	{
+        public int amount;
+        public Currency currency;
+	}
 
     public delegate IEnumerator Ability();
     public Ability IAbilityExecution;
 
     public delegate bool ClickableConditions();
     public ClickableConditions ClickableConditionsMet;
+    public ClickableConditions CanAffordConditons;
 
     public delegate void PaidAbilityActivated();
     public static event PaidAbilityActivated OnPaidAbilityActivated;
+    public PaidAbilityActivated IPayCostsExecution;
 
     CardFunction cardFunction;
 
@@ -46,7 +54,7 @@ public class PaidAbility : MonoBehaviour
     public void UpdateAbilityInteractable()
 	{
         bool interactable = false;
-        if (CanBeActive_Currency(cardFunction.card.myPlayer.Credits))
+        if (CanBeActive_Currency())
 		{
             if (cardFunction.card.IsCardType(CardType.Program))
             {
@@ -77,17 +85,9 @@ public class PaidAbility : MonoBehaviour
         button.interactable = interactable;
 	}
 
-    bool CanBeActive_Currency(int playerCredits)
+    bool CanBeActive_Currency()
 	{
-        if (currency == Currency.Credits)
-		{
-            return cardFunction.card.myPlayer.Credits >= payAmount;
-        }
-        else if (currency == Currency.Clicks)
-		{
-            return cardFunction.card.myPlayer.CanAffordAction(payAmount);
-		}
-        return false;
+        return CanAfford(cardFunction.card.myPlayer);
     }
 
     bool CanBeActive_Breaker()
@@ -176,7 +176,11 @@ public class PaidAbility : MonoBehaviour
         IAbilityExecution = _ability;
         ClickableConditionsMet = _conditionsMet;
     }
-
+    public void SetCostsAndPayments(PaidAbilityActivated _payments, ClickableConditions _costs)
+    {
+        IPayCostsExecution = _payments;
+        CanAffordConditons = _costs;
+    }
 
     //   public void SetCardFunctions(CardFunction _cardFunction, CardFunction _viewCardFunction)
     //{
@@ -184,6 +188,54 @@ public class PaidAbility : MonoBehaviour
     //       viewCardFunction = _viewCardFunction;
     //}
 
+    public bool CanAfford(PlayerNR player)
+	{
+		foreach (var payment in payments)
+		{
+            if (payment.currency == Currency.Credits)
+			{
+                if (!player.CanAffordCost(payment.amount)) return false;
+			}
+            if (payment.currency == Currency.Clicks)
+            {
+                if (!player.CanAffordAction(payment.amount)) return false;
+            }
+            if (CanAffordConditons != null && !CanAffordConditons()) return false;
+        }
+        return true;
+	}
+
+    public void PayCosts(PlayerNR player)
+	{
+		foreach (var payment in payments)
+		{
+            if (payment.currency == Currency.Credits)
+            {
+                player.Credits -= payment.amount;
+            }
+            if (payment.currency == Currency.Clicks)
+            {
+                player.ActionPoints -= payment.amount;
+            }
+
+            IPayCostsExecution?.Invoke();
+        }
+	}
+
+    public void ReverseCosts(PlayerNR player)
+	{
+        foreach (var payment in payments)
+        {
+            if (payment.currency == Currency.Credits)
+            {
+                player.Credits += payment.amount;
+            }
+            if (payment.currency == Currency.Clicks)
+            {
+                player.ActionPoints += payment.amount;
+            }
+        }
+    }
 
 
 }

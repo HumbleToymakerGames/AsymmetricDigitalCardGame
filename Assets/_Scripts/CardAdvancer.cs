@@ -38,9 +38,9 @@ public class CardAdvancer : MonoBehaviour
 		return false;
 	}
 
-	public void CardScored()
+	public void CardScored(bool scored = true)
 	{
-		isScored = true;
+		isScored = scored;
 	}
 
 	void UpdateAdvancementTexts()

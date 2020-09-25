@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Card_Snare : CardFunction
 {
-	public int numCredits;
+	public int numCredits, numTags;
 	public ServerColumn.ServerType serverType;
 	bool cardAccessed;
 	ServerColumn.ServerType? fromServer = null;
@@ -70,7 +70,7 @@ public class Card_Snare : CardFunction
 				PlayCardManager.instance.DoNetDamage(DamageDone, 3);
 				while (!damageDone) yield return null;
 
-				PlayerNR.Runner.AddTags(1);
+				PlayCardManager.instance.TagRunner(numTags);
 
 				void DamageDone()
 				{

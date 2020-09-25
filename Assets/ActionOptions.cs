@@ -15,7 +15,7 @@ public class ActionOptions : MonoBehaviour
 
 	public GameObject yesNoPanelGO;
 	public Button yesButton;
-	public TextMeshProUGUI yesText, yesnoTitleText;
+	public TextMeshProUGUI yesText, noText, yesnoTitleText;
 
 	public GameObject actionMessageGO;
 	public TextMeshProUGUI actionMessageText;
@@ -111,18 +111,21 @@ public class ActionOptions : MonoBehaviour
 	{
 		TryHideAllOptions(showOnly, false);
 		ActivateYesNo(callback, "Rez Card?", rezCost);
-		yesText.text = string.Format(rezCostFormat, rezCost);
 	}
 
 	UnityAction<bool> yesnoCallback;
 	bool isYesNo;
-	public void ActivateYesNo(UnityAction<bool> callback, string title, int yesCost = -123)
+	public void ActivateYesNo(UnityAction<bool> callback, string title, int yesCost = -123, string yesTitle = "", string noTitle = "")
 	{
 		HideAllOptions();
 		yesnoTitleText.text = title;
 		yesnoCallback = callback;
 		yesButton.interactable = PlayCardManager.instance.CanAffordCost(PlayerNR.Corporation, yesCost);
-		yesText.text = string.Format(rezCostFormat, yesCost == -123 ? "" : yesCost.ToString());
+		string yesString = yesTitle != "" ? yesTitle : "Yes";
+		if (yesCost != -123) yesString += string.Format(" ({0}cc)", yesCost);
+		string noString = noTitle != "" ? noTitle : "No";
+		yesText.text = yesString;
+		noText.text = noString;
 		isYesNo = true;
 		yesNoPanelGO.SetActive(true);
 	}
@@ -143,6 +146,7 @@ public class ActionOptions : MonoBehaviour
 		currentCounterCallback = callback;
 		counterGO.SetActive(true);
 		currentCounterMax = maxCount;
+		counterTitleText.text = title;
 	}
 
 
@@ -160,7 +164,7 @@ public class ActionOptions : MonoBehaviour
 	public void HideAllOptions()
 	{
 		if (isYesNo) return;
-		//print("HideAllOptions");
+		print("HideAllOptions");
 		fireRemainingSubsButton.gameObject.SetActive(false);
 		advanceCardButton.gameObject.SetActive(false);
 		scoreAgendaButton.gameObject.SetActive(false);

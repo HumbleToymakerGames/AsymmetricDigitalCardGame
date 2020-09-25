@@ -10,7 +10,7 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	public RectTransform arrowRT;
 	int numIceInColumn;
 	float transitionTime = 1f;
-	GameObject myGO;
+	public GameObject myGO;
 
 	private void Awake()
 	{
@@ -40,9 +40,9 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 		if (targetServer.IsRemoteServer())
 			myGO.SetActive(targetServer.HasAnyCardsInServer());
 	}
-	private void RunOperator_OnRunBeingMade(ServerColumn.ServerType serverType)
+	private void RunOperator_OnRunBeingMade(ServerColumn server)
 	{
-		if (serverType == targetServer.serverType) RunningThisServer();
+		if (server == targetServer) RunningThisServer();
 	}
 
 	public bool CanHighlight(bool highlight = true)
@@ -63,6 +63,7 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	[ContextMenu("Make Run")]
 	public void Selected()
 	{
+		print("Runner selected");
 		PlayCardManager.instance.TryMakeRun(targetServer);
 	}
 

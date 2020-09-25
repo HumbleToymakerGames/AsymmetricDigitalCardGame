@@ -6,12 +6,10 @@ using UnityEngine.UI;
 public class ServerColumn : PlayArea_Spot, ISelectableNR
 {
     public enum ServerType { Archives, RND, HQ, Remote };
-    [HideInInspector]
     public ServerType serverType;
     ServerSpace serverSpace;
     Button button;
-    public GameObject serverGO;
-    protected IAccessable serverProtected;
+    public ServerRoot serverRoot;
     public Transform iceColumnT;
     public SelectorNR selectorIce, selectorRoot;
     public List<Card_Ice> iceInColumn = new List<Card_Ice>();
@@ -21,19 +19,21 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 	{
 		base.Awake();
         serverSpace = GetComponentInParent<ServerSpace>();
-        serverProtected = serverGO.GetComponent<IAccessable>();
         button = GetComponentInChildren<Button>();
         SetInteractable(false);
-        GetServerType();
+
     }
 
-    public void InstallCardToServer(Card card)
+    public void InstallCardToServerRoot(Card card)
 	{
-        if (serverProtected is RemoteServer)
-        {
-            RemoteServer remoteServer = serverProtected as RemoteServer;
-            remoteServer.InstallCard(card);
-        }
+        if (card is Card_Upgrade)
+		{
+            serverRoot.InstallUpgrade(card as Card_Upgrade);
+		}
+        else
+		{
+            (serverRoot as ServerRoot_Remote).InstallRootCard(card);
+		}
 	}
 
 
@@ -48,7 +48,6 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
             card = iceInColumn[currentIceIndex];
             return true;
 		}
-
     }
 
     public void ResetIceIndex()
@@ -72,9 +71,9 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 	}
 
 
-    public void AccessServer(ServerColumn.ServerType serverType)
+    public void AccessServer(Card card = null)
 	{
-        serverProtected.Access(serverType);
+        serverRoot.Access(card);
     }
 
     public void SetInteractable(bool interactable = true)
@@ -116,56 +115,25 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 
     public bool IsRemoteServer()
 	{
-        return serverProtected is RemoteServer;
+        return serverRoot is ServerRoot_Remote;
 	}
-
-    public Card GetRemoteServerRoot()
-	{
-        if (serverProtected is RemoteServer)
-            return (serverProtected as RemoteServer).installedCard;
-        else return null;
-	}
-
-    public bool HasCardInServer(Card card)
-	{
-        if (IsRemoteServer())
-		{
-            RemoteServer remoteServer = serverProtected as RemoteServer;
-            if (remoteServer.installedCard != null) return (remoteServer.installedCard as Card) == card;
-		}
-        return new List<Card>(iceInColumn).Contains(card);
-    }
 
     public bool HasAnyCardsInServer()
 	{
-        if (IsRemoteServer())
-        {
-            RemoteServer remoteServer = serverProtected as RemoteServer;
-            if (remoteServer.installedCard != null) return true;
-        }
-        return iceInColumn.Count > 0;
+        return HasRootCardsInstalled() || iceInColumn.Count > 0;
     }
 
-    public bool HasRootInstalled(ref Card rootCard)
+    public bool HasRootCardsInstalled()
 	{
-        if (IsRemoteServer())
-        {
-            rootCard = (serverProtected as RemoteServer).installedCard as Card;
-            return (serverProtected as RemoteServer).HasCardInstalled();
-        }
-        return true;
+        return serverRoot.HasCardsInstalled();
 	}
 
-
-
-    void GetServerType()
+    public Card[] GetCardsInRoot()
 	{
-        if (serverProtected is DiscardPile) serverType = ServerType.Archives;
-        else if (serverProtected is Hand) serverType = ServerType.HQ;
-        else if (serverProtected is Deck) serverType = ServerType.RND;
-        else serverType = ServerType.Remote;
+        List<Card> cards = new List<Card>();
+        if (serverRoot.installedUpgradeCard) cards.Add(serverRoot.installedUpgradeCard);
+        ServerRoot_Remote remoteServer = serverRoot as ServerRoot_Remote;
+        if (remoteServer && remoteServer.installedRootCard) cards.Add(remoteServer.installedRootCard);
+        return cards.ToArray();
     }
-
-
-
 }

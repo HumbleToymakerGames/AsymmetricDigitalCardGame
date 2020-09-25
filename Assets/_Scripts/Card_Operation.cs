@@ -6,7 +6,7 @@ public class Card_Operation : Card, IActivateable
 {
     public override bool CanSelect()
     {
-        return base.CanSelect() && PlayCardManager.instance.CanActivateEvent(this);
+        return base.CanSelect() && PlayCardManager.instance.CanActivateEvent(this) && cardFunction.CanPlay();
     }
 
     public bool CanActivate()

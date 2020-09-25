@@ -54,13 +54,13 @@ public class Card_ZaibatsuLoyalty : CardFunction
 		}
 
 		choiceMade = null;
-		ActionOptions.instance.ActivateYesNo(Choice, string.Format("Use {0} ability?", card.cardTitle));
+		ActionOptions.instance.ActivateYesNo(Choice, string.Format("Activate {0}?", card.cardTitle));
 		while (!choiceMade.HasValue) yield return null;
 
 		if (choiceMade.Value)
 		{
 			choiceMade = null;
-			ActionOptions.instance.ActivateYesNo(Choice, "Pay by credits?", numCreditsToPayForAbility);
+			ActionOptions.instance.ActivateYesNo(Choice, card.cardTitle, numCreditsToPayForAbility, "Pay credits", "Trash card");
 			while (!choiceMade.HasValue) yield return null;
 
 

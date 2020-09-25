@@ -1,18 +1,20 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &4557915739314302385
+--- !u!114 &8530088526794416758
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3261332618812847419}
+  m_GameObject: {fileID: 6935622365136277145}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d671302e9ec25e4ebefa762b793f7ba, type: 3}
+  m_Script: {fileID: 11500000, guid: b409b7be4b46dd24ab4df608e732d2a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isBroken: 0
+  card: {fileID: 0}
+  paidAbilities: []
+  conditionalAbilities: []
 --- !u!1001 &3854834176905195574
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -183,27 +185,27 @@ PrefabInstance:
     - target: {fileID: 8316505669779933941, guid: ba8aae89c74e51d47811b1075c330e67,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8316505669779933941, guid: ba8aae89c74e51d47811b1075c330e67,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8316505669779933941, guid: ba8aae89c74e51d47811b1075c330e67,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 12
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8316505669779933941, guid: ba8aae89c74e51d47811b1075c330e67,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -4.15
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8705402260351160511, guid: ba8aae89c74e51d47811b1075c330e67,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 8
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8705402260351160511, guid: ba8aae89c74e51d47811b1075c330e67,
         type: 3}
@@ -223,12 +225,6 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 2454790761229599375, guid: ba8aae89c74e51d47811b1075c330e67, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ba8aae89c74e51d47811b1075c330e67, type: 3}
---- !u!1 &3261332618812847419 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1746706155016799501, guid: ba8aae89c74e51d47811b1075c330e67,
-    type: 3}
-  m_PrefabInstance: {fileID: 3854834176905195574}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7276956299241657709
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -276,7 +272,7 @@ PrefabInstance:
     - target: {fileID: 341348854826064884, guid: 33a85f753dddcae4f862709143ae5e91,
         type: 3}
       propertyPath: m_Name
-      value: Card_Ice_WallOfStatic Variant
+      value: Card_Ice_WallOfStatic
       objectReference: {fileID: 0}
     - target: {fileID: 341348854826064884, guid: 33a85f753dddcae4f862709143ae5e91,
         type: 3}
@@ -440,6 +436,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 33a85f753dddcae4f862709143ae5e91, type: 3}
+--- !u!1 &6935622365136277145 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 341348854826064884, guid: 33a85f753dddcae4f862709143ae5e91,
+    type: 3}
+  m_PrefabInstance: {fileID: 7276956299241657709}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &6935622364246328123 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 341348855750547030, guid: 33a85f753dddcae4f862709143ae5e91,

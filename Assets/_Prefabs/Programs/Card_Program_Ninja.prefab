@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   card: {fileID: 0}
   paidAbilities: []
+  conditionalAbilities: []
   strengthToAdd: 5
 --- !u!1001 &601743541941962488
 PrefabInstance:
@@ -245,12 +246,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
+      propertyPath: payments.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
+        type: 3}
       propertyPath: breakerType
       value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: payAmount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
+        type: 3}
+      propertyPath: payments.Array.data[0].amount
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -717,7 +728,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
+      propertyPath: payments.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
+        type: 3}
       propertyPath: payAmount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9006151616092137601, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
+        type: 3}
+      propertyPath: payments.Array.data[0].amount
       value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []

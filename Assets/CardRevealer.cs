@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
 using System.CodeDom;
+using UnityEngine.Events;
 
 public class CardRevealer : MonoBehaviour
 {
@@ -83,10 +84,12 @@ public class CardRevealer : MonoBehaviour
         }
     }
 
-    public void RevealCard(Card card, bool accessed)
+    UnityAction returnCallback;
+    public void RevealCard(Card card, bool accessed, UnityAction callback = null)
 	{
         targetRealCard = card;
         isAccessing = accessed;
+        returnCallback = callback;
 
         StartCoroutine(PanelActivationWaiter(true));
 
@@ -158,6 +161,9 @@ public class CardRevealer : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         unrevealedCard.FlipCard(targetRealCard.isFaceUp);
         yield return revealSequence.WaitForCompletion();
+
+        returnCallback?.Invoke();
+        returnCallback = null;
 
         Destroy(unrevealedCard.gameObject);
         Activate(false);

@@ -15,6 +15,8 @@ public class RunOperator : MonoBehaviour
     public bool isRunning;
     public bool isBreakingSubroutines;
     public bool isEncounteringIce;
+    public int? strengthModifier, netDamageModifier;
+    public bool bypassNextIce;
 
     public ServerColumn.ServerType? serverTypeOverride = null;
 
@@ -33,7 +35,7 @@ public class RunOperator : MonoBehaviour
     public delegate void RunEnded(bool success, ServerColumn.ServerType serverType);
     public static event RunEnded OnRunEnded;
 
-    public delegate void RunBeingMade(ServerColumn.ServerType serverType);
+    public delegate void RunBeingMade(ServerColumn server);
     public static event RunBeingMade OnRunBeingMade;
 
 
@@ -120,7 +122,7 @@ public class RunOperator : MonoBehaviour
 
         Card_Program.OnProgramStrengthModified += Card_Program_OnProgramStrengthModified;
         currentServerColumn = serverColumn;
-        OnRunBeingMade?.Invoke(serverColumn.serverType);
+        OnRunBeingMade?.Invoke(serverColumn);
         StartRun();
         //MoveToNextIce();
     }
@@ -160,9 +162,25 @@ public class RunOperator : MonoBehaviour
 
     public bool bypassedIce, canBreakSubroutines;
 
-    void BypassedIce()
+    void BypassedIce(bool subroutinesFired)
 	{
-        bypassedIce = true;
+        if (!strengthModifier.HasValue && netDamageModifier.HasValue)
+        {
+            if (subroutinesFired)
+            {
+                PlayCardManager.instance.DoNetDamage(DamageDone, netDamageModifier.Value);
+
+                void DamageDone()
+				{
+                    bypassedIce = true;
+                }
+            }
+            netDamageModifier = null;
+        }
+        else
+		{
+            bypassedIce = true;
+		}
     }
 
 
@@ -181,7 +199,7 @@ public class RunOperator : MonoBehaviour
 
         bypassedIce = canBreakSubroutines = false;
         isEncounteringIce = true;
-        Card viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
+        Card_Ice viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
         CardViewer.instance.PinCard(viewCard.viewIndex, false);
         viewCard.SetClickable(false);
         CardChooser.instance.ActivateFocus(null);
@@ -225,15 +243,28 @@ public class RunOperator : MonoBehaviour
 
         if (currentIceEncountered.isRezzed)
 		{
+            if (strengthModifier.HasValue)
+			{
+                viewCard.SetStrength(viewCard.strength + strengthModifier.Value);
+                strengthModifier = null;
+            }
+
             OnIceEncountered?.Invoke(currentIceEncountered);
 
             while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
 
-            currentIceEncountered = viewCard as Card_Ice;
+            currentIceEncountered = viewCard;
             if (!encounteredIceCards.Contains(currentIceEncountered)) encounteredIceCards.Add(currentIceEncountered);
 
             canBreakSubroutines = true;
             ActionOptions.instance.Display_FireRemainingSubs(true);
+
+            if (bypassNextIce)
+			{
+                BypassedIce(false);
+                bypassNextIce = false;
+			}
+
             while (!bypassedIce) yield return null;
             canBreakSubroutines = false;
         }
@@ -268,55 +299,60 @@ public class RunOperator : MonoBehaviour
         if (runCompletedRoutine != null) StopCoroutine(runCompletedRoutine);
 	}
 
+    bool waitingForCardUnReveal;
     Coroutine runCompletedRoutine;
 	IEnumerator RunCompleted()
     {
         OnApproached?.Invoke(currentServerColumn.currentIceIndex);
 
         CardViewer.instance.PinCard(-1, false);
-        Card serverCard = currentServerColumn.GetRemoteServerRoot();
-        if (serverCard)
-        {
-            CardViewer.instance.PinCard(serverCard.viewIndex, false);
-        }
 
         yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
         yield return JackOutRoutine();
 
-        bool? rezChoice = null;
-        if (serverCard)
+        ServerColumn serverColumnAccessed = serverTypeOverride.HasValue ? ServerSpace.instance.GetServerOfType(serverTypeOverride.Value) : currentServerColumn;
+        Card[] cardsInRoot = serverColumnAccessed.GetCardsInRoot();
+        if (cardsInRoot.Length > 0)
         {
-            if (TryRequestRezOnRemoteServer(serverCard, Choice))
+            List<SelectorNR> selectors = new List<SelectorNR>();
+			for (int i = 0; i < cardsInRoot.Length; i++)
+			{
+                selectors.Add(cardsInRoot[i].selector);
+			}
+
+            for (int i = 0; i < cardsInRoot.Length; i++)
             {
-                while (!rezChoice.HasValue) yield return null;
+                bool chosen = false;
+                CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
+                while (!chosen) yield return null;
+
+                print("Waiting for Unreveal...");
+                waitingForCardUnReveal = true;
+                while (waitingForCardUnReveal) yield return null;
+                print("DONE Waiting for Unreveal...");
+                while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
+
+                void Chosen(SelectorNR[] selectorNRs)
+                {
+                    Card chosenServerCard = selectorNRs[0].GetComponentInParent<Card>();
+                    serverColumnAccessed.AccessServer(chosenServerCard);
+                    chosen = true;
+                    selectors.Remove(selectorNRs[0]);
+                }
             }
         }
 
-        void Choice(bool yes)
-		{
-            rezChoice = false;
-            if (yes)
-			{
-                if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, serverCard.cardCost.costOfCard))
-				{
-                    serverCard.Rez();
-                    rezChoice = true;
-				}
-            }
-		}
-
         yield return new WaitForSeconds(0.25f);
 
-        ServerColumn serverColumnAccessed = serverTypeOverride.HasValue? ServerSpace.instance.GetServerOfType(serverTypeOverride.Value) : currentServerColumn;
         EndRun(true);
 
         CardChooser.instance.ActivateFocus();
         while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Run_Ends)) yield return null;
 
         Card installedCard = null;
-        if (serverColumnAccessed.HasRootInstalled(ref installedCard))
+        if (serverColumnAccessed.HasRootCardsInstalled())
 		{
-            serverColumnAccessed.AccessServer(serverColumnAccessed.serverType);
+            //serverColumnAccessed.AccessServer(serverColumnAccessed);
 
             while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
 
@@ -325,6 +361,11 @@ public class RunOperator : MonoBehaviour
         }
         CardChooser.instance.DeactivateFocus();
     }
+
+    public void ServerFinishedAccessing()
+	{
+        waitingForCardUnReveal = false;
+	}
 
 
     bool TryRequestRezOnRemoteServer(Card serverCard, UnityAction<bool> callback)
@@ -371,7 +412,7 @@ public class RunOperator : MonoBehaviour
         isBreakingSubroutines = false;
         if (currentIceEncountered.AllSubroutinesBypassed())
         {
-            BypassedIce();
+            BypassedIce(false);
             print("BYPASSED ICE");
         }
     }
@@ -385,10 +426,14 @@ public class RunOperator : MonoBehaviour
         currentPaidAbility = null;
     }
 
-    public void FireRemainingSubroutines()
+    public Coroutine FireRemainingSubroutines()
 	{
-        currentIceEncountered.FireAllRemainingSubroutines();
-        if (isRunning) BypassedIce();
+        return StartCoroutine(FireSubroutinesRoutine());
+	}
+    public IEnumerator FireSubroutinesRoutine()
+    {
+        yield return currentIceEncountered.FireAllRemainingSubroutines(null);
+        BypassedIce(true);
     }
 
 
@@ -423,6 +468,8 @@ public class RunOperator : MonoBehaviour
             currentIceEncountered = null;
             currentProgramEncountering = null;
             currentPaidAbility = null;
+            strengthModifier = netDamageModifier = null;
+            bypassNextIce = false;
             ServerColumn.ServerType serverType = currentServerColumn.serverType;
             if (serverTypeOverride.HasValue && success) serverType = serverTypeOverride.Value;
             currentServerColumn = null;
@@ -452,6 +499,7 @@ public class RunOperator : MonoBehaviour
 		{
             encounteredIceCards[i].ResetSubroutines();
             encounteredIceCards[i].ResetSubroutinesToFire();
+            encounteredIceCards[i].ResetStrength();
         }
     }
 

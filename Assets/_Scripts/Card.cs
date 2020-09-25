@@ -40,6 +40,12 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public bool isViewCard;
     public bool isInstalled;
     public SelectorNR selector;
+    int neutralCounters;
+    public int NeutralCounters
+	{
+        get { return neutralCounters; }
+		set { SetNeutralCounters(value); }
+    }
 
     public delegate void CardAccessed(Card card, ServerColumn.ServerType serverType);
     public static event CardAccessed OnCardAccessed;
@@ -370,10 +376,19 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         CardRevealer.instance.RevealCard(this, false);
 	}
 
-	public void Accessed(ServerColumn.ServerType serverAccessed)
+	public void Accessed()
 	{
-        OnCardAccessed?.Invoke(this, serverAccessed);
+        OnCardAccessed?.Invoke(this, RunOperator.instance.currentServerColumn.serverType);
     }
+
+
+    void SetNeutralCounters(int counters)
+	{
+        neutralCounters = counters;
+        cardRefs.UpdateNeutralCounter(counters);
+        if (isViewCard) CardViewer.instance.GetCard(viewIndex, true).SetNeutralCounters(counters);
+	}
+
 }
 
 

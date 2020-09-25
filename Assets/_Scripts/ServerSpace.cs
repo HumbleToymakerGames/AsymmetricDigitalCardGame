@@ -32,15 +32,20 @@ public class ServerSpace : MonoBehaviour
             ActivateAllColumnSelectors(true, isIceCard);
 
             List<SelectorNR> selectors = new List<SelectorNR>();
-            foreach (var server in FindObjectsOfType<ServerColumn>())
+            foreach (var server in serverColumns)
             {
-                if (isIceCard)
+                if (card is Card_Ice)
                 {
                     selectors.Add(server.selectorIce);
                 }
-                else if (server.IsRemoteServer())
+                else if (card is Card_Upgrade)
                 {
                     selectors.Add(server.selectorRoot);
+                }
+                else
+				{
+                    if (server.IsRemoteServer())
+                        selectors.Add(server.selectorRoot);
                 }
             }
             CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
@@ -60,16 +65,6 @@ public class ServerSpace : MonoBehaviour
 
     public bool CanInstallCard(IInstallable installableCard)
 	{
-  //      Card card = installableCard as Card;
-  //      bool isIceCard = card.IsCardType(CardType.Ice);
-  //      if (!isIceCard)
-		//{
-		//	foreach (var server in serverColumns)
-		//	{
-  //              if (!server.HasRootInstalled()) return true;
-		//	}
-  //          return false;
-		//}
         return true;
     }
 
@@ -87,7 +82,7 @@ public class ServerSpace : MonoBehaviour
         }
         else
 		{
-            targetServer.InstallCardToServer(card);
+            targetServer.InstallCardToServerRoot(card);
 		}
     }
 

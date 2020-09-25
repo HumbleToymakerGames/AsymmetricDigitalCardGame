@@ -11,24 +11,35 @@ public class Subroutine : MonoBehaviour
     Color ogColor;
     public bool isBroken;
 
-	private void Awake()
+    public delegate IEnumerator Ability();
+    public Ability IAbilityExecution;
+
+    private void Awake()
 	{
         button = GetComponent<Button>();
         ogColor = button.colors.normalColor;
         button.onClick.AddListener(Button_Clicked);
     }
 
-	// Start is called before the first frame update
-	void Start()
+    public Coroutine Fire()
     {
-        
+        if (abilityRoutine != null) StopCoroutine(abilityRoutine);
+        abilityRoutine = StartCoroutine(AbilityExecutionRoutine());
+        return abilityRoutine;
     }
 
-    // Update is called once per frame
-    void Update()
+    Coroutine abilityRoutine;
+    IEnumerator AbilityExecutionRoutine()
     {
-        
+        yield return IAbilityExecution();
     }
+
+    public void SetAbility(Ability ability)
+	{
+        IAbilityExecution = ability;
+    }
+
+
 
     public void SetInteractable(bool interactable)
 	{
@@ -70,17 +81,7 @@ public class Subroutine : MonoBehaviour
 
 
 
-    public virtual void Fire()
-	{
-
-	}
-
-
-    public virtual void Bypass()
-	{
-
-	}
-
+    
 
 
     public void Button_Clicked()
