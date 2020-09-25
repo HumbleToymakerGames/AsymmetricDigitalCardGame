@@ -33,7 +33,9 @@ public class RunOperator : MonoBehaviour
     public delegate void RunEnded(bool success, ServerColumn.ServerType serverType);
     public static event RunEnded OnRunEnded;
 
-    
+    public delegate void RunBeingMade(ServerColumn.ServerType serverType);
+    public static event RunBeingMade OnRunBeingMade;
+
 
     private void Awake()
     {
@@ -118,6 +120,7 @@ public class RunOperator : MonoBehaviour
 
         Card_Program.OnProgramStrengthModified += Card_Program_OnProgramStrengthModified;
         currentServerColumn = serverColumn;
+        OnRunBeingMade?.Invoke(serverColumn.serverType);
         StartRun();
         //MoveToNextIce();
     }

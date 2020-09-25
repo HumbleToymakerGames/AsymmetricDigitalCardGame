@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   card: {fileID: 0}
   paidAbilities: []
+  conditionalAbilities: []
   numCredits: 3
 --- !u!1001 &6848021747911906026
 PrefabInstance:
@@ -35,7 +36,7 @@ PrefabInstance:
     - target: {fileID: 8973013273714698890, guid: f2d750e949abee14691cbf22408fce6b,
         type: 3}
       propertyPath: m_Name
-      value: Card_Event_EasyMark Variant
+      value: Card_Event_EasyMark
       objectReference: {fileID: 0}
     - target: {fileID: 8973013273714698891, guid: f2d750e949abee14691cbf22408fce6b,
         type: 3}
@@ -200,7 +201,7 @@ PrefabInstance:
     - target: {fileID: 8973013275403747791, guid: f2d750e949abee14691cbf22408fce6b,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f2d750e949abee14691cbf22408fce6b, type: 3}

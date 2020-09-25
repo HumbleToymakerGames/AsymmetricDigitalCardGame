@@ -27,15 +27,22 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	private void OnEnable()
 	{
 		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
+		RunOperator.OnRunBeingMade += RunOperator_OnRunBeingMade;
 	}
 	private void OnDisable()
 	{
 		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
+		RunOperator.OnRunBeingMade -= RunOperator_OnRunBeingMade;
 	}
+
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
 		if (targetServer.IsRemoteServer())
 			myGO.SetActive(targetServer.HasAnyCardsInServer());
+	}
+	private void RunOperator_OnRunBeingMade(ServerColumn.ServerType serverType)
+	{
+		if (serverType == targetServer.serverType) RunningThisServer();
 	}
 
 	public bool CanHighlight(bool highlight = true)
@@ -56,11 +63,16 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	[ContextMenu("Make Run")]
 	public void Selected()
 	{
+		PlayCardManager.instance.TryMakeRun(targetServer);
+	}
+
+	void RunningThisServer()
+	{
 		RunOperator.OnApproached += RunOperator_OnCardBeingApproached;
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		numIceInColumn = targetServer.iceInColumn.Count;
-		PlayCardManager.instance.TryMakeRun(targetServer);
 	}
+
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
 	{

@@ -110,7 +110,7 @@ public class ActionOptions : MonoBehaviour
 	public void Display_RezCard(UnityAction<bool> callback, int rezCost, bool showOnly = false)
 	{
 		TryHideAllOptions(showOnly, false);
-		ActivateYesNo(callback, "Rez Card?");
+		ActivateYesNo(callback, "Rez Card?", rezCost);
 		yesText.text = string.Format(rezCostFormat, rezCost);
 	}
 

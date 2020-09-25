@@ -173,7 +173,7 @@ public class PlayerNR : MonoBehaviour
     }
     public void ActionPointsUsed(int numActions)
     {
-        ActionPoints = Mathf.Max(ActionPoints-numActions, 0);
+        ActionPoints -= numActions;
     }
 
     public void AddTotalMemory(int amountMemory)

@@ -23,6 +23,20 @@ public class Hand : PlayArea_Spot, IAccessable
         rt = GetComponent<RectTransform>();
     }
 
+	private void OnEnable()
+	{
+		GameManager.OnTurnChanged += GameManager_OnTurnChanged;
+	}
+	private void OnDisable()
+	{
+		GameManager.OnTurnChanged -= GameManager_OnTurnChanged;
+	}
+
+	private void GameManager_OnTurnChanged(bool isRunner)
+	{
+		ShowHand(myPlayer.IsRunner() == isRunner);
+	}
+
 	private void Start()
 	{
         ToggleShowing();
@@ -98,5 +112,17 @@ public class Hand : PlayArea_Spot, IAccessable
 
 		print("Hand accesssed");
 	}
+
+
+
+	void ShowHand(bool show)
+	{
+		foreach (var card in cardsInHand)
+		{
+			card.FlipCard(show);
+		}
+	}
+
+
 
 }

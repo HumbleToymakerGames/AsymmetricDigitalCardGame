@@ -9,14 +9,14 @@ public class PlayCardManager : MonoBehaviour
     public static PlayCardManager instance;
 
     // Action Point Indexes
-    private const int
+    public const int
         RUNNER_DRAW_CARD = 1,
         RUNNER_GAIN_CREDIT = 2,
         RUNNER_INSTALL = 3,
         RUNNER_EVENT = 4,
         RUNNER_REMOVE_TAG = 5,
         RUNNER_MAKE_RUN = 6;
-    private const int
+    public const int
         CORP_DRAW_CARD = 1,
         CORP_GAIN_CREDIT = 2,
         CORP_INSTALL = 3,
@@ -37,7 +37,8 @@ public class PlayCardManager : MonoBehaviour
     public static event eCardEvent OnCardExposed;
 
     [Header("Starting Points")]
-    public int numActionPointsStart;
+    public int numActionPointsStart_Runner;
+    public int numActionPointsStart_Corp;
     public int numMemoryUnitsStart;
     public int numTagsStart;
 
@@ -336,6 +337,12 @@ public class PlayCardManager : MonoBehaviour
         else print("Did not pay for card!!!");
 	}
 
+    public void CancelAction(PlayerNR player, int actionIndex)
+	{
+        int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Runner, actionIndex);
+        player.ActionPoints += costOfAction;
+    }
+
 	void UseMemorySpaceOfCard(Card card)
 	{
 		int spaceAvailable = PlayerNR.Runner.MemoryUnitsAvailable;
@@ -475,16 +482,20 @@ public class PlayCardManager : MonoBehaviour
 
     public void StartTurn(PlayerNR playerTurn, bool isFirstTurn)
 	{
+        if (isFirstTurn)
+        {
+            PlayerNR.Runner.MemoryUnitsAvailable = numMemoryUnitsStart;
+            PlayerNR.Runner.MemoryUnitsTotal = numMemoryUnitsStart;
+        }
+
         if (playerTurn.IsRunner())
 		{
-            playerTurn.ActionPoints = numActionPointsStart;
-            playerTurn.MemoryUnitsTotal = numMemoryUnitsStart;
-            if (isFirstTurn) playerTurn.MemoryUnitsAvailable = numMemoryUnitsStart;
+            playerTurn.ActionPoints = numActionPointsStart_Runner;
             playerTurn.Tags = numTagsStart;
         }
         else
 		{
-            playerTurn.ActionPoints = numActionPointsStart;
+            playerTurn.ActionPoints = numActionPointsStart_Corp;
 		}
 	}
 

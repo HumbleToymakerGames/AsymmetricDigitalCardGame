@@ -85,7 +85,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 	{
         if (card == this)
         {
-            SetInstall();
+            SetInstall(installed);
         }
     }
     private void CardViewer_OnCardPinned(Card card, bool primary)

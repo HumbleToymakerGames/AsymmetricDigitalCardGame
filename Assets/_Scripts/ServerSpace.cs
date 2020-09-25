@@ -51,6 +51,7 @@ public class ServerSpace : MonoBehaviour
                     choosingInstallColumn = false;
                     ActivateAllColumnSelectors(false, true);
                     ActivateAllColumnSelectors(false, false);
+                    PlayCardManager.instance.CancelAction(PlayerNR.Corporation, PlayCardManager.CORP_INSTALL);
                 }, true);
 
             void Chosen(SelectorNR[] selectorsChosen) { if (selectorsChosen.Length > 0) ServerChosen(selectorsChosen[0].GetComponentInParent<ServerColumn>()); }
