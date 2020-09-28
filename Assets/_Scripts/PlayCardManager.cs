@@ -261,6 +261,28 @@ public class PlayCardManager : MonoBehaviour
         return false;
     }
 
+    public bool TryPurgeVirusCounters()
+	{
+        if (CanPurgeVirusCounters())
+		{
+            int numVirusConters;
+            Card[] virusCards = GetVirusCounterCards(out numVirusConters);
+            Action_PurgeVirusCounters(virusCards);
+            return true;
+        }
+        return false;
+	}
+
+    public bool CanPurgeVirusCounters()
+	{
+        int numVirusConters;
+        GetVirusCounterCards(out numVirusConters);
+        return CanAffordAction(PlayerNR.Corporation, CORP_PURGE_VIRUSES)
+            && numVirusConters > 0;
+    }
+
+
+
     #region Actions
     void Action_DrawNextCard(PlayerNR player)
 	{
@@ -317,6 +339,13 @@ public class PlayCardManager : MonoBehaviour
         int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Corporation, CORP_ADVANCE);
         PlayerNR.Corporation.ActionPointsUsed(costOfAction);
         AdvanceCard(card);
+    }
+
+    void Action_PurgeVirusCounters(Card[] virusCards)
+	{
+        int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Corporation, CORP_PURGE_VIRUSES);
+        PlayerNR.Corporation.ActionPointsUsed(costOfAction);
+        PurgeVirusCounters(virusCards);
     }
 
     #endregion
@@ -391,6 +420,14 @@ public class PlayCardManager : MonoBehaviour
     void AdvanceCard(Card card)
 	{
         card.cardAdvancer.AdvanceCard();
+	}
+
+    void PurgeVirusCounters(Card[] virusCards)
+	{
+		foreach (var card in virusCards)
+		{
+            card.NeutralCounters = 0;
+		}
 	}
 
     void SendCardToDiscard(PlayerNR player, Card card)
@@ -510,6 +547,23 @@ public class PlayCardManager : MonoBehaviour
     }
 
 
+    public Card[] GetVirusCounterCards(out int numVirusCounters)
+	{
+        numVirusCounters = 0;
+        List<Card> virusCards = new List<Card>();
+		foreach (var card in FindObjectsOfType<Card>())
+		{
+            if (card.isInstalled && card.isViewCard)
+			{
+                if (card.neutralCountersAreVirus)
+				{
+                    virusCards.Add(card);
+                    numVirusCounters += card.NeutralCounters;
+                }
+			}
+		}
+        return virusCards.ToArray();
+    }
 
 
     public void StartTurn(PlayerNR playerTurn, bool isFirstTurn)

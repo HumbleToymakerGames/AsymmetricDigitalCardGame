@@ -5,17 +5,19 @@ using UnityEngine;
 public class ConditionalAbility : MonoBehaviour
 {
     public enum Condition {
-		Turn_Begins,
-		Card_Installed,
-		Run_Ends,
-		Agenda_Scored,
-		Agenda_Stolen,
-		Card_Accessed,
-		Card_Exposed,
-		Card_Exposed_Pre,
-		Ice_Encountered,
-		Tag_Received_Pre,
-		Runner_Damage_Pre
+		Turn_Begins = 0,
+		Card_Installed = 1,
+		Run_Ends = 2,
+		Agenda_Scored = 3,
+		Agenda_Stolen = 4,
+		Card_Accessed = 5,
+		Card_Exposed = 6,
+		Card_Exposed_Pre = 7,
+		Ice_Encountered = 8,
+		Ice_Encountered_End = 11,
+		Tag_Received_Pre = 9,
+		Runner_Damage_Pre = 10,
+
 	
 	};
     public Condition[] conditions;

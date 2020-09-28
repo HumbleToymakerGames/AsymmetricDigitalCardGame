@@ -17,6 +17,21 @@ MonoBehaviour:
   conditionalAbilities: []
   numStrength: 1
   numVirusCounters: 1
+  brokeSubroutineOnEncounter: 0
+--- !u!114 &5163739978791497746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7159203888334813363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b52af16592f95d4f844732f787e3795, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  conditions: 0b000000
+  card: {fileID: 0}
 --- !u!1001 &2545974539337925464
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -72,7 +87,7 @@ PrefabInstance:
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
@@ -87,7 +102,7 @@ PrefabInstance:
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
@@ -481,7 +496,7 @@ PrefabInstance:
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
@@ -496,7 +511,7 @@ PrefabInstance:
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
@@ -868,6 +883,11 @@ PrefabInstance:
       propertyPath: strength
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6046998404111111164, guid: e93e8dfb42af3994d8592f1d541c4291,
+        type: 3}
+      propertyPath: neutralCountersAreVirus
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9029044460803289338, guid: e93e8dfb42af3994d8592f1d541c4291,
         type: 3}
       propertyPath: costOfCard
@@ -947,7 +967,7 @@ PrefabInstance:
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
@@ -962,7 +982,7 @@ PrefabInstance:
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6045890145469810022, guid: 9b25ecc29dc1be74fa4b9d9ba027a2f5,
         type: 3}

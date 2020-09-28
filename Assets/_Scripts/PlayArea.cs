@@ -50,7 +50,7 @@ public class PlayArea : MonoBehaviour
 
     public int CostOfAction(PlayerNR player, int actionIndex)
     {
-        return runnerActionsReferenceCard.CostOfAction(actionIndex);
+        return ActionRefCardNR(player).CostOfAction(actionIndex);
         //return -123;
     }
 
@@ -82,6 +82,11 @@ public class PlayArea : MonoBehaviour
 	{
         return player.IsRunner() ? runnerScoringArea : corpScoringArea;
     }
+
+    public ActionsReferenceCard ActionRefCardNR(PlayerNR player)
+	{
+        return player.IsRunner() ? runnerActionsReferenceCard : corpActionsReferenceCard;
+	}
 
 
     #endregion

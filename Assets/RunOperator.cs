@@ -39,6 +39,8 @@ public class RunOperator : MonoBehaviour
     public delegate void RunBeingMade(ServerColumn server);
     public static event RunBeingMade OnRunBeingMade;
 
+    public delegate void eSubroutineBroken(Subroutine subroutine, PaidAbility breakerAbility);
+    public static event eSubroutineBroken OnSubroutineBroken;
 
     private void Awake()
     {
@@ -212,6 +214,7 @@ public class RunOperator : MonoBehaviour
         CardViewer.instance.PinCard(currentIceEncountered_View.viewIndex, false);
         currentIceEncountered_View.SetClickable(false);
         CardChooser.instance.ActivateFocus(null);
+        ResetIce(currentIceEncountered_View);
 
         //yield return new WaitForSeconds(0.25f);
 
@@ -421,6 +424,7 @@ public class RunOperator : MonoBehaviour
         currentIceEncountered_View.SetClickable(false);
         BreakerPanel.instance.Activate(false);
         isBreakingSubroutines = false;
+        OnSubroutineBroken?.Invoke(subroutine, currentPaidAbility);
         if (currentIceEncountered_View.AllSubroutinesBypassed())
         {
             BypassedIce(false);
@@ -509,14 +513,19 @@ public class RunOperator : MonoBehaviour
         strengthModifiedProgramCards.Clear();
     }
 
-    public void ResetAllIces()
+    void ResetAllIces()
 	{
 		for (int i = 0; i < encounteredIceCards.Count; i++)
 		{
-            encounteredIceCards[i].ResetSubroutines();
-            encounteredIceCards[i].ResetSubroutinesToFire();
-            encounteredIceCards[i].ResetStrength();
+            ResetIce(encounteredIceCards[i]);
         }
+    }
+
+    void ResetIce(Card_Ice viewCard)
+	{
+        viewCard.ResetSubroutines();
+        viewCard.ResetSubroutinesToFire();
+        viewCard.ResetStrength();
     }
 
 

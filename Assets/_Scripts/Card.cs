@@ -43,9 +43,11 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     int neutralCounters;
     public int NeutralCounters
 	{
-        get { return neutralCounters; }
+		get { return neutralCounters; }
 		set { SetNeutralCounters(value); }
-    }
+	}
+    public bool neutralCountersAreVirus;
+
 
     public delegate void CardAccessed(Card card, ServerColumn.ServerType serverType);
     public static event CardAccessed OnCardAccessed;
@@ -189,7 +191,12 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public void DeRez()
 	{
         isRezzed = false;
-	}
+        FlipCard(false);
+        if (!isViewCard)
+        {
+            CardViewer.instance.GetCard(viewIndex, false)?.DeRez();
+        }
+    }
 
 
     void UpdateCardFlipDisplay(bool faceUp, bool immediate = false)
