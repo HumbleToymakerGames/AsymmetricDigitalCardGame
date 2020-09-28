@@ -67,7 +67,7 @@ public class Card_Snare : CardFunction
 			if (PlayCardManager.instance.TryAffordCost(card.myPlayer, numCredits))
 			{
 				bool damageDone = false;
-				PlayCardManager.instance.DoNetDamage(DamageDone, 3);
+				PlayCardManager.instance.DoRunnerDamage(DamageDone, 3, DamageType.Net);
 				while (!damageDone) yield return null;
 
 				PlayCardManager.instance.TagRunner(numTags);

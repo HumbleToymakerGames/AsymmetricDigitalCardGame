@@ -19,7 +19,7 @@ public class Card_WallOfThorns : CardFunction
 	IEnumerator DoNetDamage()
 	{
 		bool damageDone = false;
-		PlayCardManager.instance.DoNetDamage(DamageDone, numNetDamage);
+		PlayCardManager.instance.DoRunnerDamage(DamageDone, numNetDamage, DamageType.Net);
 		while (!damageDone) yield return null;
 
 		void DamageDone()

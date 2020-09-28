@@ -254,7 +254,12 @@ public class CardRevealer : MonoBehaviour
 
         if (isAccessing)
         {
-            if (targetRealCard is Card_Asset)
+            if (targetRealCard is Card_Agenda)
+            {
+                SetAllCardButtonsInteractable(false);
+                cardButton_Steal.interactable = true;
+            }
+            else
             {
                 cardButton_Return.interactable = true;
 
@@ -264,11 +269,6 @@ public class CardRevealer : MonoBehaviour
                 cardButton_Trash.interactable = cardIsTrashable;
 
                 cardButton_Steal.interactable = false;
-            }
-            else if (targetRealCard is Card_Agenda)
-            {
-                SetAllCardButtonsInteractable(false);
-                cardButton_Steal.interactable = true;
             }
         }
         else

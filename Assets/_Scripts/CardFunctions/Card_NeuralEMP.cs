@@ -42,6 +42,6 @@ public class Card_NeuralEMP : CardFunction
 
 	void DoNetDamage()
     {
-		PlayCardManager.instance.DoNetDamage(null, 1);
+		PlayCardManager.instance.DoRunnerDamage(null, 1, DamageType.Net);
     }
 }

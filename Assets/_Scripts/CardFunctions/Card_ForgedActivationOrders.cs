@@ -26,13 +26,13 @@ public class Card_ForgedActivationOrders : CardFunction
 		{
 			CardChooser.instance.ActivateFocus(null);
 			Card chosenCard = selectorNRs[0].GetComponentInParent<Card>();
-			ActionOptions.instance.ActivateYesNo(Choice, card.cardTitle, chosenCard.cardCost.costOfCard, "Rez Ice", "Trash Ice");
+			ActionOptions.instance.ActivateYesNo(Choice, card.cardTitle, chosenCard.CostOfCard(), "Rez Ice", "Trash Ice");
 
 			void Choice(bool rez)
 			{
 				if (rez)
 				{
-					if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, chosenCard.cardCost.costOfCard))
+					if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, chosenCard.CostOfCard()))
 					{
 						chosenCard.Rez();
 					}

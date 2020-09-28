@@ -70,6 +70,14 @@ public class RunOperator : MonoBehaviour
 	private void Update()
 	{
         CardViewer.instance.ShowLinkIcon(isEncounteringIce && currentIceEncountered.isRezzed && CardViewer.currentPinnedCard && CardViewer.currentPinnedCard.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
+
+        if (isRunning)
+		{
+            if (!CardChooser.instance.isFocused)
+			{
+                CardChooser.instance.ActivateFocus();
+			}
+		}
 	}
 
 	void RunStructure()
@@ -168,7 +176,7 @@ public class RunOperator : MonoBehaviour
         {
             if (subroutinesFired)
             {
-                PlayCardManager.instance.DoNetDamage(DamageDone, netDamageModifier.Value);
+                PlayCardManager.instance.DoRunnerDamage(DamageDone, netDamageModifier.Value, DamageType.Net);
 
                 void DamageDone()
 				{
@@ -214,9 +222,8 @@ public class RunOperator : MonoBehaviour
 
         if (!currentIceEncountered.isRezzed)
 		{
-            PaidAbilitiesManager.instance.PausePaidWindow();
             bool? rezChoice = null;
-            ActionOptions.instance.Display_RezCard(RezChoice, currentIceEncountered.cardCost.costOfCard, true);
+            ActionOptions.instance.Display_RezCard(RezChoice, currentIceEncountered.CostOfCard(), true);
             while (!rezChoice.HasValue) yield return null;
 
             void RezChoice(bool yes)
@@ -224,13 +231,12 @@ public class RunOperator : MonoBehaviour
                 rezChoice = false;
                 if (yes)
 				{
-                    if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentIceEncountered.cardCost.costOfCard))
+                    if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentIceEncountered.CostOfCard()))
 					{
                         rezChoice = true;
                     }
 
                 }
-                PaidAbilitiesManager.instance.ResumePaidWindow();
             }
 
             if (rezChoice.Value)
@@ -239,7 +245,6 @@ public class RunOperator : MonoBehaviour
             }
 
         }
-
 
         if (currentIceEncountered.isRezzed)
 		{
@@ -250,13 +255,14 @@ public class RunOperator : MonoBehaviour
             }
 
             OnIceEncountered?.Invoke(currentIceEncountered);
-
             while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
 
             currentIceEncountered = viewCard;
             if (!encounteredIceCards.Contains(currentIceEncountered)) encounteredIceCards.Add(currentIceEncountered);
 
             canBreakSubroutines = true;
+            yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
+
             ActionOptions.instance.Display_FireRemainingSubs(true);
 
             if (bypassNextIce)
@@ -325,11 +331,14 @@ public class RunOperator : MonoBehaviour
                 bool chosen = false;
                 CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
                 while (!chosen) yield return null;
+                while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
 
                 print("Waiting for Unreveal...");
                 waitingForCardUnReveal = true;
                 while (waitingForCardUnReveal) yield return null;
                 print("DONE Waiting for Unreveal...");
+
+                yield return new WaitForSeconds(0.25f);
                 while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
 
                 void Chosen(SelectorNR[] selectorNRs)
@@ -349,7 +358,6 @@ public class RunOperator : MonoBehaviour
         CardChooser.instance.ActivateFocus();
         while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Run_Ends)) yield return null;
 
-        Card installedCard = null;
         if (serverColumnAccessed.HasRootCardsInstalled())
 		{
             //serverColumnAccessed.AccessServer(serverColumnAccessed);
@@ -376,7 +384,7 @@ public class RunOperator : MonoBehaviour
 			CardViewer.instance.PinCard(viewCard.viewIndex, false);
 			viewCard.SetClickable(false);
 
-			ActionOptions.instance.Display_RezCard(callback, serverCard.cardCost.costOfCard, true);
+			ActionOptions.instance.Display_RezCard(callback, serverCard.CostOfCard(), true);
 			return true;
 		}
 		return false;
@@ -450,6 +458,10 @@ public class RunOperator : MonoBehaviour
     //public void Reset
 
     [ContextMenu("EndRun")]
+    public void Ender()
+	{
+        EndRun(false);
+	}
     public void EndRun(bool success)
     {
         if (isRunning)
@@ -480,6 +492,7 @@ public class RunOperator : MonoBehaviour
             OnRunEnded?.Invoke(success, serverType);
             SetServerTypeOverride(null);
             CardChooser.instance.DeactivateFocus();
+            PaidAbilitiesManager.instance.SetPriorityToTurn();
             print("Run Ended.");
         }
     }

@@ -4,7 +4,20 @@ using UnityEngine;
 
 public class ConditionalAbility : MonoBehaviour
 {
-    public enum Condition { Turn_Begins, Card_Installed, Run_Ends, Agenda_Scored, Agenda_Stolen, Card_Accessed, Card_Exposed, Card_Exposed_Pre, Ice_Encountered, Tag_Received_Pre };
+    public enum Condition {
+		Turn_Begins,
+		Card_Installed,
+		Run_Ends,
+		Agenda_Scored,
+		Agenda_Stolen,
+		Card_Accessed,
+		Card_Exposed,
+		Card_Exposed_Pre,
+		Ice_Encountered,
+		Tag_Received_Pre,
+		Runner_Damage_Pre
+	
+	};
     public Condition[] conditions;
 
 	public delegate IEnumerator Ability();

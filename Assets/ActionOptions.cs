@@ -269,4 +269,22 @@ public class ActionOptions : MonoBehaviour
 	#endregion
 
 
+
+
+	public bool AllOptionsHidden()
+	{
+		return
+			!fireRemainingSubsButton.gameObject.activeSelf &&
+			!advanceCardButton.gameObject.activeSelf &&
+			!scoreAgendaButton.gameObject.activeSelf &&
+			!cancelButton.gameObject.activeSelf &&
+			!continueGO.gameObject.activeSelf &&
+			!yesNoPanelGO.gameObject.activeSelf &&
+			!actionMessageGO.gameObject.activeSelf &&
+			!counterGO.gameObject.activeSelf;
+	}
+
+
+
+
 }

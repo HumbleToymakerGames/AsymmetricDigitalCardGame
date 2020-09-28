@@ -61,17 +61,7 @@ public class Card_ProjectJunebug : CardFunction
 		print("junebug accessed");
 		int numAdvancements = card.cardAdvancer.advancementAmount;
 
-		bool damageDone = false;
-		PlayCardManager.instance.DoNetDamage(DamageDone, numNetDamage * numAdvancements);
-		while (!damageDone) yield return null;
-
-		void DamageDone()
-		{
-			damageDone = true;
-			print("JunDamage!");
-		}
-
-
+		yield return PlayCardManager.instance.DoRunnerDamage(null, numNetDamage * numAdvancements, DamageType.Net);
 
 
 		cardAccessed = false;

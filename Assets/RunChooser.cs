@@ -105,7 +105,6 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	public IEnumerator ResetArrow(bool success)
 	{
 		if (success) yield return new WaitForSeconds(2);
-		if (success) yield return new WaitForSeconds(2);
 
 		Vector2 size = arrowRT.sizeDelta;
 		size.x = 80;

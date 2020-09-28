@@ -27,6 +27,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		PlayCardManager.OnCardExposed_Pre += PlayCardManager_OnCardExposed_Pre;
 		RunOperator.OnIceEncountered += RunOperator_OnIceEncountered;
 		PlayCardManager.OnTagGiven_Pre += PlayCardManager_OnTagGiven_Pre;
+		PlayCardManager.OnDamageDone_Pre += PlayCardManager_OnDamageDone_Pre;
 	}
 	private void OnDisable()
 	{
@@ -40,6 +41,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		PlayCardManager.OnCardExposed_Pre -= PlayCardManager_OnCardExposed_Pre;
 		RunOperator.OnIceEncountered -= RunOperator_OnIceEncountered;
 		PlayCardManager.OnTagGiven_Pre -= PlayCardManager_OnTagGiven_Pre;
+		PlayCardManager.OnDamageDone_Pre -= PlayCardManager_OnDamageDone_Pre;
 	}
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
@@ -82,6 +84,10 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	{
 		StartResolvingConditionals(ConditionalAbility.Condition.Tag_Received_Pre);
 	}
+	private void PlayCardManager_OnDamageDone_Pre(DamageWrapper damageWrapper)
+	{
+		StartResolvingConditionals(ConditionalAbility.Condition.Runner_Damage_Pre);
+	}
 
 
 	void StartResolvingConditionals(ConditionalAbility.Condition condition)
@@ -89,7 +95,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		if (resolvingRoutine != null)
 		{
 			StopCoroutine(resolvingRoutine);
-			print("resolvingRoutine stopped");
+			print("ConditionalsRoutine stopped");
 		}
 		resolvingRoutine = StartCoroutine(ResolvingConditionalsRoutine(condition));
 		PaidAbilitiesManager.instance.PausePaidWindow();
@@ -148,7 +154,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 			ability.ExecuteAbility();
 			while (waitForConditionResolved) yield return null;
 		}
-		print("resolvingRoutine Over!");
+		print("ConditionalsRoutine Over!");
 		resolvingRoutine = null;
 		PaidAbilitiesManager.instance.ResumePaidWindow();
 	}

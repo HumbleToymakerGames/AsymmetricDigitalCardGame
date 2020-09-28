@@ -13,17 +13,6 @@ public class CardCost : MonoBehaviour
         return balance >= costOfCard;
 	}
 
-    public bool TryBuyCard(ref int newBalance)
-	{
-        if (CanAffordCard(newBalance))
-		{
-            newBalance -= costOfCard;
-            return true;
-		}
-        return false;
-	}
-
-
     public bool CanUseMemorySpace(int spaceAvailable)
 	{
         return spaceAvailable >= memorySpaceCost;

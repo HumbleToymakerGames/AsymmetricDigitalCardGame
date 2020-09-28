@@ -15,6 +15,8 @@ MonoBehaviour:
   card: {fileID: 0}
   paidAbilities: []
   conditionalAbilities: []
+  costModifier: 2
+  myServer: {fileID: 0}
 --- !u!1001 &443941744227493958
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -142,6 +144,11 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 7898579722294623853, guid: e105397b18d37d045896b55abd33bf58,
+        type: 3}
+      propertyPath: m_text
+      value: The rez cost of ice protecting this server is lowered by 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7898579722294623859, guid: e105397b18d37d045896b55abd33bf58,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -155,6 +162,16 @@ PrefabInstance:
     - target: {fileID: 7898579722294623859, guid: e105397b18d37d045896b55abd33bf58,
         type: 3}
       propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7898579722294623859, guid: e105397b18d37d045896b55abd33bf58,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7898579722294623859, guid: e105397b18d37d045896b55abd33bf58,
+        type: 3}
+      propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7898579722673918419, guid: e105397b18d37d045896b55abd33bf58,
@@ -181,6 +198,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7898579722673918419, guid: e105397b18d37d045896b55abd33bf58,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 19.94
+      objectReference: {fileID: 0}
+    - target: {fileID: 8270858076753823625, guid: e105397b18d37d045896b55abd33bf58,
+        type: 3}
+      propertyPath: trashCost
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e105397b18d37d045896b55abd33bf58, type: 3}

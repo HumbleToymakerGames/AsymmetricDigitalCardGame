@@ -8,7 +8,7 @@ public class Card_LemuriaCodeCracker : CardFunction
 
 	public ServerColumn.ServerType targetServer;
 	public int numCredits, numClicks;
-	bool runMade, myTurn;
+	public bool runMade, myTurn;
 
 
 	protected override void OnEnable()

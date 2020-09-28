@@ -26,6 +26,8 @@ public class PlayCardManager : MonoBehaviour
         CORP_PURGE_VIRUSES = 6,
         CORP_TRASH_RESOURCE_TAGGED = 7;
 
+    public const int COST_REMOVE_TAG = 2;
+
     public delegate void eCardInstalled(Card card, bool installed);
     public static event eCardInstalled OnCardInstalled;
 
@@ -39,6 +41,9 @@ public class PlayCardManager : MonoBehaviour
 
     public delegate void TagGiven(TagWrapper tagWrapper);
     public static event TagGiven OnTagGiven_Pre;
+
+    public delegate void DamageDone(DamageWrapper damageWrapper);
+    public static event DamageDone OnDamageDone, OnDamageDone_Pre;
 
     [Header("Starting Points")]
     public int numActionPointsStart_Runner;
@@ -126,13 +131,13 @@ public class PlayCardManager : MonoBehaviour
 
     public bool TryInstallCard(IInstallable installableCard)
 	{
-        if (CanInstallCard(installableCard))
+        Card card = (Card)installableCard;
+        if (CanInstallCard(installableCard) && CanAffordCost(GameManager.CurrentTurnPlayer, card.CostOfCard()))
 		{
-            Card card = (Card)installableCard;
             if (GameManager.CurrentTurnPlayer.IsRunner())
             {
                 Action_InstallCard_Runner(installableCard);
-                PayCostOfCard(GameManager.CurrentTurnPlayer, card);
+                PayCost(GameManager.CurrentTurnPlayer, card.CostOfCard());
                 UseMemorySpaceOfCard(card);
             }
             else
@@ -161,25 +166,27 @@ public class PlayCardManager : MonoBehaviour
 
     public bool CanActivateEvent(IActivateable activateableCard)
 	{
-        return CanAffordAction(GameManager.CurrentTurnPlayer, RUNNER_EVENT) && activateableCard.CanActivate();
+        return CanAffordAction(GameManager.CurrentTurnPlayer, RUNNER_EVENT) &&
+            activateableCard.CanActivate();
 	}
 
     public bool TryActivateEvent(IActivateable activateableCard)
 	{
-        if (CanActivateEvent(activateableCard))
+        Card card = (Card)activateableCard;
+        if (CanActivateEvent(activateableCard) && CanAffordCost(GameManager.CurrentTurnPlayer, card.CostOfCard()))
 		{
             Action_ActivateEvent(GameManager.CurrentTurnPlayer, activateableCard);
-            Card card = (Card)activateableCard;
-            PayCostOfCard(GameManager.CurrentTurnPlayer, card);
+            PayCost(GameManager.CurrentTurnPlayer, card.CostOfCard());
             SendCardToDiscard(GameManager.CurrentTurnPlayer, card);
+            return true;
         }
-        return true;
+        return false;
 	}
 
     public bool CanRemoveTag()
 	{
         return CanAffordAction(PlayerNR.Runner, RUNNER_REMOVE_TAG)
-            && CanAffordCost(PlayerNR.Runner, 2)
+            && CanAffordCost(PlayerNR.Runner, COST_REMOVE_TAG)
             && PlayerNR.Runner.Tags > 0;
     }
 
@@ -188,7 +195,7 @@ public class PlayCardManager : MonoBehaviour
         if (CanRemoveTag())
 		{
             Action_RemoveTag();
-            PayCost(PlayerNR.Runner, 2);
+            PayCost(PlayerNR.Runner, COST_REMOVE_TAG);
 
             return true;
 		}
@@ -298,7 +305,7 @@ public class PlayCardManager : MonoBehaviour
         ActivateCard(activateableCard);
     }
 
-    void Action_RemoveTag()
+    public void Action_RemoveTag()
 	{
         int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Runner, RUNNER_REMOVE_TAG);
         PlayerNR.Runner.ActionPointsUsed(costOfAction);
@@ -318,16 +325,6 @@ public class PlayCardManager : MonoBehaviour
     void PayCost(PlayerNR player, int cost)
 	{
         player.Credits -= cost;
-	}
-
-    void PayCostOfCard(PlayerNR player, Card card)
-	{
-        int balance = player.Credits;
-        if (card.cardCost.TryBuyCard(ref balance))
-        {
-            player.Credits = balance;
-        }
-        else print("Did not pay for card!!!");
 	}
 
     public void CancelAction(PlayerNR player, int actionIndex)
@@ -444,22 +441,40 @@ public class PlayCardManager : MonoBehaviour
     }
 
 
-    public void DoNetDamage(UnityAction callBack, int numDamage)
+    public Coroutine DoRunnerDamage(UnityAction callBack, int numDamage, DamageType damageType)
+	{
+        return StartCoroutine(DoDamageRoutine(callBack, numDamage, damageType));
+	}
+
+    public IEnumerator DoDamageRoutine(UnityAction callBack, int numDamage, DamageType damageType)
 	{
         if (numDamage <= 0)
         {
             callBack?.Invoke();
-            return;
+            yield break;
         }
         List<SelectorNR> selectorNRs = new List<SelectorNR>();
 		foreach (var card in PlayArea.instance.HandNR(PlayerNR.Runner).cardsInHand)
 		{
             selectorNRs.Add(card.selector);
 		}
-        if (selectorNRs.Count <= 0) return;
+        if (selectorNRs.Count <= 0) yield break;
 
-        CardChooser.instance.ActivateFocus(NetDamageDone, numDamage, selectorNRs.ToArray());
-        ActionOptions.instance.ActivateActionMessage(string.Format("Net Damage:\nRemove ({0}) cards", numDamage));
+
+        DamageWrapper damageWrapper = new DamageWrapper(numDamage, damageType);
+        OnDamageDone_Pre?.Invoke(damageWrapper);
+        while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
+
+        if (damageWrapper.Damage <= 0)
+        {
+            callBack?.Invoke();
+            yield break;
+        }
+
+        CardChooser.instance.ActivateFocus(NetDamageDone, damageWrapper.Damage, selectorNRs.ToArray());
+        ActionOptions.instance.ActivateActionMessage(string.Format("Net Damage:\nRemove ({0}) cards", damageWrapper.Damage));
+
+        OnDamageDone?.Invoke(damageWrapper);
 
         void NetDamageDone(SelectorNR[] selectors)
 		{
@@ -503,18 +518,20 @@ public class PlayCardManager : MonoBehaviour
         {
             PlayerNR.Runner.MemoryUnitsAvailable = numMemoryUnitsStart;
             PlayerNR.Runner.MemoryUnitsTotal = numMemoryUnitsStart;
+            PlayerNR.Runner.Tags = numTagsStart;
         }
 
         if (playerTurn.IsRunner())
 		{
             playerTurn.ActionPoints = numActionPointsStart_Runner;
-            playerTurn.Tags = numTagsStart;
+            PlayerNR.Corporation.ActionPoints = 0;
         }
         else
 		{
             playerTurn.ActionPoints = numActionPointsStart_Corp;
-		}
-	}
+            PlayerNR.Runner.ActionPoints = 0;
+        }
+    }
 
 
 

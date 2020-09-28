@@ -31,7 +31,7 @@ public class PaidAbilitiesManager : MonoBehaviour
 
 	private void GameManager_OnTurnChanged(bool isRunner)
 	{
-		StartPaidAbilitiesWindow();
+		SetPriorityToTurn();
 	}
 	private void PaidAbility_OnPaidAbilityActivated()
 	{
@@ -53,7 +53,7 @@ public class PaidAbilitiesManager : MonoBehaviour
 		return paidAbitiliesRoutine;
 	}
 
-	void StopPaidAbilitiesWindow()
+	public void StopPaidAbilitiesWindow()
 	{
 		if (paidAbitiliesRoutine != null) StopCoroutine(paidAbitiliesRoutine);
 	}
@@ -75,10 +75,10 @@ public class PaidAbilitiesManager : MonoBehaviour
 				SwapPriorityPlayer();
 			}
 
-			SetPriorityPlayer(GameManager.CurrentTurnPlayer);
 		}
-		print("PaidAbilitiesWindow Closed");
 
+		SetPriorityPlayer(null);
+		print("PaidAbilitiesWindow Closed");
 	}
 
 
@@ -88,13 +88,24 @@ public class PaidAbilitiesManager : MonoBehaviour
 		numberAbilitiesUsed = 0;
 		bool waitingForContinue = true;
 		ActionOptions.instance.Display_Continue(Continue, true);
-		while (waitingForContinue) yield return null;
+		while (waitingForContinue)
+		{
+			yield return new WaitForSeconds(0.1f);
+			if (waitingForContinue && ActionOptions.instance.AllOptionsHidden())
+				ActionOptions.instance.Display_Continue(Continue, true);
+		}
 
 		void Continue()
 		{
 			waitingForContinue = false;
 		}
 
+	}
+
+	public void SetPriorityToTurn()
+	{
+		SetPriorityPlayer(GameManager.CurrentTurnPlayer);
+		StopPaidAbilitiesWindow();
 	}
 
 
@@ -115,9 +126,9 @@ public class PaidAbilitiesManager : MonoBehaviour
 	PlayerNR pausedPriorityPlayer;
 	public void PausePaidWindow()
 	{
-		print("Paused");
 		if (IsResolving() && !isPaused)
 		{
+			print("PausedPaidWindow");
 			pausedPriorityPlayer = PriorityPlayer;
 			SetPriorityPlayer(null);
 			isPaused = true;
@@ -126,9 +137,9 @@ public class PaidAbilitiesManager : MonoBehaviour
 
 	public void ResumePaidWindow()
 	{
-		print("Resumed	");
 		if (isPaused)
 		{
+			print("ResumedPaidWindow");
 			SetPriorityPlayer(pausedPriorityPlayer);
 			pausedPriorityPlayer = null;
 			isPaused = false;

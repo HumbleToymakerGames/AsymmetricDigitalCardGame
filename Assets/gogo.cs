@@ -14,37 +14,18 @@ public class gogo : MonoBehaviour
         //UnityAction<bool> banger = (dang) => print(dang);
         //actions.Add(banger);
 
-        bool t = false;
-        ganger((g) => g.banger(t));
-
 
     }
-
-    void Update()
-    {
-    }
-
-
-    void ganger(UnityAction<gogo> action)
+	private void OnEnable()
 	{
-        action.Invoke(this);
+		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
 	}
-
-   
-
-
-    void banger()
+	private void OnDisable()
 	{
-
+		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
 	}
-
-    void banger(bool i)
+	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
+		print("card: " + card.name +" installed -- " + installed);
 	}
-
-    void banger(int i, string s)
-	{
-
-	}
-
 }

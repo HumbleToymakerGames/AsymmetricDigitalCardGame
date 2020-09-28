@@ -49,7 +49,7 @@ public class Card_Jinteki : CardFunction
 		// Do net damage
 
 		bool damageDone = false;
-		PlayCardManager.instance.DoNetDamage(DamageDone, numNetDamage);
+		PlayCardManager.instance.DoRunnerDamage(DamageDone, numNetDamage, DamageType.Net);
 		while (!damageDone) yield return null;
 
 		void DamageDone()

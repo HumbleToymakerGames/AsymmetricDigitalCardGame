@@ -53,6 +53,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public delegate void CardRezzed(Card card);
     public static event CardRezzed OnCardRezzed;
 
+    public int cardCostModifier;
+
     protected virtual void Awake()
 	{
         isFaceUp = true;
@@ -140,7 +142,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
     void UpdateCardCost()
 	{
-        cardRefs.UpdateCardCost(cardCost.costOfCard);
+        cardRefs.UpdateCardCost(CostOfCard());
 	}
 
     void UpdateCardTitle()
@@ -333,11 +335,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
     public virtual bool CanBeClicked()
     {
-        bool hasPriority = false;
-        if (PaidAbilitiesManager.instance.IsResolving())
-        {
-            hasPriority = PaidAbilitiesManager.instance.IsMyPriority(myPlayer);
-        }
+        bool hasPriority = PaidAbilitiesManager.instance.IsMyPriority(myPlayer);
         return isInstalled && hasPriority && isViewCard && viewIndex == CardViewer.currentPinnedCard?.viewIndex;  
     }
 
@@ -387,6 +385,18 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         neutralCounters = counters;
         cardRefs.UpdateNeutralCounter(counters);
         if (isViewCard) CardViewer.instance.GetCard(viewIndex, true).SetNeutralCounters(counters);
+	}
+
+    public void SetCardCostModifier(int modifier)
+	{
+        cardCostModifier = modifier;
+        UpdateCardCost();
+        if (!isViewCard) CardViewer.instance.GetCard(viewIndex, false).SetCardCostModifier(modifier);
+	}
+
+    public int CostOfCard()
+	{
+        return cardCost.costOfCard + cardCostModifier;
 	}
 
 }
