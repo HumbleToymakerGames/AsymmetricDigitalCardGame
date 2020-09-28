@@ -28,23 +28,38 @@ public class RunChooser : MonoBehaviour, ISelectableNR
 	{
 		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
 		RunOperator.OnRunBeingMade += RunOperator_OnRunBeingMade;
+		RunOperator.OnRunEnded += RunOperator_OnRunEnded1;
 	}
+
+	
+
 	private void OnDisable()
 	{
 		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
 		RunOperator.OnRunBeingMade -= RunOperator_OnRunBeingMade;
+		RunOperator.OnRunEnded -= RunOperator_OnRunEnded1;
 	}
 
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
 		if (targetServer.IsRemoteServer())
-			myGO.SetActive(targetServer.HasAnyCardsInServer());
+		{
+			if (targetServer.HasAnyCardsInServer())
+				myGO.SetActive(true);
+		}
 	}
 	private void RunOperator_OnRunBeingMade(ServerColumn server)
 	{
 		if (server == targetServer) RunningThisServer();
 	}
-
+	private void RunOperator_OnRunEnded1(bool success, ServerColumn.ServerType serverType)
+	{
+		if (serverType == targetServer.serverType)
+		{
+			if (targetServer.IsRemoteServer() && !targetServer.HasAnyCardsInServer())
+				myGO.SetActive(false);
+		}
+	}
 	public bool CanHighlight(bool highlight = true)
 	{
 		if (highlight) return !RunOperator.instance.isRunning && GameManager.CurrentTurnPlayer.IsRunner();

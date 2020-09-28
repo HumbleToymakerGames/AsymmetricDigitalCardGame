@@ -403,7 +403,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
     public int CostOfCard()
 	{
-        return cardCost.costOfCard + cardCostModifier;
+        return Mathf.Max(cardCost.costOfCard + cardCostModifier, 0);
 	}
 
 }

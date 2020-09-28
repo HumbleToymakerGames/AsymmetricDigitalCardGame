@@ -115,6 +115,15 @@ public abstract class CardFunction : MonoBehaviour
 		return false;
 	}
 
+	public bool HasBreaker()
+	{
+		for (int i = 0; i < paidAbilities.Length; i++)
+		{
+			if (paidAbilities[i].isBreakerRoutine) return true;
+		}
+		return false;
+	}
+
 
 	void GetPaidAbilities()
 	{

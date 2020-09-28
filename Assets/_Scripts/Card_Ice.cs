@@ -11,7 +11,7 @@ public class Card_Ice : Card, IInstallable
     public int strength;
     int baseStrength;
 
-    Subroutine[] subroutines;
+    public Subroutine[] subroutines;
     public bool[] subroutinesToFire;
 
 	protected override void Awake()
@@ -37,8 +37,6 @@ public class Card_Ice : Card, IInstallable
     public bool CanInstall()
     {
         return true;
-        //cardCost.CanAffordCard(PlayerNR.Runner.Credits)
-            //&& cardCost.CanUseMemorySpace(PlayerNR.Runner.MemoryUnitsAvailable);
     }
 
     public void ShowSubroutinesBreakable(bool breakable)

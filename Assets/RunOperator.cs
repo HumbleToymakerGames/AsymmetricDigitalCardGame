@@ -72,7 +72,7 @@ public class RunOperator : MonoBehaviour
 
 	private void Update()
 	{
-        CardViewer.instance.ShowLinkIcon(isEncounteringIce && currentIceEncountered.isRezzed && CardViewer.currentPinnedCard && CardViewer.currentPinnedCard.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
+        CardViewer.instance.ShowLinkIcon(isEncounteringIce && CardViewer.currentPinnedCard && CardViewer.currentPinnedCard.cardFunction.HasBreakerOfType(currentIceEncountered.cardSubType));
 
         if (isRunning)
 		{
@@ -173,7 +173,7 @@ public class RunOperator : MonoBehaviour
 
     public bool bypassedIce, canBreakSubroutines;
 
-    void BypassedIce(bool subroutinesFired)
+    public void BypassedIce(bool subroutinesFired)
 	{
         if (!strengthModifier.HasValue && netDamageModifier.HasValue)
         {
@@ -209,7 +209,6 @@ public class RunOperator : MonoBehaviour
         CardViewer.instance.PinCard(-1, false);
 
         bypassedIce = canBreakSubroutines = false;
-        isEncounteringIce = true;
         currentIceEncountered_View = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
         CardViewer.instance.PinCard(currentIceEncountered_View.viewIndex, false);
         currentIceEncountered_View.SetClickable(false);
@@ -258,6 +257,7 @@ public class RunOperator : MonoBehaviour
                 strengthModifier = null;
             }
 
+            isEncounteringIce = true;
             OnIceEncountered?.Invoke(currentIceEncountered);
             while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
 
@@ -266,7 +266,7 @@ public class RunOperator : MonoBehaviour
             canBreakSubroutines = true;
             yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
 
-            ActionOptions.instance.Display_FireRemainingSubs(true);
+            if (!bypassedIce) ActionOptions.instance.Display_FireRemainingSubs(true);
 
             OnIceEncountered_End?.Invoke(currentIceEncountered);
             while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
@@ -323,57 +323,57 @@ public class RunOperator : MonoBehaviour
         yield return JackOutRoutine();
 
         ServerColumn serverColumnAccessed = serverTypeOverride.HasValue ? ServerSpace.instance.GetServerOfType(serverTypeOverride.Value) : currentServerColumn;
-        Card[] cardsInRoot = serverColumnAccessed.GetCardsInRoot();
-        if (cardsInRoot.Length > 0)
+        OnRunEnded?.Invoke(true, serverColumnAccessed.serverType);
+        yield return new WaitForSeconds(0.25f);
+        while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Run_Ends)) yield return null;
+
+        if (serverColumnAccessed.IsRemoteServer())
         {
-            List<SelectorNR> selectors = new List<SelectorNR>();
-			for (int i = 0; i < cardsInRoot.Length; i++)
-			{
-                selectors.Add(cardsInRoot[i].selector);
-			}
-
-            for (int i = 0; i < cardsInRoot.Length; i++)
+            Card[] cardsInRoot = serverColumnAccessed.GetCardsInRoot();
+            if (cardsInRoot.Length > 0)
             {
-                bool chosen = false;
-                CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
-                while (!chosen) yield return null;
-                while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
-
-                print("Waiting for Unreveal...");
-                waitingForCardUnReveal = true;
-                while (waitingForCardUnReveal) yield return null;
-                print("DONE Waiting for Unreveal...");
-
-                yield return new WaitForSeconds(0.25f);
-                while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
-
-                void Chosen(SelectorNR[] selectorNRs)
+                List<SelectorNR> selectors = new List<SelectorNR>();
+                for (int i = 0; i < cardsInRoot.Length; i++)
                 {
-                    Card chosenServerCard = selectorNRs[0].GetComponentInParent<Card>();
-                    serverColumnAccessed.AccessServer(chosenServerCard);
-                    chosen = true;
-                    selectors.Remove(selectorNRs[0]);
+                    selectors.Add(cardsInRoot[i].selector);
+                }
+
+                for (int i = 0; i < cardsInRoot.Length; i++)
+                {
+                    bool chosen = false;
+                    CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
+                    while (!chosen) yield return null;
+                    while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
+
+                    print("Waiting for Unreveal...");
+                    waitingForCardUnReveal = true;
+                    while (waitingForCardUnReveal) yield return null;
+                    print("DONE Waiting for Unreveal...");
+
+                    yield return new WaitForSeconds(0.25f);
+                    while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
+
+                    void Chosen(SelectorNR[] selectorNRs)
+                    {
+                        Card chosenServerCard = selectorNRs[0].GetComponentInParent<Card>();
+                        serverColumnAccessed.AccessServer(chosenServerCard);
+                        chosen = true;
+                        selectors.Remove(selectorNRs[0]);
+                    }
                 }
             }
         }
-
-        yield return new WaitForSeconds(0.25f);
-
-        EndRun(true);
-
-        CardChooser.instance.ActivateFocus();
-        while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Run_Ends)) yield return null;
-
-        if (serverColumnAccessed.HasRootCardsInstalled())
+        else
 		{
-            //serverColumnAccessed.AccessServer(serverColumnAccessed);
-
+            CardChooser.instance.ActivateFocus();
+            serverColumnAccessed.AccessServer();
             while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
 
-            print("RunCompleted Over!");
-
         }
+
         CardChooser.instance.DeactivateFocus();
+        print("RunCompleted Over!");
+        EndRun(true);
     }
 
     public void ServerFinishedAccessing()
@@ -451,6 +451,15 @@ public class RunOperator : MonoBehaviour
         BypassedIce(true);
     }
 
+    public void BreakAllSubroutines()
+	{
+		foreach (var subroutine in currentIceEncountered_View.subroutines)
+		{
+            subroutine.SetBroken(true);
+        }
+        BypassedIce(false);
+    }
+
 
     public bool IsCardStrongEnough(Card_Program programCard)
     {
@@ -464,11 +473,6 @@ public class RunOperator : MonoBehaviour
 
     //public void Reset
 
-    [ContextMenu("EndRun")]
-    public void Ender()
-	{
-        EndRun(false);
-	}
     public void EndRun(bool success)
     {
         if (isRunning)
@@ -496,7 +500,7 @@ public class RunOperator : MonoBehaviour
             ActionOptions.instance.HideAllOptions();
             isRunning = false;
             StopRun();
-            OnRunEnded?.Invoke(success, serverType);
+            if (!success) OnRunEnded?.Invoke(success, serverType);
             SetServerTypeOverride(null);
             CardChooser.instance.DeactivateFocus();
             PaidAbilitiesManager.instance.SetPriorityToTurn();

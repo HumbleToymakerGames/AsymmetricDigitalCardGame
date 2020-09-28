@@ -9,7 +9,7 @@ public class PaidAbility : MonoBehaviour
     public Payment[] payments;
     public CardSubType breakerType;
     public bool breakAllIceTypes;
-    bool isBreakerRoutine;
+    public bool isBreakerRoutine;
     Button button;
     CanvasGroup canvasGroup;
 
@@ -59,7 +59,7 @@ public class PaidAbility : MonoBehaviour
 		{
             if (cardFunction.card.IsCardType(CardType.Program))
             {
-                if (RunOperator.instance.isEncounteringIce && RunOperator.instance.currentIceEncountered.isRezzed)
+                if (RunOperator.instance.isEncounteringIce)
                 {
                     Card_Program programCard = cardFunction.card as Card_Program;
                     bool isStrongEnough = RunOperator.instance.IsCardStrongEnough(programCard);

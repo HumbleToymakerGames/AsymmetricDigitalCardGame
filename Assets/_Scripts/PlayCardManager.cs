@@ -508,8 +508,10 @@ public class PlayCardManager : MonoBehaviour
             yield break;
         }
 
+        bool damageDone = false;
         CardChooser.instance.ActivateFocus(NetDamageDone, damageWrapper.Damage, selectorNRs.ToArray());
         ActionOptions.instance.ActivateActionMessage(string.Format("Net Damage:\nRemove ({0}) cards", damageWrapper.Damage));
+        while (!damageDone) yield return null;
 
         OnDamageDone?.Invoke(damageWrapper);
 
@@ -519,7 +521,7 @@ public class PlayCardManager : MonoBehaviour
 			{
                 PlayArea.instance.DiscardNR(PlayerNR.Runner).AddCardToDiscard(selector.GetComponentInParent<Card>());
 			}
-
+            damageDone = true;
             callBack?.Invoke();
 		}
 	}

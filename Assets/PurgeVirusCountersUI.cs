@@ -6,12 +6,12 @@ public class PurgeVirusCountersUI : MonoBehaviour, ISelectableNR
 {
 	public bool CanHighlight(bool highlight = true)
 	{
-		return true;
+		return !GameManager.CurrentTurnPlayer.IsRunner();
 	}
 
 	public bool CanSelect()
 	{
-		return PlayCardManager.instance.CanPurgeVirusCounters();
+		return CanHighlight() && PlayCardManager.instance.CanPurgeVirusCounters();
 	}
 
 	public void Highlighted()

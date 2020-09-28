@@ -204,6 +204,8 @@ public class CardViewer : MonoBehaviour
 			Card viewCard = cardPair.viewCard;
 
 			viewCard.FlipCard(realCard.isFaceUp, true);
+			if (realCard.IsOwnedByPlayerSide(PlayerSide.Corporation) && realCard.isInstalled)
+				viewCard.FlipCard(true, true);
 			viewCard.isRezzed = realCard.isRezzed;
 			viewCard.isInstalled = realCard.isInstalled;
 
