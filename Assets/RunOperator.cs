@@ -7,7 +7,7 @@ public class RunOperator : MonoBehaviour
 {
     public static RunOperator instance;
 
-    public Card_Ice currentIceEncountered;
+    public Card_Ice currentIceEncountered, currentIceEncountered_View;
     public Card_Program currentProgramEncountering;
     public PaidAbility currentPaidAbility;
     public ServerColumn currentServerColumn;
@@ -28,6 +28,7 @@ public class RunOperator : MonoBehaviour
 
     public delegate void IceEncountered(Card_Ice iceCard);
     public static event IceEncountered OnIceEncountered;
+    public static event IceEncountered OnIceEncountered_End;
 
     public delegate void RunEvent();
     public static event RunEvent OnRunStarted;
@@ -207,9 +208,9 @@ public class RunOperator : MonoBehaviour
 
         bypassedIce = canBreakSubroutines = false;
         isEncounteringIce = true;
-        Card_Ice viewCard = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
-        CardViewer.instance.PinCard(viewCard.viewIndex, false);
-        viewCard.SetClickable(false);
+        currentIceEncountered_View = CardViewer.instance.GetCard(currentIceEncountered.viewIndex, false) as Card_Ice;
+        CardViewer.instance.PinCard(currentIceEncountered_View.viewIndex, false);
+        currentIceEncountered_View.SetClickable(false);
         CardChooser.instance.ActivateFocus(null);
 
         //yield return new WaitForSeconds(0.25f);
@@ -250,20 +251,22 @@ public class RunOperator : MonoBehaviour
 		{
             if (strengthModifier.HasValue)
 			{
-                viewCard.SetStrength(viewCard.strength + strengthModifier.Value);
+                currentIceEncountered_View.SetStrength(currentIceEncountered_View.strength + strengthModifier.Value);
                 strengthModifier = null;
             }
 
             OnIceEncountered?.Invoke(currentIceEncountered);
             while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
 
-            currentIceEncountered = viewCard;
-            if (!encounteredIceCards.Contains(currentIceEncountered)) encounteredIceCards.Add(currentIceEncountered);
+            if (!encounteredIceCards.Contains(currentIceEncountered_View)) encounteredIceCards.Add(currentIceEncountered_View);
 
             canBreakSubroutines = true;
             yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
 
             ActionOptions.instance.Display_FireRemainingSubs(true);
+
+            OnIceEncountered_End?.Invoke(currentIceEncountered);
+            while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
 
             if (bypassNextIce)
 			{
@@ -403,8 +406,8 @@ public class RunOperator : MonoBehaviour
     {
         if (!isRunning) return;
         currentPaidAbility = paidAbility;
-        currentIceEncountered.ShowSubroutinesBreakable(true);
-        currentIceEncountered.SetClickable();
+        currentIceEncountered_View.ShowSubroutinesBreakable(true);
+        currentIceEncountered_View.SetClickable();
         BreakerPanel.instance.Activate();
 
         isBreakingSubroutines = true;
@@ -412,13 +415,13 @@ public class RunOperator : MonoBehaviour
 
     public void SubroutineBroken(Subroutine subroutine)
     {
-        currentIceEncountered.ShowSubroutinesBreakable(false);
+        currentIceEncountered_View.ShowSubroutinesBreakable(false);
         subroutine.SetBroken(true);
-        currentIceEncountered.SetSubroutineToBypass(subroutine);
-        currentIceEncountered.SetClickable(false);
+        currentIceEncountered_View.SetSubroutineToBypass(subroutine);
+        currentIceEncountered_View.SetClickable(false);
         BreakerPanel.instance.Activate(false);
         isBreakingSubroutines = false;
-        if (currentIceEncountered.AllSubroutinesBypassed())
+        if (currentIceEncountered_View.AllSubroutinesBypassed())
         {
             BypassedIce(false);
             print("BYPASSED ICE");
@@ -427,8 +430,8 @@ public class RunOperator : MonoBehaviour
 
     public void SubroutineBreakCancelled()
     {
-        currentIceEncountered.ShowSubroutinesBreakable(false);
-        currentIceEncountered.SetClickable(false);
+        currentIceEncountered_View.ShowSubroutinesBreakable(false);
+        currentIceEncountered_View.SetClickable(false);
         isBreakingSubroutines = false;
         PlayCardManager.instance.ReversePaidAbility(currentPaidAbility);
         currentPaidAbility = null;
@@ -440,14 +443,14 @@ public class RunOperator : MonoBehaviour
 	}
     public IEnumerator FireSubroutinesRoutine()
     {
-        yield return currentIceEncountered.FireAllRemainingSubroutines(null);
+        yield return currentIceEncountered_View.FireAllRemainingSubroutines(null);
         BypassedIce(true);
     }
 
 
     public bool IsCardStrongEnough(Card_Program programCard)
     {
-        return programCard.strength >= currentIceEncountered.strength;
+        return programCard.strength >= currentIceEncountered_View.strength;
     }
 
     public bool IceIsType(CardSubType subType)
@@ -477,7 +480,7 @@ public class RunOperator : MonoBehaviour
 
             isEncounteringIce = false;
             canBreakSubroutines = false;
-            currentIceEncountered = null;
+            currentIceEncountered = currentIceEncountered_View = null;
             currentProgramEncountering = null;
             currentPaidAbility = null;
             strengthModifier = netDamageModifier = null;

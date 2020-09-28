@@ -110,7 +110,7 @@ public abstract class CardFunction : MonoBehaviour
 	{
 		for (int i = 0; i < paidAbilities.Length; i++)
 		{
-			if (paidAbilities[i].breakerType == cardSubType) return true;
+			if (paidAbilities[i].IsBreakerOfType(cardSubType)) return true;
 		}
 		return false;
 	}

@@ -8,6 +8,7 @@ public class PaidAbility : MonoBehaviour
     [Header("Ability")]
     public Payment[] payments;
     public CardSubType breakerType;
+    public bool breakAllIceTypes;
     bool isBreakerRoutine;
     Button button;
     CanvasGroup canvasGroup;
@@ -37,7 +38,7 @@ public class PaidAbility : MonoBehaviour
         cardFunction = GetComponentInParent<CardFunction>();
         button = GetComponent<Button>();
         canvasGroup = GetComponent<CanvasGroup>();
-        isBreakerRoutine = breakerType != CardSubType.NULL;
+        isBreakerRoutine = breakerType != CardSubType.NULL || breakAllIceTypes;
     }
 
     void Start()
@@ -116,7 +117,7 @@ public class PaidAbility : MonoBehaviour
 	{
         if (cardFunction.card.isViewCard && isBreakerRoutine)
 		{
-            if (!RunOperator.instance.IceIsType(breakerType))
+            if (!RunOperator.instance.IceIsType(breakerType) && !breakAllIceTypes)
 			{
                 return false;
 			}
@@ -235,6 +236,12 @@ public class PaidAbility : MonoBehaviour
                 player.ActionPoints += payment.amount;
             }
         }
+    }
+
+
+    public bool IsBreakerOfType(CardSubType cardSubType)
+	{
+        return breakerType == cardSubType || breakAllIceTypes;
     }
 
 
