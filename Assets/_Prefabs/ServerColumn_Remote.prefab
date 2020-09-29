@@ -77,6 +77,11 @@ PrefabInstance:
       propertyPath: highlighter
       value: 
       objectReference: {fileID: 3114769356001599405}
+    - target: {fileID: 6537389762138219819, guid: 66e7d53bb914e6a43b98a84a446c9d24,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.34901962
+      objectReference: {fileID: 0}
     - target: {fileID: 7191130565686150594, guid: 66e7d53bb914e6a43b98a84a446c9d24,
         type: 3}
       propertyPath: serverGO

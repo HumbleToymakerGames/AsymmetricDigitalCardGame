@@ -27,6 +27,26 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5952911336578078627, guid: 66e7d53bb914e6a43b98a84a446c9d24,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5952911336578078627, guid: 66e7d53bb914e6a43b98a84a446c9d24,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 5952911336578078627, guid: 66e7d53bb914e6a43b98a84a446c9d24,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5952911336578078627, guid: 66e7d53bb914e6a43b98a84a446c9d24,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 14
+      objectReference: {fileID: 0}
     - target: {fileID: 7191130565686150594, guid: 66e7d53bb914e6a43b98a84a446c9d24,
         type: 3}
       propertyPath: serverGO

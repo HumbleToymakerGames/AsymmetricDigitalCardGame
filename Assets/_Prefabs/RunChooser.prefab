@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.9601233, b: 0.929, a: 0.7882353}
+  m_Color: {r: 1, g: 0.9601233, b: 0.929, a: 0.41960785}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 5243934209462567144}
   - component: {fileID: 5243934209462567143}
   - component: {fileID: 5243934209462567142}
+  - component: {fileID: 7006274015047517634}
   m_Layer: 5
   m_Name: Arrow
   m_TagString: Untagged
@@ -148,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.57679915, b: 0, a: 0.77254903}
+  m_Color: {r: 1, g: 0.57679915, b: 0, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -164,6 +165,21 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7006274015047517634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5243934209462567141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 2, y: -2}
+  m_UseGraphicAlpha: 1
 --- !u!1 &5243934209653499603
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,7 +216,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 10}
+  m_SizeDelta: {x: 8, y: 8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5243934209653499606
 CanvasRenderer:
@@ -410,6 +426,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetServer: {fileID: 0}
   arrowRT: {fileID: 5243934209462567144}
+  myGO: {fileID: 0}
 --- !u!1 &6090202949488669037
 GameObject:
   m_ObjectHideFlags: 0

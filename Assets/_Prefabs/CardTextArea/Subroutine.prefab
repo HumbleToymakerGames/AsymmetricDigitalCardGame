@@ -290,7 +290,7 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 0.34643373, b: 0, a: 1}
+    m_NormalColor: {r: 1, g: 0.43602607, b: 0, a: 1}
     m_HighlightedColor: {r: 0.7254902, g: 0.03137254, b: 0.10088883, a: 1}
     m_PressedColor: {r: 0.509434, g: 0.0072089583, b: 0.058282763, a: 1}
     m_SelectedColor: {r: 0.7538519, g: 1, b: 0, a: 1}
@@ -463,8 +463,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 8, y: 8}
+  m_AnchoredPosition: {x: 2, y: 0}
+  m_SizeDelta: {x: 0, y: 8}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &647989762399724205
 CanvasRenderer:

@@ -154,7 +154,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 
     void UpdateCardTypes()
 	{
-        cardRefs.UpdateCardTypes(cardType.TypeToString(), cardSubType.TypeToString());
+        cardRefs.UpdateCardTypes(cardType.TypeToString() + ":", cardSubType.TypeToString());
     }
 
     public void SetInstall(bool installed = true)
