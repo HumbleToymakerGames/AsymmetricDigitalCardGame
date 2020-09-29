@@ -18772,7 +18772,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentTurnSide: 1
   numCardsToDrawFirstHand: 5
-  numCreditsToStartWith: 12
+  numCreditsToStartWith: 5
   hasGameStarted: 0
 --- !u!114 &1374242825
 MonoBehaviour:
@@ -18786,8 +18786,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d356b0ec709c1fa4e95f5720898a1af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numActionPointsStart_Runner: 6
-  numActionPointsStart_Corp: 6
+  numActionPointsStart_Runner: 4
+  numActionPointsStart_Corp: 3
   numMemoryUnitsStart: 4
   numTagsStart: 0
 --- !u!114 &1374242826

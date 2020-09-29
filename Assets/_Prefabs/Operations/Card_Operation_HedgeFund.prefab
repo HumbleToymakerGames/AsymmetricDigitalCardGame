@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &1996874189600481015
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6203487735795676610}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9058bca847bd1de458e833412f8a6865, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  im: {fileID: 6203487734168646219}
 --- !u!114 &8395233223189837746
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,6 +51,11 @@ PrefabInstance:
     - target: {fileID: 8616847852115059306, guid: 2a2fb356e6c2d4342b25321b43df0e2b,
         type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8616847852115059306, guid: 2a2fb356e6c2d4342b25321b43df0e2b,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8616847852115059316, guid: 2a2fb356e6c2d4342b25321b43df0e2b,
@@ -209,7 +201,7 @@ PrefabInstance:
     - target: {fileID: 8616847852796874186, guid: 2a2fb356e6c2d4342b25321b43df0e2b,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 6.87
+      value: 12.01
       objectReference: {fileID: 0}
     - target: {fileID: 8616847852828500230, guid: 2a2fb356e6c2d4342b25321b43df0e2b,
         type: 3}
@@ -239,15 +231,3 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 2414499281713189709}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6203487734168646219 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8616847852828500230, guid: 2a2fb356e6c2d4342b25321b43df0e2b,
-    type: 3}
-  m_PrefabInstance: {fileID: 2414499281713189709}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
