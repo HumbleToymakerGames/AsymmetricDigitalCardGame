@@ -170,11 +170,12 @@ public class CardRevealer : MonoBehaviour
     }
 
 
-    public void RevealCards(Card[] cards, bool moveable, PlayArea_Spot playArea_Spot)
+    public void RevealCards(Card[] cards, bool moveable, PlayArea_Spot playArea_Spot, UnityAction callback = null)
 	{
         realCards = cards;
         isMovingCards = moveable;
         currentPlayAreaSpot = playArea_Spot;
+        returnCallback = callback;
 
         StartCoroutine(PanelActivationWaiter(false));
 
@@ -321,6 +322,8 @@ public class CardRevealer : MonoBehaviour
         DestroyAllCards();
         Activate(false);
         cardsButtonsGO.SetActive(false);
+        returnCallback?.Invoke();
+        returnCallback = null;
     }
 
 

@@ -73,7 +73,7 @@ public class Card_AccountSiphon : CardFunction
 
 		if (!choiceMade.Value)
 		{
-			RunOperator.instance.StopRunCompletedRoutine();
+			RunOperator.instance.SetAccessCards(false);
 
 			int numCreditsToLose = Mathf.Min(numCreditsLost, PlayerNR.Corporation.Credits);
 			if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, numCreditsToLose))

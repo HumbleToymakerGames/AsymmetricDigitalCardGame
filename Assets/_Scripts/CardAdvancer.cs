@@ -41,6 +41,7 @@ public class CardAdvancer : MonoBehaviour
 	public void CardScored(bool scored = true)
 	{
 		isScored = scored;
+		if (!card.isViewCard) CardViewer.instance.GetCard(card.viewIndex, false).cardAdvancer.CardScored(scored);
 	}
 
 	void UpdateAdvancementTexts()

@@ -47,16 +47,7 @@ public class Card_Jinteki : CardFunction
 	IEnumerator NetDamage()
 	{
 		// Do net damage
-
-		bool damageDone = false;
-		PlayCardManager.instance.DoRunnerDamage(DamageDone, numNetDamage, DamageType.Net);
-		while (!damageDone) yield return null;
-
-		void DamageDone()
-		{
-			print("net damage done.");
-			damageDone = true;
-		}
+		yield return PlayCardManager.instance.DoRunnerDamage(null, numNetDamage, DamageType.Net);
 	}
 
 

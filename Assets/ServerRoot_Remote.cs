@@ -64,18 +64,20 @@ public class ServerRoot_Remote : ServerRoot
 	}
 
 
-    public override void Access(Card card)
+    public override void Access()
 	{
-		if (card == installedRootCard)
+
+	}
+
+	public override SelectorNR[] AccessableSelectors()
+	{
+		Card[] cards = GetCardsInRoot();
+		SelectorNR[] selectors = new SelectorNR[cards.Length];
+		for (int i = 0; i < cards.Length; i++)
 		{
-			card.Accessed();
-			CardRevealer.instance.RevealCard(card, true, RunOperator.instance.ServerFinishedAccessing);
+			selectors[i] = cards[i].selector;
 		}
-		else
-		{
-			card.Accessed();
-			CardRevealer.instance.RevealCard(card, true, RunOperator.instance.ServerFinishedAccessing);
-		}
+		return selectors;
 	}
 
 

@@ -71,9 +71,9 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
 	}
 
 
-    public void AccessServer(Card card = null)
+    public void AccessServer()
 	{
-        serverRoot.Access(card);
+        serverRoot.Access();
     }
 
     public void SetInteractable(bool interactable = true)
@@ -128,12 +128,11 @@ public class ServerColumn : PlayArea_Spot, ISelectableNR
         return serverRoot.HasCardsInstalled();
 	}
 
-    public Card[] GetCardsInRoot()
-	{
-        List<Card> cards = new List<Card>();
-        if (serverRoot.installedUpgradeCard) cards.Add(serverRoot.installedUpgradeCard);
-        ServerRoot_Remote remoteServer = serverRoot as ServerRoot_Remote;
-        if (remoteServer && remoteServer.installedRootCard) cards.Add(remoteServer.installedRootCard);
-        return cards.ToArray();
+
+    public SelectorNR[] AccessableSelectors()
+    {
+        return serverRoot.AccessableSelectors();
     }
+
+
 }

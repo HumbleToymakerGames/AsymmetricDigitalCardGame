@@ -10,12 +10,12 @@ public class Card_ProjectJunebug : CardFunction
 	protected override void OnEnable()
 	{
 		base.OnEnable();
-		Card.OnCardAccessed += Card_OnCardAccessed;
+		RunOperator.OnCardAccessed += Card_OnCardAccessed;
 	}
 	protected override void OnDisable()
 	{
 		base.OnDisable();
-		Card.OnCardAccessed -= Card_OnCardAccessed;
+		RunOperator.OnCardAccessed -= Card_OnCardAccessed;
 	}
 
 	protected override void AssignConditionalAbilities()

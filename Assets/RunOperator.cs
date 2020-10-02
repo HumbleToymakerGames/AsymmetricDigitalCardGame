@@ -42,6 +42,9 @@ public class RunOperator : MonoBehaviour
     public delegate void eSubroutineBroken(Subroutine subroutine, PaidAbility breakerAbility);
     public static event eSubroutineBroken OnSubroutineBroken;
 
+    public delegate void CardAccessed(Card card, ServerColumn.ServerType serverType);
+    public static event CardAccessed OnCardAccessed;
+
     private void Awake()
     {
         instance = this;
@@ -133,6 +136,7 @@ public class RunOperator : MonoBehaviour
 
         Card_Program.OnProgramStrengthModified += Card_Program_OnProgramStrengthModified;
         currentServerColumn = serverColumn;
+        SetAccessCards();
         OnRunBeingMade?.Invoke(serverColumn);
         StartRun();
         //MoveToNextIce();
@@ -306,11 +310,12 @@ public class RunOperator : MonoBehaviour
         return runCompletedRoutine = StartCoroutine(RunCompleted());
     }
 
-    public void StopRunCompletedRoutine()
+    void StopRunCompletedRoutine()
 	{
         if (runCompletedRoutine != null) StopCoroutine(runCompletedRoutine);
 	}
 
+    public bool shouldAccessServer;
     bool waitingForCardUnReveal;
     Coroutine runCompletedRoutine;
 	IEnumerator RunCompleted()
@@ -327,58 +332,104 @@ public class RunOperator : MonoBehaviour
         yield return new WaitForSeconds(0.25f);
         while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Run_Ends)) yield return null;
 
-        if (serverColumnAccessed.IsRemoteServer())
+        if (shouldAccessServer)
         {
-            Card[] cardsInRoot = serverColumnAccessed.GetCardsInRoot();
-            if (cardsInRoot.Length > 0)
+            List<SelectorNR> accessedSelectors = new List<SelectorNR>(serverColumnAccessed.AccessableSelectors());
+            if (accessedSelectors.Count > 0)
             {
-                List<SelectorNR> selectors = new List<SelectorNR>();
-                for (int i = 0; i < cardsInRoot.Length; i++)
-                {
-                    selectors.Add(cardsInRoot[i].selector);
-                }
-
-                for (int i = 0; i < cardsInRoot.Length; i++)
+                int numSelectors = accessedSelectors.Count;
+                for (int i = 0; i < numSelectors; i++)
                 {
                     bool chosen = false;
-                    CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
-                    while (!chosen) yield return null;
-                    while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
+                    IEnumerator revealCardRoutine = null;
+                    serverColumnAccessed.ActivateSelector_Root();
+                    CardChooser.instance.ActivateFocus(Chosen, 1, accessedSelectors.ToArray());
 
-                    print("Waiting for Unreveal...");
-                    waitingForCardUnReveal = true;
-                    while (waitingForCardUnReveal) yield return null;
-                    print("DONE Waiting for Unreveal...");
+                    while (!chosen) yield return null;
+                    if (!serverColumnAccessed.IsRemoteServer()) serverColumnAccessed.ActivateSelector_Root(false);
+
+                    yield return StartCoroutine(revealCardRoutine);
+
+                    while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
 
                     yield return new WaitForSeconds(0.25f);
                     while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
 
                     void Chosen(SelectorNR[] selectorNRs)
                     {
-                        Card chosenServerCard = selectorNRs[0].GetComponentInParent<Card>();
-                        serverColumnAccessed.AccessServer(chosenServerCard);
+                        Card[] accessedCards;
+                        PlayArea_Spot playArea_Spot = null;
+                        // Could be a card, or central server root
+                        Card chosenServerCard = selectorNRs[0].selectable as Card;
+                        if (chosenServerCard)
+						{
+                            accessedCards = new Card[1] { chosenServerCard };
+                        }
+                        else
+						{
+                            ServerRoot_Central root_Central = serverColumnAccessed.serverRoot as ServerRoot_Central;
+                            accessedCards = root_Central.GetAccessedCards();
+                            playArea_Spot = root_Central.targetAccessable as PlayArea_Spot;
+                        }
+
+                        revealCardRoutine = RevealAccessedCard(accessedCards, playArea_Spot);
+                        OnCardAccessed?.Invoke(accessedCards[0], serverColumnAccessed.serverType);
+
+                        accessedSelectors.Remove(selectorNRs[0]);
                         chosen = true;
-                        selectors.Remove(selectorNRs[0]);
                     }
                 }
             }
-        }
-        else
-		{
-            CardChooser.instance.ActivateFocus();
-            serverColumnAccessed.AccessServer();
-            while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Card_Accessed)) yield return null;
 
+            IEnumerator RevealAccessedCard(Card[] accessedCards, PlayArea_Spot playArea_Spot = null)
+			{
+                print("Waiting for Unreveal...");
+                bool waitingForCardUnReveal = true;
+
+                if (accessedCards.Length == 1)
+                {
+                    CardRevealer.instance.RevealCard(accessedCards[0], true, CardUnRevealed);
+                }
+                else
+                {
+                    CardRevealer.instance.RevealCards(accessedCards, true, playArea_Spot, CardUnRevealed);
+                }
+
+                while (waitingForCardUnReveal) yield return null;
+
+                
+
+                void CardUnRevealed()
+				{
+                    waitingForCardUnReveal = false;
+                }
+
+                print("DONE Waiting for Unreveal...");
+            }
         }
 
+        EndRun(true);
         CardChooser.instance.DeactivateFocus();
         print("RunCompleted Over!");
-        EndRun(true);
+    }
+
+
+    IEnumerator WaitForUnrevealRoutine()
+	{
+        print("Waiting for Unreveal...");
+        waitingForCardUnReveal = true;
+        while (waitingForCardUnReveal) yield return null;
+        print("DONE Waiting for Unreveal...");
     }
 
     public void ServerFinishedAccessing()
 	{
         waitingForCardUnReveal = false;
+	}
+
+    public void SetAccessCards(bool access = true)
+	{
+        shouldAccessServer = access;
 	}
 
 

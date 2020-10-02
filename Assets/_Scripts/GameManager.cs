@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
 
     public delegate void TurnChanged(bool isRunner);
     public static event TurnChanged OnTurnChanged;
+    public static event TurnChanged OnGameEnded;
+
 
     [Header("Game Data")]
     public int numCardsToDrawFirstHand;
@@ -24,7 +26,26 @@ public class GameManager : MonoBehaviour
         UpdateCurrentTurn(currentTurnSide);
     }
 
-    // Start is called before the first frame update
+	private void OnEnable()
+	{
+		PlayCardManager.OnCardScored += PlayCardManager_OnCardScored;
+		PlayCardManager.OnCardStolen += PlayCardManager_OnCardStolen;
+	}
+	private void OnDisable()
+    {
+        PlayCardManager.OnCardScored -= PlayCardManager_OnCardScored;
+		PlayCardManager.OnCardStolen -= PlayCardManager_OnCardStolen;
+    }
+
+    private void PlayCardManager_OnCardScored(Card card)
+	{
+        CheckForWinState();
+    }
+    private void PlayCardManager_OnCardStolen(Card card)
+    {
+        CheckForWinState();
+    }
+
     void Start()
     {
         StartCoroutine(StartGame());
@@ -49,7 +70,6 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T)) StartNextTurn();
-        
     }
 
 
@@ -116,6 +136,19 @@ public class GameManager : MonoBehaviour
         PlayerNR.Runner.hasPriority = player.IsRunner();
         PlayerNR.Corporation.hasPriority = !player.IsRunner();
     }
+
+
+    void CheckForWinState()
+	{
+        if (PlayerNR.Corporation.Score >= 7)
+		{
+            OnGameEnded?.Invoke(false);
+		}
+        else if (PlayerNR.Runner.Score >= 7)
+		{
+            OnGameEnded?.Invoke(true);
+        }
+	}
 
 
 

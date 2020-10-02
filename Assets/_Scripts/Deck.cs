@@ -97,15 +97,13 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
 
 	public void Access()
 	{
-        Card card = cardsInDeck[0];
-        card.Accessed();
-        RevealCard(card);
+
     }
 
-    public void RevealCard(Card card)
-	{
-        CardRevealer.instance.RevealCard(card, true);
-	}
+    public Card[] GetAccessedCards()
+    {
+        return !IsDeckEmpty() ? new Card[] { cardsInDeck[0] } : null;
+    }
 
     public void RevealCards(int numCards)
 	{

@@ -23,7 +23,7 @@ public class Card_BankJob : CardFunction
 
 	private void RunOperator_OnRunEnded(bool success, ServerColumn.ServerType serverType)
 	{
-		if (success)
+		if (success && serverType == ServerColumn.ServerType.Remote)
 		{
 			runSuccessful = true;
 		}
@@ -69,7 +69,7 @@ public class Card_BankJob : CardFunction
 		if (choiceMade.Value)
 		{
 
-			RunOperator.instance.StopRunCompletedRoutine();
+			RunOperator.instance.SetAccessCards(false);
 
 			choiceMade = null;
 			int counterCount = 0;

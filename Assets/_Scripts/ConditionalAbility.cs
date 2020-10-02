@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ConditionalAbility : MonoBehaviour
 {
@@ -46,8 +47,10 @@ public class ConditionalAbility : MonoBehaviour
 		if (!card.isViewCard) RemoveFromConditionsList();
 	}
 
-	public void ExecuteAbility()
+	UnityAction currentCallback;
+	public void ExecuteAbility(UnityAction callback)
 	{
+		currentCallback = callback;
 		StartCoroutine(AbilityExecutionRoutine());
 	}
 
@@ -59,7 +62,9 @@ public class ConditionalAbility : MonoBehaviour
 
 	void ConditionResolved()
 	{
-		ConditionalAbilitiesManager.instance.ConditionalAbilityResolved(this);
+		currentCallback?.Invoke();
+		currentCallback = null;
+		//ConditionalAbilitiesManager.instance.ConditionalAbilityResolved(this);
 		Debug.Log("ConditionResolved - " + name);
 	}
 

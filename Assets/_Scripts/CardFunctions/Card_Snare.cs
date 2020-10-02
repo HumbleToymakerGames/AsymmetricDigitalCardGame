@@ -12,12 +12,12 @@ public class Card_Snare : CardFunction
 	protected override void OnEnable()
 	{
 		base.OnEnable();
-		Card.OnCardAccessed += Card_OnCardAccessed;
+		RunOperator.OnCardAccessed += Card_OnCardAccessed;
 	}
 	protected override void OnDisable()
 	{
 		base.OnDisable();
-		Card.OnCardAccessed += Card_OnCardAccessed;
+		RunOperator.OnCardAccessed += Card_OnCardAccessed;
 	}
 
 	private void Card_OnCardAccessed(Card card, ServerColumn.ServerType _serverType)
@@ -66,16 +66,10 @@ public class Card_Snare : CardFunction
 		{
 			if (PlayCardManager.instance.TryAffordCost(card.myPlayer, numCredits))
 			{
-				bool damageDone = false;
-				PlayCardManager.instance.DoRunnerDamage(DamageDone, 3, DamageType.Net);
-				while (!damageDone) yield return null;
+				yield return PlayCardManager.instance.DoRunnerDamage(null, 3, DamageType.Net);
 
-				PlayCardManager.instance.TagRunner(numTags);
+				yield return PlayCardManager.instance.TagRunner(numTags);
 
-				void DamageDone()
-				{
-					damageDone = true;
-				}
 
 			}
 		}

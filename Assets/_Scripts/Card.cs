@@ -49,8 +49,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public bool neutralCountersAreVirus;
 
 
-    public delegate void CardAccessed(Card card, ServerColumn.ServerType serverType);
-    public static event CardAccessed OnCardAccessed;
+    
 
     public delegate void CardRezzed(Card card);
     public static event CardRezzed OnCardRezzed;
@@ -164,6 +163,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         if (!isViewCard) CardViewer.instance.GetCard(viewIndex, false).SetInstall(installed);
     }
 
+
     [ContextMenu("FlipCardOver")]
     public void FlipCardOver()
 	{
@@ -174,7 +174,8 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public void FlipCard(bool faceUp, bool immediate = false)
 	{
         UpdateCardFlipDisplay(faceUp, immediate);
-        CardViewer.instance.GetCard(viewIndex, false)?.UpdateCardFlipDisplay(faceUp);
+        if (CardViewer.currentPinnedCard && CardViewer.currentPinnedCard.viewIndex == viewIndex)
+            CardViewer.instance.GetCard(viewIndex, false)?.UpdateCardFlipDisplay(faceUp);
     }
 
     public void Rez()
@@ -343,7 +344,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     public virtual bool CanBeClicked()
     {
         bool hasPriority = PaidAbilitiesManager.instance.IsMyPriority(myPlayer);
-        return isInstalled && hasPriority && isViewCard && viewIndex == CardViewer.currentPinnedCard?.viewIndex;  
+        return (isInstalled || (cardAdvancer && cardAdvancer.isScored)) && hasPriority && isViewCard && viewIndex == CardViewer.currentPinnedCard?.viewIndex;  
     }
 
     public bool IsTrashable() { return cardTrasher != null; }
@@ -380,12 +381,6 @@ public abstract class Card : MonoBehaviour, ISelectableNR
 	{
         CardRevealer.instance.RevealCard(this, false);
 	}
-
-	public void Accessed()
-	{
-        OnCardAccessed?.Invoke(this, RunOperator.instance.currentServerColumn.serverType);
-    }
-
 
     void SetNeutralCounters(int counters)
 	{

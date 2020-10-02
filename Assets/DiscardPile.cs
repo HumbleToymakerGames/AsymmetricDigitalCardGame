@@ -27,10 +27,13 @@ public class DiscardPile : PlayArea_Spot, IAccessable
 
 	public void Access()
 	{
-		if (cardsInDiscard.Count > 0)
-			CardRevealer.instance.RevealCards(cardsInDiscard.ToArray(), true, this);
+
 	}
 
+	public Card[] GetAccessedCards()
+	{
+		return cardsInDiscard.ToArray();
+	}
 
 	public override List<Card> MyDeck()
 	{
@@ -42,5 +45,5 @@ public class DiscardPile : PlayArea_Spot, IAccessable
 		cardsInDiscard = deck;
 	}
 
-
+	
 }

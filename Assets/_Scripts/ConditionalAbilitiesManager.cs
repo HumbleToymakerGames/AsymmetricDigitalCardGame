@@ -22,7 +22,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		RunOperator.OnRunEnded += RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored += PlayCardManager_OnCardScored;
 		PlayCardManager.OnCardStolen += PlayCardManager_OnCardStolen;
-		Card.OnCardAccessed += Card_OnCardAccessed;
+		RunOperator.OnCardAccessed += Card_OnCardAccessed;
 		PlayCardManager.OnCardExposed += PlayCardManager_OnCardExposed;
 		PlayCardManager.OnCardExposed_Pre += PlayCardManager_OnCardExposed_Pre;
 		RunOperator.OnIceEncountered += RunOperator_OnIceEncountered;
@@ -37,7 +37,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		RunOperator.OnRunEnded -= RunOperator_OnRunEnded;
 		PlayCardManager.OnCardScored -= PlayCardManager_OnCardScored;
 		PlayCardManager.OnCardStolen -= PlayCardManager_OnCardStolen;
-		Card.OnCardAccessed -= Card_OnCardAccessed;
+		RunOperator.OnCardAccessed -= Card_OnCardAccessed;
 		PlayCardManager.OnCardExposed -= PlayCardManager_OnCardExposed;
 		PlayCardManager.OnCardExposed_Pre -= PlayCardManager_OnCardExposed_Pre;
 		RunOperator.OnIceEncountered -= RunOperator_OnIceEncountered;
@@ -95,33 +95,81 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		StartResolvingConditionals(ConditionalAbility.Condition.Ice_Encountered_End);
 	}
 
-	void StartResolvingConditionals(ConditionalAbility.Condition condition)
+
+	class ConditionalsPackage : MonoBehaviour
 	{
-		if (resolvingRoutine != null)
+		public Coroutine conditionalsManagerRoutine;
+		public ConditionalAbility.Condition conditionResolving;
+
+		public ConditionalsPackage(ConditionalAbility.Condition _conditionResolving)
 		{
-			StopCoroutine(resolvingRoutine);
-			print("ConditionalsRoutine stopped");
+			conditionResolving = _conditionResolving;
+			conditionalsManagerRoutine = instance.StartCoroutine(ResolvingConditionals());
 		}
-		resolvingRoutine = StartCoroutine(ResolvingConditionalsRoutine(condition));
-		PaidAbilitiesManager.instance.PausePaidWindow();
+
+		IEnumerator ResolvingConditionals()
+		{
+			yield return instance.StartConditionalManagerRoutine(conditionResolving);
+			conditionalsManagerRoutine = null;
+		}
 	}
 
+	static List<ConditionalsPackage> conditionalsPackages = new List<ConditionalsPackage>();
 
-	static Coroutine resolvingRoutine;
-	static ConditionalAbility.Condition currentConditionResolving;
-	IEnumerator ResolvingConditionalsRoutine(ConditionalAbility.Condition condition)
+	void Push(ConditionalsPackage conditionalsPackage) { conditionalsPackages.Add(conditionalsPackage); }
+	ConditionalsPackage Pop()
 	{
-		currentConditionResolving = condition;
+		if (conditionalsPackages.Count > 0)
+		{
+			ConditionalsPackage package = conditionalsPackages[conditionalsPackages.Count - 1];
+			conditionalsPackages.RemoveAt(conditionalsPackages.Count - 1);
+			return package;
+		}
+		return null; }
+
+	static bool HasPackageWithCondition(ConditionalAbility.Condition condition)
+	{
+		foreach (var package in conditionalsPackages)
+		{
+			if (package.conditionResolving == condition) return true;
+		}
+		return false;
+	}
+
+	static bool IsResolvingCondition(ConditionalAbility.Condition condition)
+	{
+		int? conditionIndex = null;
+		for (int i = 0; i < conditionalsPackages.Count; i++)
+		{
+			if (conditionalsPackages[i].conditionResolving == condition) conditionIndex = i;
+		}
+		return conditionIndex.HasValue && conditionalsPackages.Count >= conditionIndex;
+	}
+
+	void StartResolvingConditionals(ConditionalAbility.Condition condition)
+	{
+		if (conditionalsPackages.Count == 0) PaidAbilitiesManager.instance.PausePaidWindow();
+		ConditionalsPackage conditionalsPackage = new ConditionalsPackage(condition);
+		Push(conditionalsPackage);
+
+	}
+
+	Coroutine StartConditionalManagerRoutine(ConditionalAbility.Condition condition)
+	{
+		return StartCoroutine(ConditionalManagerRoutine(condition));
+	}
+
+	IEnumerator ConditionalManagerRoutine(ConditionalAbility.Condition condition)
+	{
 		yield return new WaitForSeconds(0.25f);
 
 		List<ConditionalAbility> conditionalAbilities = new List<ConditionalAbility>();
-		for (int i = 0; i < allConditionalAbilities.Count; i++)
+		for (int i = 0; i < instance.allConditionalAbilities.Count; i++)
 		{
 			ConditionalAbility currentAbility = allConditionalAbilities[i];
 			if (currentAbility.HasCondition(condition) && currentAbility.AreConditionsMet())
 			{
 				conditionalAbilities.Add(currentAbility);
-
 			}
 		}
 
@@ -136,32 +184,35 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 			}
 		}
 
+		yield return ConditionalsRoutine(conditionalAbilities_CurrentTurn);
 
-		StartCoroutine(ConditionalsRoutine(conditionalAbilities_CurrentTurn));
+		Pop();
+		if (conditionalsPackages.Count == 0)
+		{
+			PaidAbilitiesManager.instance.ResumePaidWindow();
+		}
 
 	}
 
-	public void ConditionalAbilityResolved(ConditionalAbility ability)
-	{
-		Debug.Log("ConditionalAbilityResolved - " + currentConditionResolving.ToString(), ability);
-		waitForConditionResolved = false;
-	}
-
-	bool waitForConditionResolved;
-	IEnumerator currentConditionalsRoutine;
     IEnumerator ConditionalsRoutine(List<ConditionalAbility> conditionals)
 	{
 		foreach (var ability in conditionals)
 		{
-			print("ConditionalAbilityResolving..." + currentConditionResolving.ToString());
+			print("ConditionalAbilityResolving..." + ability.conditions[0].ToString());
 
-			waitForConditionResolved = true;
-			ability.ExecuteAbility();
+			bool waitForConditionResolved = true;
+			ability.ExecuteAbility(ConditionResolved);
 			while (waitForConditionResolved) yield return null;
+
+			void ConditionResolved()
+			{
+				waitForConditionResolved = false;
+				Debug.Log("ConditionalAbilityResolved - " + ability.conditions[0].ToString(), ability);
+			}
+
+			yield return new WaitForSeconds(0.1f);
 		}
 		print("ConditionalsRoutine Over!");
-		resolvingRoutine = null;
-		PaidAbilitiesManager.instance.ResumePaidWindow();
 	}
 
 
@@ -176,11 +227,6 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	}
 
 
-
-
-
-
-
 	void TryAddToList(ConditionalAbility conditionalAbility)
 	{
         if (!allConditionalAbilities.Contains(conditionalAbility)) allConditionalAbilities.Add(conditionalAbility);
@@ -191,10 +237,9 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 		allConditionalAbilities.Remove(conditionalAbility);
 	}
 
-	public static bool IsResolvingConditionals(ConditionalAbility.Condition? condition = null)
+	public static bool IsResolvingConditionals(ConditionalAbility.Condition? _condition = null)
 	{
-		bool conditionalsCheck = condition.HasValue ? currentConditionResolving == condition : true;
-		return resolvingRoutine != null && conditionalsCheck;
+		return _condition.HasValue ? IsResolvingCondition(_condition.Value) : conditionalsPackages.Count > 0;
 	}
 
 

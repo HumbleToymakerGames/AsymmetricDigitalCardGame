@@ -132,19 +132,22 @@ public class PlayCardManager : MonoBehaviour
     public bool TryInstallCard(IInstallable installableCard)
 	{
         Card card = (Card)installableCard;
-        if (CanInstallCard(installableCard) && CanAffordCost(GameManager.CurrentTurnPlayer, card.CostOfCard()))
+        if (CanInstallCard(installableCard))
 		{
             if (GameManager.CurrentTurnPlayer.IsRunner())
             {
-                Action_InstallCard_Runner(installableCard);
-                PayCost(GameManager.CurrentTurnPlayer, card.CostOfCard());
-                UseMemorySpaceOfCard(card);
+                if (CanAffordCost(GameManager.CurrentTurnPlayer, card.CostOfCard()))
+                {
+                    Action_InstallCard_Runner(installableCard);
+                    PayCost(GameManager.CurrentTurnPlayer, card.CostOfCard());
+                    UseMemorySpaceOfCard(card);
+                }
             }
             else
-			{
+            {
                 Action_InstallCard_Corp(installableCard);
             }
-                return true;
+            return true;
 		}
         return false;
 	}
@@ -451,6 +454,11 @@ public class PlayCardManager : MonoBehaviour
         scoringPlayer.AddScore(agenda.scoringAmount);
         agenda.cardAdvancer.CardScored();
 
+        if (agenda.isInstalled)
+        {
+            OnCardInstalled?.Invoke(agenda, false);
+        }
+
         if (!scoringPlayer.IsRunner()) OnCardScored?.Invoke(agenda);
         else OnCardStolen?.Invoke(agenda);
     }
@@ -472,7 +480,7 @@ public class PlayCardManager : MonoBehaviour
 	{
         TagWrapper tagWrapper = new TagWrapper(numTags);
         OnTagGiven_Pre?.Invoke(tagWrapper);
-        while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
+        while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Tag_Received_Pre)) yield return null;
 
         PlayerNR.Runner.AddTags(tagWrapper.Tags);
     }
@@ -500,7 +508,7 @@ public class PlayCardManager : MonoBehaviour
 
         DamageWrapper damageWrapper = new DamageWrapper(numDamage, damageType);
         OnDamageDone_Pre?.Invoke(damageWrapper);
-        while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
+        while (ConditionalAbilitiesManager.IsResolvingConditionals(ConditionalAbility.Condition.Runner_Damage_Pre)) yield return null;
 
         if (damageWrapper.Damage <= 0)
         {

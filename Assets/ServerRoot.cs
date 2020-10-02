@@ -4,8 +4,13 @@ using UnityEngine;
 
 public abstract class ServerRoot : MonoBehaviour
 {
+	protected ServerColumn serverColumn;
     public Card_Upgrade installedUpgradeCard;
     public Transform serverRootT01;
+	protected virtual void Awake()
+	{
+		serverColumn = GetComponentInParent<ServerColumn>();
+	}
 
 	private void OnEnable()
 	{
@@ -15,6 +20,7 @@ public abstract class ServerRoot : MonoBehaviour
 	{
 		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
 	}
+
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
 		if (card == installedUpgradeCard && !installed)
@@ -43,8 +49,24 @@ public abstract class ServerRoot : MonoBehaviour
 	}
 
 
-	public virtual void Access(Card card)
+	public virtual void Access()
 	{
 
 	}
+
+
+	public virtual SelectorNR[] AccessableSelectors()
+	{
+		return null;
+	}
+
+	protected Card[] GetCardsInRoot()
+	{
+		List<Card> cards = new List<Card>();
+		if (installedUpgradeCard) cards.Add(installedUpgradeCard);
+		ServerRoot_Remote remoteServer = this as ServerRoot_Remote;
+		if (remoteServer && remoteServer.installedRootCard) cards.Add(remoteServer.installedRootCard);
+		return cards.ToArray();
+	}
+
 }
