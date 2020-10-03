@@ -12,11 +12,15 @@ public class Card_AkitaroWatanabe : CardFunction
 	{
 		base.OnEnable();
 		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
+		Card.OnCardRezzed += Card_OnCardRezzed;
 	}
+
+
 	protected override void OnDisable()
 	{
 		base.OnDisable();
 		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
+		Card.OnCardRezzed -= Card_OnCardRezzed;
 	}
 
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
@@ -25,9 +29,7 @@ public class Card_AkitaroWatanabe : CardFunction
 		{
 			if (installed)
 			{
-				myServer = GetComponentInParent<ServerColumn>();
-				modifiedIceCards = myServer.iceInColumn;
- 				UpdateCardCosts();
+				TryUpdateCardCosts();
 			}
 			else
 			{
@@ -40,8 +42,7 @@ public class Card_AkitaroWatanabe : CardFunction
 			{
 				if (installed)
 				{
-					modifiedIceCards.Add(card as Card_Ice);
-					UpdateCardCosts();
+					TryUpdateCardCosts();
 				}
 				else
 				{
@@ -49,6 +50,23 @@ public class Card_AkitaroWatanabe : CardFunction
 					card.SetCardCostModifier(0);
 				}
 			}
+		}
+	}
+	private void Card_OnCardRezzed(Card card)
+	{
+		if (card == this.card)
+		{
+			TryUpdateCardCosts();
+		}
+	}
+
+	void TryUpdateCardCosts()
+	{
+		if (card.isInstalled && card.isRezzed)
+		{
+			myServer = GetComponentInParent<ServerColumn>();
+			modifiedIceCards = myServer.iceInColumn;
+			UpdateCardCosts();
 		}
 	}
 

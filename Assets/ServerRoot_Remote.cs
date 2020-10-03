@@ -8,14 +8,17 @@ public class ServerRoot_Remote : ServerRoot
 	public Card installedRootCard;
 	public Transform serverRootT02;
 
-	private void OnEnable()
+	protected override void OnEnable()
 	{
+		base.OnEnable();
 		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
 	}
-	private void OnDisable()
+	protected override void OnDisable()
 	{
+		base.OnDisable();
 		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
 	}
+
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
 		if (card == installedRootCard && !installed)

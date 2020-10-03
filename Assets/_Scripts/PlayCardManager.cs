@@ -499,12 +499,12 @@ public class PlayCardManager : MonoBehaviour
             yield break;
         }
         List<SelectorNR> selectorNRs = new List<SelectorNR>();
-		foreach (var card in PlayArea.instance.HandNR(PlayerNR.Runner).cardsInHand)
+        List<Card> cardsInHand = PlayArea.instance.HandNR(PlayerNR.Runner).cardsInHand;
+
+        foreach (var card in cardsInHand)
 		{
             selectorNRs.Add(card.selector);
 		}
-        if (selectorNRs.Count <= 0) yield break;
-
 
         DamageWrapper damageWrapper = new DamageWrapper(numDamage, damageType);
         OnDamageDone_Pre?.Invoke(damageWrapper);
@@ -514,6 +514,10 @@ public class PlayCardManager : MonoBehaviour
         {
             callBack?.Invoke();
             yield break;
+        }
+        else if (damageWrapper.Damage > cardsInHand.Count)
+        {
+            GameManager.instance.EndGame_Damage();
         }
 
         bool damageDone = false;

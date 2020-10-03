@@ -5,7 +5,7 @@ using UnityEngine;
 public class ServerSpace : MonoBehaviour
 {
     public static ServerSpace instance;
-    ServerColumn[] serverColumns;
+    public ServerColumn[] serverColumns;
     public bool choosingInstallColumn;
     IInstallable currentInstallableCard;
 

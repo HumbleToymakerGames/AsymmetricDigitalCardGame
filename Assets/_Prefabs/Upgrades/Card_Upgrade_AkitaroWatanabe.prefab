@@ -34,6 +34,11 @@ PrefabInstance:
       propertyPath: cardSubType
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 3524765578019637670, guid: e105397b18d37d045896b55abd33bf58,
+        type: 3}
+      propertyPath: costOfCard
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7898579722235951766, guid: e105397b18d37d045896b55abd33bf58,
         type: 3}
       propertyPath: m_Name
@@ -172,6 +177,11 @@ PrefabInstance:
     - target: {fileID: 7898579722294623859, guid: e105397b18d37d045896b55abd33bf58,
         type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7898579722294623859, guid: e105397b18d37d045896b55abd33bf58,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7898579722673918419, guid: e105397b18d37d045896b55abd33bf58,

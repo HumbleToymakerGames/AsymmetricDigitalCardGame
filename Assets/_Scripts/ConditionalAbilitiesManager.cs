@@ -96,7 +96,7 @@ public class ConditionalAbilitiesManager : MonoBehaviour
 	}
 
 
-	class ConditionalsPackage : MonoBehaviour
+	class ConditionalsPackage
 	{
 		public Coroutine conditionalsManagerRoutine;
 		public ConditionalAbility.Condition conditionResolving;

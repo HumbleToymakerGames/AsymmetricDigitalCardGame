@@ -17,7 +17,7 @@ public class Card_MelangeMiningCorp : CardFunction
 
 	bool CanBeClickable()
 	{
-		return true;
+		return card.isRezzed;
 	}
 
 	IEnumerator GainCredits()

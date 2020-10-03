@@ -12,11 +12,11 @@ public abstract class ServerRoot : MonoBehaviour
 		serverColumn = GetComponentInParent<ServerColumn>();
 	}
 
-	private void OnEnable()
+	protected virtual void OnEnable()
 	{
 		PlayCardManager.OnCardInstalled += PlayCardManager_OnCardInstalled;
 	}
-	private void OnDisable()
+	protected virtual void OnDisable()
 	{
 		PlayCardManager.OnCardInstalled -= PlayCardManager_OnCardInstalled;
 	}
@@ -60,7 +60,7 @@ public abstract class ServerRoot : MonoBehaviour
 		return null;
 	}
 
-	protected Card[] GetCardsInRoot()
+	public Card[] GetCardsInRoot()
 	{
 		List<Card> cards = new List<Card>();
 		if (installedUpgradeCard) cards.Add(installedUpgradeCard);

@@ -76,7 +76,7 @@ public class Card_CrashSpace : CardFunction
 
 	IEnumerator PreventMeatDamage()
 	{
-		if (damageWrapperCached.damageType == DamageType.Net)
+		if (damageWrapperCached.damageType == DamageType.Meat)
 		{
 			bool? chosen = null;
 			ActionOptions.instance.ActivateYesNo(Choice, string.Format("Prevent Damage: {0}?", card.cardTitle));

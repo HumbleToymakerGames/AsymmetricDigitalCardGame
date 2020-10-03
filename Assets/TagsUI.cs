@@ -33,7 +33,7 @@ public class TagsUI : PlayArea_Spot, ISelectableNR
 
 	public bool CanHighlight(bool highlight = true)
 	{
-		return true;
+		return GameManager.CurrentTurnPlayer.IsRunner();
 	}
 
 	public bool CanSelect()

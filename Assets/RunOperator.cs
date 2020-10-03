@@ -162,6 +162,8 @@ public class RunOperator : MonoBehaviour
         int numIceEncountered = 0;
         while (currentServerColumn.GetNextIce(ref currentIceEncountered))
 		{
+            yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
+
             if (numIceEncountered > 0)
             {
                 yield return JackOutRoutine();
@@ -241,17 +243,14 @@ public class RunOperator : MonoBehaviour
                     if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, currentIceEncountered.CostOfCard()))
 					{
                         rezChoice = true;
+                        currentIceEncountered.Rez();
                     }
 
                 }
             }
-
-            if (rezChoice.Value)
-			{
-                currentIceEncountered.Rez();
-            }
-
         }
+
+        yield return RezNonIceRoutine();
 
         if (currentIceEncountered.isRezzed)
 		{
@@ -270,7 +269,7 @@ public class RunOperator : MonoBehaviour
             canBreakSubroutines = true;
             yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
 
-            if (!bypassedIce) ActionOptions.instance.Display_FireRemainingSubs(true);
+            if (!bypassedIce && !bypassNextIce) ActionOptions.instance.Display_FireRemainingSubs(true);
 
             OnIceEncountered_End?.Invoke(currentIceEncountered);
             while (ConditionalAbilitiesManager.IsResolvingConditionals()) yield return null;
@@ -316,7 +315,6 @@ public class RunOperator : MonoBehaviour
 	}
 
     public bool shouldAccessServer;
-    bool waitingForCardUnReveal;
     Coroutine runCompletedRoutine;
 	IEnumerator RunCompleted()
     {
@@ -326,6 +324,9 @@ public class RunOperator : MonoBehaviour
 
         yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
         yield return JackOutRoutine();
+        yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
+
+        yield return RezNonIceRoutine();
 
         ServerColumn serverColumnAccessed = serverTypeOverride.HasValue ? ServerSpace.instance.GetServerOfType(serverTypeOverride.Value) : currentServerColumn;
         OnRunEnded?.Invoke(true, serverColumnAccessed.serverType);
@@ -344,6 +345,7 @@ public class RunOperator : MonoBehaviour
                     IEnumerator revealCardRoutine = null;
                     serverColumnAccessed.ActivateSelector_Root();
                     CardChooser.instance.ActivateFocus(Chosen, 1, accessedSelectors.ToArray());
+                    ActionOptions.instance.ActivateActionMessage("Access Server");
 
                     while (!chosen) yield return null;
                     if (!serverColumnAccessed.IsRemoteServer()) serverColumnAccessed.ActivateSelector_Root(false);
@@ -413,19 +415,64 @@ public class RunOperator : MonoBehaviour
         print("RunCompleted Over!");
     }
 
-
-    IEnumerator WaitForUnrevealRoutine()
+    IEnumerator RezNonIceRoutine()
 	{
-        print("Waiting for Unreveal...");
-        waitingForCardUnReveal = true;
-        while (waitingForCardUnReveal) yield return null;
-        print("DONE Waiting for Unreveal...");
+        CardChooser.instance.ActivateFocus();
+        bool requestRez = true;
+        while (requestRez)
+		{
+            List<SelectorNR> selectors = new List<SelectorNR>();
+            foreach (var server in ServerSpace.instance.serverColumns)
+            {
+                Card[] serverRootCards = server.serverRoot.GetCardsInRoot();
+                foreach (var card in serverRootCards)
+                {
+                    if (!card.isRezzed && PlayCardManager.instance.CanAffordCost(PlayerNR.Corporation, card.CostOfCard()))
+                    {
+                        selectors.Add(card.selector);
+                    }
+                }
+            }
+
+            if (selectors.Count <= 0)
+            {
+                CardChooser.instance.DeactivateFocus();
+                yield break;
+            }
+
+            bool? choice = null;
+            ActionOptions.instance.ActivateYesNo(Choice, "Rez Non-Ice Cards?");
+            while (!choice.HasValue) yield return null;
+
+            if (choice.Value)
+			{
+                bool chosen = false;
+                CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
+                while (!chosen) yield return null;
+
+                void Chosen(SelectorNR[] selectorNRs)
+				{
+                    chosen = true;
+                    Card card = selectorNRs[0].selectable as Card;
+                    if (PlayCardManager.instance.TryAffordCost(PlayerNR.Corporation, card.CostOfCard()))
+					{
+                        card.Rez();
+					}
+                }
+			}
+            else
+			{
+                requestRez = false;
+			}
+
+            void Choice(bool yes)
+			{
+                choice = yes;
+			}
+		}
+
+        CardChooser.instance.DeactivateFocus();
     }
-
-    public void ServerFinishedAccessing()
-	{
-        waitingForCardUnReveal = false;
-	}
 
     public void SetAccessCards(bool access = true)
 	{
@@ -551,6 +598,7 @@ public class RunOperator : MonoBehaviour
             ActionOptions.instance.HideAllOptions();
             isRunning = false;
             StopRun();
+            StopRunCompletedRoutine();
             if (!success) OnRunEnded?.Invoke(success, serverType);
             SetServerTypeOverride(null);
             CardChooser.instance.DeactivateFocus();

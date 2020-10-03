@@ -137,6 +137,10 @@ public class GameManager : MonoBehaviour
         PlayerNR.Corporation.hasPriority = !player.IsRunner();
     }
 
+    public void EndGame_Damage()
+	{
+        OnGameEnded?.Invoke(false);
+    }
 
     void CheckForWinState()
 	{

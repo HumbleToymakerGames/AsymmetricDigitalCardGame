@@ -17,6 +17,11 @@ public class Card_Identity : Card
         UpdateLinkStrengthText();
     }
 
+	public override bool CanHighlight(bool highlight = true)
+	{
+        return false;
+	}
+
 	void UpdateLinkStrengthText()
     {
         linkStrengthText.text = baseLinkStrength.ToString();
