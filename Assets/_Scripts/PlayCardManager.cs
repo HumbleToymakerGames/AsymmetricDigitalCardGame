@@ -26,7 +26,10 @@ public class PlayCardManager : MonoBehaviour
         CORP_PURGE_VIRUSES = 6,
         CORP_TRASH_RESOURCE_TAGGED = 7;
 
-    public const int COST_REMOVE_TAG = 2;
+    public const int
+        COST_REMOVE_TAG = 2,
+        COST_TRASH_RESOURCE = 2;
+
 
     public delegate void eCardInstalled(Card card, bool installed);
     public static event eCardInstalled OnCardInstalled;
@@ -284,6 +287,57 @@ public class PlayCardManager : MonoBehaviour
             && numVirusConters > 0;
     }
 
+    public bool TryTrashResource()
+	{
+        if (CanTrashResource())
+		{
+            Card_Resource chosenCard = null;
+            StartCoroutine(ChooseTrashedResource(CardChosen));
+
+            void CardChosen(Card_Resource card)
+			{
+                chosenCard = card;
+                Action_TrashResource(chosenCard);
+                PayCost(PlayerNR.Corporation, COST_TRASH_RESOURCE);
+            }
+
+            return true;
+        }
+        return false;
+	}
+
+    IEnumerator ChooseTrashedResource(UnityAction<Card_Resource> callback)
+	{
+        Card[] resourceCards = GetTrashableResourceCards();
+
+        List<SelectorNR> selectors = new List<SelectorNR>();
+		foreach (var card in resourceCards)
+		{
+            selectors.Add(card.selector);
+		}
+
+        Card_Resource chosenCard = null;
+        CardChooser.instance.ActivateFocus(Chosen, 1, selectors.ToArray());
+        while (chosenCard == null) yield return null;
+
+
+        void Chosen(SelectorNR[] selectorNRs)
+		{
+            chosenCard = selectorNRs[0].selectable as Card_Resource;
+		}
+
+        callback?.Invoke(chosenCard);
+        CardChooser.instance.DeactivateFocus();
+    }
+
+    public bool CanTrashResource()
+	{
+        return CanAffordAction(PlayerNR.Corporation, CORP_TRASH_RESOURCE_TAGGED)
+            && CanAffordCost(PlayerNR.Corporation, COST_TRASH_RESOURCE)
+            && GetTrashableResourceCards().Length > 0
+            && PlayerNR.Runner.Tags > 0;
+    }
+
 
 
     #region Actions
@@ -349,6 +403,13 @@ public class PlayCardManager : MonoBehaviour
         int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Corporation, CORP_PURGE_VIRUSES);
         PlayerNR.Corporation.ActionPointsUsed(costOfAction);
         PurgeVirusCounters(virusCards);
+    }
+
+    void Action_TrashResource(Card_Resource resourceCard)
+	{
+        int costOfAction = PlayArea.instance.CostOfAction(PlayerNR.Corporation, CORP_TRASH_RESOURCE_TAGGED);
+        PlayerNR.Corporation.ActionPointsUsed(costOfAction);
+        TrashResource(resourceCard);
     }
 
     #endregion
@@ -431,6 +492,11 @@ public class PlayCardManager : MonoBehaviour
 		{
             card.NeutralCounters = 0;
 		}
+	}
+
+    void TrashResource(Card resourceCard)
+	{
+        TrashCard(PlayerNR.Runner, resourceCard);
 	}
 
     void SendCardToDiscard(PlayerNR player, Card card)
@@ -578,6 +644,11 @@ public class PlayCardManager : MonoBehaviour
 		}
         return virusCards.ToArray();
     }
+
+    public Card[] GetTrashableResourceCards()
+	{
+        return RunnerRIG.instance.resourceCards.ToArray();
+	}
 
 
     public void StartTurn(PlayerNR playerTurn, bool isFirstTurn)

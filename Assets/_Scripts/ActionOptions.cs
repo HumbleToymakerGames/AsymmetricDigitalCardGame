@@ -164,7 +164,7 @@ public class ActionOptions : MonoBehaviour
 	public void HideAllOptions()
 	{
 		if (isYesNo) return;
-		print("HideAllOptions");
+		//print("HideAllOptions");
 		fireRemainingSubsButton.gameObject.SetActive(false);
 		advanceCardButton.gameObject.SetActive(false);
 		scoreAgendaButton.gameObject.SetActive(false);

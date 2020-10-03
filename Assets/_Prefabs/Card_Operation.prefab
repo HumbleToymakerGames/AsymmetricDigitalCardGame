@@ -12,13 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c363e6310ff817449e632eeb6c0c0d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardRefs: {fileID: 0}
+  cardFunction: {fileID: 0}
   cardCost: {fileID: 0}
+  cardTrasher: {fileID: 0}
+  cardAdvancer: {fileID: 0}
   playerSide: 0
+  controllingPlayerSide: 0
   myPlayer: {fileID: 0}
   cardType: 2
   cardSubType: 0
   cardTitle: 
   isFaceUp: 1
+  isRezzed: 0
+  viewIndex: 0
+  isViewCard: 0
+  isInstalled: 0
+  selector: {fileID: 0}
+  neutralCountersAreVirus: 0
+  cardCostModifier: 0
 --- !u!1001 &7263245992201766115
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -89,7 +101,7 @@ PrefabInstance:
     - target: {fileID: 1394157417265357420, guid: 2c36707fb223ee34abbe5e7dadfa2f11,
         type: 3}
       propertyPath: m_Name
-      value: Card_Operation Variant
+      value: Card_Operation
       objectReference: {fileID: 0}
     - target: {fileID: 1394157417265357421, guid: 2c36707fb223ee34abbe5e7dadfa2f11,
         type: 3}

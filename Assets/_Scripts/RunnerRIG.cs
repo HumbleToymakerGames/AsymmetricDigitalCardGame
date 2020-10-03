@@ -50,6 +50,7 @@ public class RunnerRIG : PlayArea_Spot
             Card_Resource resourceCard = (Card_Resource)installableCard;
             AddCardToResources(resourceCard);
         }
+        card.Rez();
     }
 
 

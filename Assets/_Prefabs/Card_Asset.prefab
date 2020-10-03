@@ -236,6 +236,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 1
+--- !u!114 &2794639878779506956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7755675337010267095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1c7779dbd32ee246b0110009bf184dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardRefs: {fileID: 0}
+  cardFunction: {fileID: 0}
+  cardCost: {fileID: 0}
+  cardTrasher: {fileID: 0}
+  cardAdvancer: {fileID: 0}
+  playerSide: 0
+  controllingPlayerSide: 0
+  myPlayer: {fileID: 0}
+  cardType: 6
+  cardSubType: 0
+  cardTitle: 
+  isFaceUp: 1
+  isRezzed: 0
+  viewIndex: 0
+  isViewCard: 0
+  isInstalled: 0
+  selector: {fileID: 0}
+  neutralCountersAreVirus: 0
+  cardCostModifier: 0
+--- !u!114 &2968951417815691339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7755675337010267095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59209639f56de2741b5e4980d70042de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trashCostText: {fileID: 8734609495281695145}
+  trashCost: 0
 --- !u!1 &7888629575215391538
 GameObject:
   m_ObjectHideFlags: 0
@@ -370,51 +415,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &2794639878779506956
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7755675337010267095}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1c7779dbd32ee246b0110009bf184dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cardRefs: {fileID: 0}
-  cardFunction: {fileID: 0}
-  cardCost: {fileID: 0}
-  cardTrasher: {fileID: 0}
-  cardAdvancer: {fileID: 0}
-  playerSide: 0
-  controllingPlayerSide: 0
-  myPlayer: {fileID: 0}
-  cardType: 6
-  cardSubType: 0
-  cardTitle: 
-  isFaceUp: 1
-  isRezzed: 1
-  viewIndex: 0
-  isViewCard: 0
-  isInstalled: 0
-  selector: {fileID: 0}
-  neutralCountersAreVirus: 0
-  cardCostModifier: 0
---- !u!114 &2968951417815691339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7755675337010267095}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59209639f56de2741b5e4980d70042de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  trashCostText: {fileID: 8734609495281695145}
-  trashCost: 0
 --- !u!1001 &8716923136254321083
 PrefabInstance:
   m_ObjectHideFlags: 0

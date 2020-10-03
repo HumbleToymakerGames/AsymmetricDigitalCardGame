@@ -14,6 +14,7 @@ public class Card_Identity : Card
 	protected override void Start()
 	{
 		base.Start();
+        UpdateSubTitle();
         UpdateLinkStrengthText();
     }
 
@@ -21,6 +22,11 @@ public class Card_Identity : Card
 	{
         return false;
 	}
+
+    void UpdateSubTitle()
+	{
+        subTitleText.text = cardSubTitle;
+    }
 
 	void UpdateLinkStrengthText()
     {

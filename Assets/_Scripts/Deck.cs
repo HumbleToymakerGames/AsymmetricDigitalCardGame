@@ -7,9 +7,14 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
 
     public Transform cardsParentT;
     public List<Card> cardsInDeck;
+    public GameObject deckCardBacking;
 
+	protected override void Awake()
+	{
+		base.Awake();
+	}
 
-    public void SetCardsToDeck(Card[] cards)
+	public void SetCardsToDeck(Card[] cards)
 	{
         cardsInDeck = new List<Card>();
 		for (int i = 0; i < cards.Length; i++)
@@ -53,7 +58,7 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
     {
         for (int i = 0; i < cardsInDeck.Count; i++)
         {
-            cardsInDeck[i].FlipCardOver();
+            cardsInDeck[i].FlipCard(false, true);
         }
     }
 
@@ -69,6 +74,8 @@ public class Deck : PlayArea_Spot, ISelectableNR, IAccessable
 		{
             nextCard = cardsInDeck[0];
             cardsInDeck.RemoveAt(0);
+
+            deckCardBacking.SetActive(!IsDeckEmpty());
             return true;
 		}
         return false;

@@ -32,7 +32,7 @@ public abstract class Card : MonoBehaviour, ISelectableNR
     [Header("Play Data")]
     //[HideInInspector]
     public bool isFaceUp = true;
-    public bool isRezzed = true;
+    public bool isRezzed = false;
     float cardFlipTransitionTime = 1f;
 
 
@@ -199,20 +199,28 @@ public abstract class Card : MonoBehaviour, ISelectableNR
         }
     }
 
-
+    Tween rotationTweener;
     void UpdateCardFlipDisplay(bool faceUp, bool immediate = false)
 	{
+        rotationTweener.Kill();
         isFaceUp = faceUp;
         float time = immediate ? 0 : cardFlipTransitionTime;
         if (faceUp)
 		{
-            transform.DOLocalRotate(Vector3.zero, time);
+            rotationTweener = transform.DOLocalRotate(Vector3.zero, time);
 		}
         else
 		{
-            transform.DOLocalRotate(Vector3.up * 180, time);
+            rotationTweener = transform.DOLocalRotate(Vector3.up * 180, time);
         }
+        Invoke("UpdateFrontFace", 0.25f);
     }
+
+    void UpdateFrontFace()
+	{
+        cardRefs.ActivateFrontFace(isFaceUp);
+    }
+
 
     public bool IsCardInHand()
 	{

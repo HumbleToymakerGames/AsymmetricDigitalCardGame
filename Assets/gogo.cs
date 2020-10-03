@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class gogo : MonoBehaviour
 {
     List<UnityAction> actions = new List<UnityAction>();
     public List<CardSubType> subs;
+
 
     void Start()
     {
@@ -26,6 +28,22 @@ public class gogo : MonoBehaviour
 	}
 	private void PlayCardManager_OnCardInstalled(Card card, bool installed)
 	{
-		print("card: " + card.name +" installed -- " + installed);
+		//print("card: " + card.name +" installed -- " + installed);
 	}
+
+
+
+
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.P)) print( DOTween.TotalPlayingTweens());
+	}
+
+
+
+
+
+
+
+
 }

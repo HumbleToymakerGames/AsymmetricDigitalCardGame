@@ -24,7 +24,7 @@ MonoBehaviour:
   cardSubType: 0
   cardTitle: 
   isFaceUp: 1
-  isRezzed: 1
+  isRezzed: 0
   viewIndex: 0
   isViewCard: 0
   isInstalled: 0

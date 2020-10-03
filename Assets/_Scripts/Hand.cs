@@ -70,11 +70,11 @@ public class Hand : PlayArea_Spot, IAccessable
 	void ToggleShowing()
 	{
         isShowing = !isShowing;
-		Vector3 anchorpos = rt.anchoredPosition;
-		anchorpos.y = isShowing ? showYValue : hideYValue;
-		rt.anchoredPosition = anchorpos;
+		//Vector3 anchorpos = rt.anchoredPosition;
+		//anchorpos.y = isShowing ? showYValue : hideYValue;
+		//rt.anchoredPosition = anchorpos;
 
-		//rt.DOAnchorPosY(isShowing ? showYValue : hideYValue, transitionTime);
+		rt.DOAnchorPosY(isShowing ? showYValue : hideYValue, transitionTime);
 
     }
 
@@ -118,7 +118,7 @@ public class Hand : PlayArea_Spot, IAccessable
 	{
 		foreach (var card in cardsInHand)
 		{
-			card.FlipCard(show, true);
+			card.FlipCard(show, false);
 		}
 	}
 

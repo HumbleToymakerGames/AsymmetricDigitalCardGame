@@ -8,9 +8,13 @@ public class CyberColor : MonoBehaviour
     public Color[] cyberColors;
 	Card card;
 
-	private void Start()
+	private void Awake()
 	{
 		card = GetComponentInParent<Card>();
+	}
+
+	private void Start()
+	{
 		Invoke("gogo", 3);
 	}
 

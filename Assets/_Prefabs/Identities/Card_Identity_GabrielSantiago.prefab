@@ -15,9 +15,9 @@ MonoBehaviour:
   card: {fileID: 0}
   paidAbilities: []
   conditionalAbilities: []
-  myTurn: 0
+  canBeActivated: 0
+  runSuccessful: 0
   numCredits: 2
-  canGainCredits: 0
 --- !u!114 &6306356397784706988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,10 +109,15 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5279771943338238481, guid: eb4d0d3ba0320b645bd596fa6281c7b0,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5279771943530964724, guid: eb4d0d3ba0320b645bd596fa6281c7b0,
         type: 3}
       propertyPath: m_Name
-      value: Card_Identity_GabrielSantiago Variant
+      value: Card_Identity_GabrielSantiago
       objectReference: {fileID: 0}
     - target: {fileID: 5279771943530964724, guid: eb4d0d3ba0320b645bd596fa6281c7b0,
         type: 3}

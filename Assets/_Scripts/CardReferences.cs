@@ -14,6 +14,7 @@ public class CardReferences : MonoBehaviour
     public TextMeshProUGUI advancementText_Front, advancementText_Back;
     public GameObject advancementCost_BackGO;
     public TextMeshProUGUI neutralCounterText;
+    public CanvasGroup frontFaceGroup;
 
     public void UpdateCardTitle(string cardTitle)
 	{
@@ -36,5 +37,9 @@ public class CardReferences : MonoBehaviour
         neutralCounterText.text = neutralCount.ToString();
     }
 
+    public void ActivateFrontFace(bool activate = true)
+	{
+        frontFaceGroup.alpha = activate ? 1 : 0;
+	}
 
 }
