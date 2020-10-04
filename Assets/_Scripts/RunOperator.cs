@@ -162,8 +162,6 @@ public class RunOperator : MonoBehaviour
         int numIceEncountered = 0;
         while (currentServerColumn.GetNextIce(ref currentIceEncountered))
 		{
-            yield return PaidAbilitiesManager.instance.StartPaidAbilitiesWindow();
-
             if (numIceEncountered > 0)
             {
                 yield return JackOutRoutine();
@@ -422,6 +420,7 @@ public class RunOperator : MonoBehaviour
         while (requestRez)
 		{
             List<SelectorNR> selectors = new List<SelectorNR>();
+
             foreach (var server in ServerSpace.instance.serverColumns)
             {
                 Card[] serverRootCards = server.serverRoot.GetCardsInRoot();
